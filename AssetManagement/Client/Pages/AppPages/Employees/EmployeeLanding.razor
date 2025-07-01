@@ -106,17 +106,17 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label class="form-label bold-font required-field">Date Of Birth</label>
-                            <InputDate id="DateOfBirth" -Value="model.DateOfBirth" class="form-control" />
+                            <InputDate id="DateOfBirth" @bind-Value="model.DateOfBirth" class="form-control" />
                             <ValidationMessage For="() => model.DateOfBirth" />
                         </div>
                         <div class="col-md-4">
                             <label class="form-label bold-font required-field">Aadhar No</label>
-                            <InputText id="AadhaarNumber" -Value="model.AadhaarNumber" class="form-control" />
+                            <InputText id="AadhaarNumber" @bind-Value="model.AadhaarNumber" class="form-control" />
                             <ValidationMessage For="() => model.AadhaarNumber" />
                         </div>
                         <div class="col-md-4">
                             <label class="form-label bold-font">PAN No</label>
-                            <InputText id="PANNumber" -Value="model.PANNumber" class="form-control" />
+                            <InputText id="PANNumber" @bind-Value="model.PANNumber" class="form-control" />
                             <ValidationMessage For="() => model.PANNumber" />
                         </div>
                     </div>
