@@ -20,15 +20,19 @@ namespace AssetManagement.Server.Controllers.Api
     public class AppController : ControllerBase
     {
         readonly IAppRepository _appRepository;
+        readonly IEmployeeRepository _employeeRepository;
+        readonly ICompanyRepository _companyRepository;
         readonly ILogger _logger;
         readonly IConfiguration _configuration;
         private readonly IMailService _mailService;
         private readonly IWebHostEnvironment _env;
         private readonly IHttpContextAccessor _httpContextAccessor;
         readonly OnboardingConfirmation _OnboardingConfirmation;
-        public AppController(ILogger<AppController> logger, IConfiguration appConfig, IAppRepository appRepository, IMailService mailService, IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor, OnboardingConfirmation onboardingConfirmation ) : base()
+        public AppController(ILogger<AppController> logger, IConfiguration appConfig, IAppRepository appRepository, IEmployeeRepository employeeRepository, ICompanyRepository companyRepository, IMailService mailService, IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor, OnboardingConfirmation onboardingConfirmation ) : base()
         {
             _appRepository = (AppRepository?)appRepository;
+            _employeeRepository = employeeRepository;
+            _companyRepository = companyRepository;
             _logger = logger;
             _configuration = appConfig;
             _mailService = mailService;
@@ -95,14 +99,14 @@ namespace AssetManagement.Server.Controllers.Api
         [Route("Company/{id}")]
         public async Task<Company> GetCompanyById(int id)
         {
-            return await _appRepository.GetCompanyById(id);
+            return await _companyRepository.GetCompanyByIdAsync(id);
         }
 
         [HttpGet]
         [Route("all-Company")]
         public async Task<IEnumerable<Company>> GetAllCompany()
         {
-            return await _appRepository.GetAllCompany();
+            return await _companyRepository.GetAllCompanyAsync();
         }
 
         [HttpPost]
@@ -112,7 +116,7 @@ namespace AssetManagement.Server.Controllers.Api
             var result = new ApiResponse<Company>();
             try
             {
-                result = await _appRepository.UpsertCompanyAsync(data);
+                result = await _companyRepository.UpsertCompanyAsync(data);
                 if (!result.IsSuccess)
                 {
                     result.Message = result.Message;
@@ -138,21 +142,21 @@ namespace AssetManagement.Server.Controllers.Api
         [Route("DeleteCompany")]
         public async Task<(bool, string)> DeleteCompanyById(Company data)
         {
-            return await _appRepository.DeleteCompanyById(data);
+            return await _companyRepository.DeleteCompanyByIdAsync(data);
         }
 
         [HttpPost]
         [Route("UpsertSubOffice")]
         public async Task<List<SubOffice>> UpsertTrainingQuiz(List<SubOffice> data)
         {
-            return await _appRepository.UpsertSubOffice(data);
+            return await _companyRepository.UpsertSubOfficeAsync(data);
         }
 
         [HttpGet]
         [Route("SubOffice-by-id/{id}")]
         public async Task<IEnumerable<SubOffice>> GetTrainingQuizById(int id)
         {
-            return await _appRepository.GetSubOfficeById(id);
+            return await _companyRepository.GetSubOfficeByIdAsync(id);
         }
         #endregion
 
@@ -183,8 +187,7 @@ namespace AssetManagement.Server.Controllers.Api
         [Route("Employee/{id}")]
         public async Task<Employee> GetEmployeeById(int id)
         {
-            var data =  await _appRepository.GetEmployeeById(id);
-            return data;
+            return await _employeeRepository.GetEmployeeByIdAsync(id);
         }
         [HttpGet]
         [Route("EmployeeOnboarding/{id}")]
@@ -228,7 +231,15 @@ namespace AssetManagement.Server.Controllers.Api
         [Route("all-Employee")]
         public async Task<IEnumerable<Employee>> GetAllEmployee()
         {
-            return await _appRepository.GetAllEmployee();
+            var result = await _employeeRepository.GetEmployeesAsync(1, int.MaxValue);
+            return result.Items;
+        }
+
+        [HttpGet]
+        [Route("EmployeePaged")]
+        public async Task<PagedResult<Employee>> GetEmployeesPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+        {
+            return await _employeeRepository.GetEmployeesAsync(page, pageSize);
         }
 
         [HttpPost]
@@ -241,7 +252,7 @@ namespace AssetManagement.Server.Controllers.Api
             {
                 string baseUrl = $"{Request.Scheme}://{Request.Host.Value}";
                 data.BaseUrl = baseUrl;
-                result = await _appRepository.UpsertEmployeeAsync(data);
+                result = await _employeeRepository.UpsertEmployeeAsync(data);
 
                 if (!result.IsSuccess)
                 {
@@ -496,7 +507,7 @@ namespace AssetManagement.Server.Controllers.Api
         [Route("DeleteEmployee/{id}")]
         public async Task<(bool, string)> DeleteEmployee(int id)
         {
-            return await _appRepository.DeleteEmployeeById(id);
+            return await _employeeRepository.DeleteEmployeeByIdAsync(id);
         }
 
         [HttpDelete]
@@ -1113,7 +1124,7 @@ namespace AssetManagement.Server.Controllers.Api
         public async Task<ApiResponse<string>> EmployeeInsuranceformSender()
         {
             var result = new ApiResponse<string>();
-            var employees = await _appRepository.GetAllEmployee();
+            var employees = (await _employeeRepository.GetEmployeesAsync(1, int.MaxValue)).Items;
             //var employee = await _appRepository.GetEmployeeById(26);
 
             List<string> validEmployeeIds = new List<string>
