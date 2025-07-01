@@ -1110,6 +1110,12 @@
                     model.EmpAccountName = data.EmpAccountName;
                     model.EmpBankAccNumber = data.EmpBankAccNumber;
                     model.EmpBankIfsc = data.EmpBankIfsc;
+                    model.Designation = data.Designation;
+                    model.ReportingTo = data.ReportingTo;
+                    model.Reference = data.Reference;
+                    selectedManager = employee.FirstOrDefault(x => x.EmployeeId == data.ReportingTo);
+                    selectedReference = employee.FirstOrDefault(x => x.EmployeeId == data.Reference);
+                    selectedDesigantion = designation.FirstOrDefault(x => x.Designation == data.Designation);
                     model.EmailId = data.ExternalEmailId;
                     model.ExternalEmailId = data.ExternalEmailId;
                     model.EmployeeEducation = data.EmployeeGraduation;

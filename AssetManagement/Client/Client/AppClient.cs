@@ -398,7 +398,7 @@ namespace AssetManagement.Client.Client
             EmployeeOnboardingDto result = null;
             try
             {
-                var res = await HttpClient.GetAsync($"api/App/EmployeeOnboarding/{id}");
+                var res = await HttpClient.GetAsync($"api/EmployeeOnboarding/{id}");
 
                 res.EnsureSuccessStatusCode();
 
@@ -417,7 +417,7 @@ namespace AssetManagement.Client.Client
         {
             try
             {
-                var res = await HttpClient.PostAsJsonAsync($"api/App/UpsertEmployeeOnboardingDto", data);
+                var res = await HttpClient.PostAsJsonAsync($"api/EmployeeOnboarding/Confirm", data);
 
                 res.EnsureSuccessStatusCode();
 
@@ -509,7 +509,7 @@ namespace AssetManagement.Client.Client
         {
             try
             {
-                var res = await HttpClient.PostAsJsonAsync($"api/App/EmployeeOnboarding", data);
+                var res = await HttpClient.PostAsJsonAsync($"api/EmployeeOnboarding", data);
 
                 res.EnsureSuccessStatusCode();
 
@@ -530,7 +530,7 @@ namespace AssetManagement.Client.Client
             try
             {
                 var payload = new GenericApiRequest<string>() { Param = Key };
-                var responce = await HttpClient.PostAsJsonAsync<GenericApiRequest<string>>($"api/App/employee-Onboard", payload);
+                var responce = await HttpClient.PostAsJsonAsync<GenericApiRequest<string>>($"api/EmployeeOnboarding/ByKey", payload);
                 responce.EnsureSuccessStatusCode();
                 if (responce.IsSuccessStatusCode)
                 {
@@ -552,7 +552,7 @@ namespace AssetManagement.Client.Client
             try
             {
                 var payload = new GenericApiRequest<string>() { Param = Key };
-                var responce = await HttpClient.PostAsJsonAsync<GenericApiRequest<string>>($"api/App/employeeOnboardByID", payload);
+                var responce = await HttpClient.PostAsJsonAsync<GenericApiRequest<string>>($"api/EmployeeOnboarding/ById", payload);
                 responce.EnsureSuccessStatusCode();
 
                 if (responce.IsSuccessStatusCode)
@@ -575,7 +575,7 @@ namespace AssetManagement.Client.Client
         {
             try
             {
-                var res = await HttpClient.PostAsJsonAsync($"api/App/UpsertEmployeeFiles", data);
+                var res = await HttpClient.PostAsJsonAsync($"api/EmployeeOnboarding/Files", data);
 
                 res.EnsureSuccessStatusCode();
 
@@ -596,7 +596,7 @@ namespace AssetManagement.Client.Client
             EmployeeFilesMapping result = null;
             try
             {
-                var res = await HttpClient.GetAsync($"api/App/EmployeeFilesById/{id}");
+                var res = await HttpClient.GetAsync($"api/EmployeeOnboarding/Files/{id}");
                 res.EnsureSuccessStatusCode();
 
                 if (res.Content is not null)
@@ -626,7 +626,7 @@ namespace AssetManagement.Client.Client
             IEnumerable<EmployeeFilesMapping> result = null;
             try
             {
-                var res = await HttpClient.GetAsync($"api/App/all-EmployeeFileMap");
+                var res = await HttpClient.GetAsync($"api/EmployeeOnboarding/AllFiles");
 
                 res.EnsureSuccessStatusCode();
 
@@ -744,7 +744,7 @@ namespace AssetManagement.Client.Client
             var result = new ApiResponse<EmployeeOnboardingDto>();
             try
             {
-                var res = await HttpClient.GetAsync($"api/App/ShareFormWithOnboardeeViaEmail/{id}");
+                var res = await HttpClient.GetAsync($"api/EmployeeOnboarding/ShareForm/{id}");
 
                 res.EnsureSuccessStatusCode();
 
