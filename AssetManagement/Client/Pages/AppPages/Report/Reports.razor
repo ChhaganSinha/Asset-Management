@@ -137,7 +137,7 @@
                         {
                             <label class="col-form-label col-md-3 bold-font">IssueDate Range</label>
                             <div class="col-md-4">
-                                <MudDateRangePicker @ref="_issueDatePicker" @bind-DateRange="_issueDate" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM">
+                                <MudDateRangePicker @ref="_issueDatePicker" @bind-DateRange="_issueDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM">
                                     <PickerActions Context="pickerActionsContext">
                                         <MudButton Class="mr-auto align-self-start" OnClick="@(() => _issueDatePicker.Clear())">Clear</MudButton>
                                         <MudButton OnClick="@(() => _issueDatePicker.Close(false))">Cancel</MudButton>
@@ -156,7 +156,7 @@
                         {
                             <label class="col-form-label col-md-3 bold-font">IssueTill Range</label>
                             <div class="col-md-4">
-                                <MudDateRangePicker @ref="_issueTillPicker" @bind-DateRange="_issueTill" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM">
+                                <MudDateRangePicker @ref="_issueTillPicker" @bind-DateRange="_issueTill" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM">
                                     <PickerActions Context="pickerActionsContext">
                                         <MudButton Class="mr-auto align-self-start" OnClick="@(() => _issueTillPicker.Clear())">Clear</MudButton>
                                         <MudButton OnClick="@(() => _issueTillPicker.Close(false))">Cancel</MudButton>
@@ -175,7 +175,7 @@
                         {
                             <label class="col-form-label col-md-3 bold-font">ReturnDate Range</label>
                             <div class="col-md-4">
-                                <MudDateRangePicker Style="left: 50% !important;top: 50% !important;transform: translate(-50%, -50%);" @ref="_returnDatePicker" @bind-DateRange="_returnDate" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM">
+                                <MudDateRangePicker Style="left: 50% !important;top: 50% !important;transform: translate(-50%, -50%);" @ref="_returnDatePicker" @bind-DateRange="_returnDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM">
                                     <PickerActions Context="pickerActionsContext">
                                         <MudButton Class="mr-auto align-self-start" OnClick="@(() => _returnDatePicker.Clear())">Clear</MudButton>
                                         <MudButton OnClick="@(() => _returnDatePicker.Close(false))">Cancel</MudButton>
@@ -287,15 +287,15 @@
                                     }
                                     @if (model.IssueDate)
                                     {
-                                        <td>@r.IssueDate.ToString("dd/MM/yyyy")</td>
+                                        <td>@r.IssueDate.ToString("dd/MMM/yyyy")</td>
                                     }
                                     @if (model.IssueTill)
                                     {
-                                        <td>@(r.IssueTill?.ToString("dd/MM/yyyy"))</td>
+                                        <td>@(r.IssueTill?.ToString("dd/MMM/yyyy"))</td>
                                     }
                                     @if (model.ReturnDate)
                                     {
-                                        <td>@(r.ReturnDate?.ToString("dd/MM/yyyy"))</td>
+                                        <td>@(r.ReturnDate?.ToString("dd/MMM/yyyy"))</td>
 
                                     }
                                 </tr>

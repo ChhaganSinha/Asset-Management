@@ -130,7 +130,7 @@
                             </div>
 
                             <div class="col-md-4">
-                                <MudDateRangePicker Label="Join Date" @ref="_dateOfJoinPicker" @bind-DateRange="_joinDate" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                <MudDateRangePicker Label="Join Date" @ref="_dateOfJoinPicker" @bind-DateRange="_joinDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
                                     @*  <PickerActions Context="pickerActionsContext">
                                 <MudButton Class="mr-auto align-self-start" OnClick="@(() => _dateOfJoinPicker.Clear())">Clear</MudButton>
                                 <MudButton OnClick="@(() => _dateOfJoinPicker.Close(false))">Cancel</MudButton>
@@ -141,7 +141,7 @@
                             @if(selectedEmployeeStatus == "Resigned")
                             {
                                 <div class="col-md-4">
-                                    <MudDateRangePicker Label="Resign Date" @ref="_resignDatePicker" @bind-DateRange="_resignDate" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                    <MudDateRangePicker Label="Resign Date" @ref="_resignDatePicker" @bind-DateRange="_resignDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
                                         @*  <PickerActions Context="pickerActionsContext">
                                     <MudButton Class="mr-auto align-self-start" OnClick="@(() => _resignDatePicker.Clear())">Clear</MudButton>
                                     <MudButton OnClick="@(() => _resignDatePicker.Close(false))">Cancel</MudButton>
@@ -251,13 +251,13 @@
                             </div>
 
                             <div class="col-md-4">
-                                <MudDateRangePicker Label="Aquire Date" @ref="_aquireDatePicker" @bind-DateRange="_aquireDate" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                <MudDateRangePicker Label="Aquire Date" @ref="_aquireDatePicker" @bind-DateRange="_aquireDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
 
                                 </MudDateRangePicker>
                             </div>
 
                             <div class="col-md-4">
-                                <MudDateRangePicker Label="Discard Date" @ref="_discardDatePicker" @bind-DateRange="_discardDate" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                <MudDateRangePicker Label="Discard Date" @ref="_discardDatePicker" @bind-DateRange="_discardDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
   
                                 </MudDateRangePicker>
                             </div>
@@ -329,10 +329,10 @@
                                         <td>@r.EmployeeEducation</td>
                                         <td>@r.Skills</td>
                                         <td>@r.Designation</td>
-                                        <td>@r.DateOfBirth.ToString("dd/MM/yyyy")</td>
+                                        <td>@r.DateOfBirth.ToString("dd/MMM/yyyy")</td>
                                         <td>@r.ReportingTo</td>
-                                        <td>@r.DateOfJoin.ToString("dd/MM/yyyy")</td>
-                                        <td>@r.DateOfLeaving.ToString("dd/MM/yyyy")</td>
+                                        <td>@r.DateOfJoin.ToString("dd/MMM/yyyy")</td>
+                                        <td>@r.DateOfLeaving.ToString("dd/MMM/yyyy")</td>
 
                                     </tr>
 
@@ -397,8 +397,8 @@
                                         @* <td>@r.EmployeeId</td> *@
                                         <td>@r.EmployeeName</td>
                                         <td>@r.EmployeeEmail</td>
-                                        <td>@r.AcquireDate.ToString("dd/MM/yyyy")</td>
-                                        <td>@r.DiscardDate?.ToString("dd/MM/yyyy")</td>
+                                        <td>@r.AcquireDate.ToString("dd/MMM/yyyy")</td>
+                                        <td>@r.DiscardDate?.ToString("dd/MMM/yyyy")</td>
                                         
                                     </tr>
 
