@@ -5,7 +5,6 @@
 @using AssetManagement.Client.Shared.Popup
 @using AssetManagement.Dto.Models;
 @using System.Globalization;
-@using MudBlazor
 @inject AppClient client
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
@@ -13,14 +12,9 @@
 
 <div class="card">
     <div class="card-header" style="padding: 8px !important; display: flex; align-items: center;">
-        <MudButton Href="employees"
-                   Variant="Variant.Outlined"
-                   StartIcon="@Icons.Material.Filled.ArrowBack"
-                   Color="Color.Tertiary"
-                   Size="Size.Small"
-                   Disabled=false>
-            Back
-        </MudButton>
+        <a href="employees" class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i> Back
+        </a>
         <div style="margin-left: auto;">
             <ol class="breadcrumb" style="display: flex; justify-content: flex-end; align-items: center; list-style: none; padding: 0; margin: 0;">
                 <li class="breadcrumb-item"><a href="/"><i class="fa fa-home" aria-hidden="true"></i></a></li>

@@ -37,8 +37,8 @@
                 <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
-                    <MudExpansionPanels MultiExpansion="true">
-                        <MudExpansionPanel Text="Insurance Form" MaxHeight="500" Class="custom-header" IsExpanded="true">
+                    <div class="accordion-section">
+                        <details class="mb-2"><summary class="fw-bold">Insurance Form</summary>
                             <div class="form-group row mb-2">
                                 <label class="col-form-label col-md-2 bold-font">Name</label>
                                 <div class="col-md-10">
@@ -110,8 +110,8 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </MudExpansionPanel>
-                    </MudExpansionPanels>
+                        </details>
+                    </div>
 
                     <div style="text-align:center;" class="mt-4">
                         <button type="submit" class="btn btn-success col-md-2">Submit</button>

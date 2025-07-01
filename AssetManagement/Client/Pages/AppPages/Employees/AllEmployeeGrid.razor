@@ -14,7 +14,7 @@
 @using System.Globalization;
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.Primitives;
-@using MudBlazor
+
 @inject ILogger<AllEmployeeGrid> logger
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
@@ -22,70 +22,30 @@
 @inject IJSRuntime JSRuntime
 
 
-<div class="card">
-    <div class="card-header" style="padding: 8px !important; display: flex; align-items: center;">
-        <MudButton Href="employee-config"
-                   Variant="Variant.Outlined"
-                   Color="MudBlazor.Color.Tertiary"
-                   Size="Size.Small"
-                   Disabled=false>
-            Add Employee
-        </MudButton>
-        <div style="margin-left: auto;">
-            <ol class="breadcrumb" style="display: flex; justify-content: flex-end; align-items: center; list-style: none; padding: 0; margin: 0;">
-                <li class="breadcrumb-item"><a href="/"><i class="fa fa-home" aria-hidden="true"></i></a></li>
-                <li class="breadcrumb-item active">Employees</li>
-            </ol>
-        </div>
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Employees</li>
+    </ol>
+</nav>
 
-    </div>
-   
+<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+    <a href="employee-config" class="btn btn-primary p-1">
+        <i class="fa fa-plus fa-lg" aria-hidden="true"></i> Employee
+    </a>
+    <InputFile id="importFile" OnChange="@(e => UploadFiles(e.File))" accept=".xlsx" class="d-none" />
+    <label for="importFile" class="btn btn-outline-primary btn-sm">
+        <i class="fa fa-download"></i> Import Employees
+    </label>
+    <a href="sample-data/Employee_Template.xlsx" title="Employee Template" class="btn btn-outline-info btn-sm mb-0">
+        <i class="fa fa-cloud-download me-1"></i> Template
+    </a>
+    <a href="EmployeeTransfer" class="btn btn-outline-warning btn-sm">Employee Transfer</a>
+    <a href="newOnboarding" class="btn btn-outline-secondary btn-sm">New Onboard</a>
+</div>
+
+<div class="card borderd" style="padding: 0 10px;">
     <div class="card-body">
-        <div class="card-header" style="padding: 8px !important;">
-            <div class="row">
-                <div class="col-md-6 mb-2 mb-md-0">
-                    <div class="d-flex flex-md-row">
-                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles" Accept=".xlsx">
-                            <ButtonTemplate>
-                                <MudButton HtmlTag="label"
-                                           Variant="Variant.Outlined"
-                                           Color="MudBlazor.Color.Primary"
-                                           StartIcon="@Icons.Material.Filled.Download"
-                                           Size="Size.Small"
-                                           Class="mr-2"
-                                           Style="margin-top: -8px;"
-                                           for="@context">
-                                    Import Employees
-                                </MudButton>
-                            </ButtonTemplate>
-                        </MudFileUpload>
-                        <a href="sample-data/Employee_Template.xlsx" title="Employee Template" class="ml-5" style="margin-top: 3px;">
-                            <i class="fa fa-cloud-download fa-2x text-info" aria-hidden="true"></i>
-                        </a>
-                    </div>
-
-
-                </div>
-                <div class="col-md-6">
-                    <div class="d-flex flex-column flex-md-row justify-content-md-end">
-                        <MudButton Href="EmployeeTransfer"
-                                   Variant="Variant.Outlined"
-                                   Color="MudBlazor.Color.Warning"
-                                   Size="Size.Small"
-                                   Class="mb-2 mb-md-0 mr-md-2">
-                            Employee Transfer
-                        </MudButton>
-                        <MudButton Href="newOnboarding"
-                                   Variant="Variant.Outlined"
-                                   Color="MudBlazor.Color.Secondary"
-                                   Size="Size.Small"
-                                   Class="mb-2 mb-md-0">
-                            New Onboard
-                        </MudButton>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         @if(cmp != null)
         {

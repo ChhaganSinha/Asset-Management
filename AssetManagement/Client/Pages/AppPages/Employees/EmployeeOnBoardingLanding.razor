@@ -50,8 +50,8 @@
                 <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
-                <MudExpansionPanels MultiExpansion="true">
-                    <MudExpansionPanel Text=" Personal Details" IsExpanded="true">
+                <div class="accordion-section">
+                    <details class="mb-2"><summary class="fw-bold"> Personal Details</summary>
                         @if (param != null)
                         {
                             <div class="form-group row mb-2">
@@ -168,39 +168,19 @@
                             <div class="form-group row mb-2">
                                 <label class="col-form-label col-md-2 bold-font">Reporting To</label>
                                 <div class="col-md-4">
-                                    <MudGrid>
-                                        <MudItem xs="12" sm="12" md="12">
-                                            <MudAutocomplete Label="Select" T="Employee" @bind-Value="selectedManager" SearchFunc="@ManagerSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                             ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} ({e.EmailId})")"
-                                                             Required="false"
-                                                             ResetValueOnEmptyText="true"
-                                                             CoerceText="true"
-                                                             CoerceValue="true"
-                                                             MaxItems="null">
-
-                                            </MudAutocomplete>
-                                        </MudItem>
-                                    </MudGrid>
-                                    @if (selectedManager != null) { model.ReportingTo = selectedManager.EmployeeId; }
+                                    <DropdownSelect @bind-Value="model.ReportingTo"
+                                                   DataSource="EmployeeDropdown"
+                                                   EmptyText="-- Select --"
+                                                   Css="form-select" />
                                     <ValidationMessage For="() => model.ReportingTo" />
                                 </div>
 
                                 <label class="col-form-label col-md-2 bold-font">Designation</label>
                                 <div class="col-md-3">
-                                    <MudGrid>
-                                        <MudItem xs="12" sm="12" md="12">
-                                            <MudAutocomplete Label="Select" T="DesignationDTO" @bind-Value="selectedDesigantion" SearchFunc="@DesignationSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                             ToStringFunc="@(e => e == null ? null : $"{e.Designation}")"
-                                                             Required="false"
-                                                             ResetValueOnEmptyText="true"
-                                                             CoerceText="true"
-                                                             CoerceValue="true"
-                                                             MaxItems="null">
-
-                                            </MudAutocomplete>
-                                        </MudItem>
-                                    </MudGrid>
-                                    @if (selectedDesigantion != null) { model.Designation = selectedDesigantion.Designation; }
+                                    <DropdownSelect @bind-Value="model.Designation"
+                                                   DataSource="DesignationDropdown"
+                                                   EmptyText="-- Select --"
+                                                   Css="form-select" />
                                     <ValidationMessage For="() => model.Designation" />
                                 </div>
                             </div>
@@ -406,8 +386,8 @@
                         </div>
 
 
-                    </MudExpansionPanel>
-                    <MudExpansionPanel Text=" Permanent Address Details" MaxHeight="500">
+                    </details>
+                    <details class="mb-2"><summary class="fw-bold"> Permanent Address Details</summary>
                         <div class="form-group row">
                             <label class="col-form-label col-md-2 bold-font required-field">Address</label>
                             <div class="col-md-10 mb-2">
@@ -433,8 +413,8 @@
                                 <ValidationMessage For="() => model.PPin" />
                             </div>
                         </div>
-                    </MudExpansionPanel>
-                    <MudExpansionPanel Text="Current Address Details" MaxHeight="500">
+                    </details>
+                    <details class="mb-2"><summary class="fw-bold">Current Address Details</summary>
                         <div class="form-group row mb-2">
                             <label class="col-form-label col-md-5 bold-font">Check if Current Address is same As Permanent Address</label>
                             <div class="col-md-1">
@@ -466,8 +446,8 @@
                                 <ValidationMessage For="() => model.CPin" />
                             </div>
                         </div>
-                    </MudExpansionPanel>
-                    <MudExpansionPanel Text="Bank Details" MaxHeight="500">
+                    </details>
+                    <details class="mb-2"><summary class="fw-bold">Bank Details</summary>
                         <div class="form-group row">
                             <label class="col-form-label col-md-2 bold-font required-field">Bank Name</label>
                             <div class="col-md-10 mb-2">
@@ -529,8 +509,8 @@
                                 <span style="color:red">@BankPassFileErrorMsg</span>
                             </div>
                         </div>
-                    </MudExpansionPanel>
-                </MudExpansionPanels>
+                    </details>
+                </div>
 
 
                 <div style="text-align:center;" class="mt-4 btn-group flex-wrap">
@@ -1140,4 +1120,10 @@
         string extension = System.IO.Path.GetExtension(filePath);
         return imageExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
     }
+
+    private List<KeyValuePair<string, string>> EmployeeDropdown =>
+        employee.Select(e => new KeyValuePair<string, string>(e.EmployeeId, $"{e.EmployeeName} ({e.EmailId})")).ToList();
+
+    private List<KeyValuePair<string, string>> DesignationDropdown =>
+        designation.Select(d => new KeyValuePair<string, string>(d.Designation, d.Designation)).ToList();
 }

@@ -19,19 +19,10 @@
         <div class="form-group row">
             <label class="col-form-label col-md-2 bold-font required-field">Company Code</label>
             <div class="col-md-4 mb-1">
-                <MudGrid>
-                    <MudItem xs="12" sm="12" md="12">
-                        <MudAutocomplete Label="Select" T="Company" @bind-Value="selectedCompany" SearchFunc="@CompanySearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                        ToStringFunc="@(e => e == null ? null : $"{e.CompanyCode} ({e.CompanyCode})")"
-                        Required="false"
-                        ResetValueOnEmptyText="true"
-                        CoerceText="true"
-                        CoerceValue="true"
-                        MaxItems="null">
-                        </MudAutocomplete>
-                    </MudItem>
-                </MudGrid>
-                @if (selectedCompany != null) { model.CompanyCode = selectedCompany.CompanyCode; }
+                <DropdownSelect @bind-Value="model.CompanyCode"
+                               DataSource="CompanyDropdown"
+                               EmptyText="-- Select Company --"
+                               Css="form-select" />
                 <ValidationMessage For="() => model.CompanyCode" />
             </div>
 
@@ -66,19 +57,10 @@
             @* </div> *@
             <label class="col-form-label col-md-2 bold-font required-field">Reference From</label>
             <div class="col-md-4 mb-1">
-                <MudGrid>
-                    <MudItem xs="12" sm="12" md="12">
-                        <MudAutocomplete Label="Select" T="Employee" @bind-Value="selectedReference" SearchFunc="@ReferenceSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                        ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} ({e.EmailId})")"
-                        Required="false"
-                        ResetValueOnEmptyText="true"
-                        CoerceText="true"
-                        CoerceValue="true"
-                        MaxItems="null">
-                        </MudAutocomplete>
-                    </MudItem>
-                </MudGrid>
-                @if (selectedManager != null) { model.ReportingTo = selectedReference.ReportingTo; model.ManagerEmail = selectedManager.EmailId; }
+                <DropdownSelect @bind-Value="model.Reference"
+                               DataSource="EmployeeEmailDropdown"
+                               EmptyText="-- Select --"
+                               Css="form-select" />
                 <ValidationMessage For="() => model.ReportingTo" />
 
             </div>
@@ -87,39 +69,21 @@
         <div class="form-group row">
             <label class="col-form-label col-md-2 bold-font required-field">Reporting To</label>
             <div class="col-md-4 mb-1">
-                <MudGrid>
-                    <MudItem xs="12" sm="12" md="12">
-                        <MudAutocomplete Label="Select" T="Employee" @bind-Value="selectedManager" SearchFunc="@ManagerSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                        ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} ({e.EmailId})")"
-                        Required="false"
-                        ResetValueOnEmptyText="true"
-                        CoerceText="true"
-                        CoerceValue="true"
-                        MaxItems="null">
-                        </MudAutocomplete>
-                    </MudItem>
-                </MudGrid>
-                @if (selectedManager != null) { model.ReportingTo = selectedManager.ReportingTo; model.ManagerEmail = selectedManager.EmailId; }
+                <DropdownSelect @bind-Value="model.ReportingTo"
+                               EventDropdown="OnManagerChanged"
+                               DataSource="EmployeeDropdown"
+                               EmptyText="-- Select --"
+                               Css="form-select" />
                 <ValidationMessage For="() => model.ReportingTo" />
 
             </div>
 
             <label class="col-form-label col-md-2 bold-font required-field">Designation</label>
             <div class="col-md-4 mb-1">
-                <MudGrid>
-                    <MudItem xs="12" sm="12" md="12">
-                        <MudAutocomplete Label="Select" T="DesignationDTO" @bind-Value="selectedDesigantion" SearchFunc="@DesignationSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                        ToStringFunc="@(e => e == null ? null : $"{e.Designation}")"
-                        Required="false"
-                        ResetValueOnEmptyText="true"
-                        CoerceText="true"
-                        CoerceValue="true"
-                        MaxItems="null">
-
-                        </MudAutocomplete>
-                    </MudItem>
-                </MudGrid>
-                @if (selectedDesigantion != null) { model.Designation = selectedDesigantion.Designation; }
+                <DropdownSelect @bind-Value="model.Designation"
+                               DataSource="DesignationDropdown"
+                               EmptyText="-- Select --"
+                               Css="form-select" />
                 <ValidationMessage For="() => model.Designation" />
             </div>
         </div>
@@ -204,11 +168,18 @@ else
 
 @code
 {
-    private DesignationDTO? selectedDesigantion { get; set; }
-    private Company? selectedCompany { get; set; }
-    private Employee? selectedManager { get; set; }
-    private Employee? selectedReference { get; set; }
-    // private Employee? selectedHR { get; set; }
+    // Dropdown data
+    private List<KeyValuePair<string, string>> CompanyDropdown =>
+        company.Select(c => new KeyValuePair<string, string>(c.CompanyCode, c.Name)).ToList();
+
+    private List<KeyValuePair<string, string>> EmployeeDropdown =>
+        employees.Select(e => new KeyValuePair<string, string>(e.EmployeeId, $"{e.EmployeeName} ({e.EmailId})")).ToList();
+
+    private List<KeyValuePair<string, string>> EmployeeEmailDropdown =>
+        employees.Select(e => new KeyValuePair<string, string>(e.EmailId, $"{e.EmployeeName} ({e.EmailId})")).ToList();
+
+    private List<KeyValuePair<string, string>> DesignationDropdown =>
+        designation.Select(d => new KeyValuePair<string, string>(d.Designation, d.Designation)).ToList();
     List<DesignationDTO> designation = new();
 
 
@@ -289,17 +260,13 @@ else
         try
         {
             Message = "Please wait";
-            model.Reference = selectedReference.EmailId;
 
             var responce = await clients.UpsertEmployeeOnboarding(model);
             if (responce.IsSuccess)
             {
                 Message = responce.Message;
                 TaskCompleted = true;
-                selectedCompany = null;
-                selectedReference = null;
-                selectedManager = null;
-                selectedDesigantion = new();
+                model = new();
             }
             else
             {
@@ -329,38 +296,13 @@ else
         await Component.UpdateGrid();
     }
 
-    private async Task<IEnumerable<DesignationDTO>> DesignationSearch(string value)
+    private Task OnManagerChanged(string val)
     {
-        await Task.Delay(5);
-        if (string.IsNullOrEmpty(value))
-            return designation;
-        return designation
-        .Where(x => x.Designation.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    }
-
-    private async Task<IEnumerable<Employee>> ManagerSearch(string value)
-    {
-        await Task.Delay(5);
-        if (string.IsNullOrEmpty(value))
-            return employees;
-        return employees
-        .Where(x => x.EmployeeName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    } 
-    private async Task<IEnumerable<Employee>> ReferenceSearch(string value)
-    {
-        await Task.Delay(5);
-        if (string.IsNullOrEmpty(value))
-            return employees;
-        return employees
-        .Where(x => x.EmployeeName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    }
-
-    private async Task<IEnumerable<Company>> CompanySearch(string value)
-    {
-        await Task.Delay(5);
-        if (string.IsNullOrEmpty(value))
-            return company;
-        return company
-        .Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        var selected = employees.FirstOrDefault(e => e.EmployeeId == val);
+        if (selected != null)
+        {
+            model.ManagerEmail = selected.EmailId;
+        }
+        return Task.CompletedTask;
     }
 }
