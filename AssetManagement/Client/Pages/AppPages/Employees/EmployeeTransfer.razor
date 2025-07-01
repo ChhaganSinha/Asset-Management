@@ -24,18 +24,11 @@
             <EditForm Model="model">
                 <div class="form-group row" style="padding:4px">
                     <div class="col-md-4">
-                        <MudGrid>
-                            <MudItem xs="12" sm="12" md="12">
-                                <MudAutocomplete T="Company" Label="Source Company" @bind-Value="selectedSourceCompany" SearchFunc="@SourceCompanySearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                 ToStringFunc="@(e => e == null ? null : $"{e.Name} ({e.CompanyCode})")"
-                                                 Required="false"
-                                                 ResetValueOnEmptyText="true"
-                                                 CoerceText="true"
-                                                 CoerceValue="true"
-                                                 MaxItems="null">
-                                </MudAutocomplete>
-                            </MudItem>
-                        </MudGrid>
+                        <DropdownSelect @bind-Value="SourceCompanyId"
+                                        EventDropdown="OnSourceCompanyChanged"
+                                        DataSource="CompanyDropdown"
+                                        EmptyText="-- Select Company --"
+                                        Css="form-select" />
                         <span style="color:red; padding-left: 1px">@ErrorSourceCompany</span>
                         @if (selectedSourceCompany == null)
                         {
@@ -46,34 +39,20 @@
                         }
                     </div>
                     <div class="col-md-4">
-                        <MudGrid>
-                            <MudItem xs="12" sm="12" md="12">
-                                <MudAutocomplete T="Employee" Label="Select Employee" @bind-Value="selectedEmployee" SearchFunc="@EmployeeSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                 ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} - {e.CompanyCode} (EmpID - {e.EmployeeId})")"
-                                                 Required="false"
-                                                 ResetValueOnEmptyText="true"
-                                                 CoerceText="true"
-                                                 CoerceValue="true"
-                                                 MaxItems="null">
-                                </MudAutocomplete>
-                            </MudItem>
-                        </MudGrid>
+                        <DropdownSelect @bind-Value="EmployeeId"
+                                        EventDropdown="OnEmployeeChanged"
+                                        DataSource="EmployeeDropdown"
+                                        EmptyText="-- Select Employee --"
+                                        Css="form-select" />
                         <span style="color:red; padding-left: 1px">@ErrorSourceEmployee</span>
                         @if (selectedEmployee != null) { OnEmployeeChange(selectedEmployee); } else { model = new(); }
                     </div>
                     <div class="col-md-4">
-                        <MudGrid>
-                            <MudItem xs="12" sm="12" md="12">
-                                <MudAutocomplete T="Company" Label="Target Company" @bind-Value="selectedTargetCompany" SearchFunc="@TargetCompanySearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                 ToStringFunc="@(e => e == null ? null : $"{e.Name} ({e.CompanyCode})")"
-                                                 Required="true"
-                                                 ResetValueOnEmptyText="true"
-                                                 CoerceText="true"
-                                                 CoerceValue="true"
-                                                 MaxItems="null">
-                                </MudAutocomplete>
-                            </MudItem>
-                        </MudGrid>
+                        <DropdownSelect @bind-Value="TargetCompanyId"
+                                        EventDropdown="OnTargetCompanyChanged"
+                                        DataSource="TargetCompanyDropdown"
+                                        EmptyText="-- Select Company --"
+                                        Css="form-select" />
                         <span style="color:red; padding-left: 1px">@ErrorTargetCompany</span>
                     </div>
                 </div>
@@ -210,6 +189,10 @@
     string ErrorSourceEmployee = string.Empty;
     string ErrorTargetCompany = string.Empty;
     string NewEmployeeIDErrorMessage = string.Empty;
+
+    private int SourceCompanyId;
+    private int EmployeeId;
+    private int TargetCompanyId;
 
     List<Company> company = new();
     List<Employee> employee = new();
@@ -364,21 +347,18 @@
     }
 
     private Employee? selectedEmployee { get; set; }
-    private async Task<IEnumerable<Employee>> EmployeeSearch(string value)
+    private Task OnEmployeeChanged(string val)
     {
-        await Task.Delay(5);
-
-        if (string.IsNullOrEmpty(value) && selectedSourceCompany != null)
+        if (int.TryParse(val, out var id))
         {
-            return employee.Where(o => o.CompanyCode == selectedSourceCompany.CompanyCode && o.Status != EmployeeStatus.Resigned);
+            EmployeeId = id;
+            selectedEmployee = employee.FirstOrDefault(e => e.Id == id);
+            if (selectedEmployee != null)
+                OnEmployeeChange(selectedEmployee);
+            else
+                model = new();
         }
-        if (!string.IsNullOrEmpty(value) && selectedSourceCompany != null)
-        {
-            return employee.Where(o => o.CompanyCode == selectedSourceCompany.CompanyCode && o.Status != EmployeeStatus.Resigned)
-                .Where(x => x.EmployeeId.Contains(value, StringComparison.InvariantCultureIgnoreCase) || x.EmployeeName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-        }
-        else
-            return null;
+        return Task.CompletedTask;
     }
 
     private void OnEmployeeChange(Employee employee)
@@ -387,31 +367,45 @@
     }
 
     private Company? selectedSourceCompany { get; set; }
-    private async Task<IEnumerable<Company>> SourceCompanySearch(string value)
+    private Task OnSourceCompanyChanged(string val)
     {
-        await Task.Delay(5);
-        if (string.IsNullOrEmpty(value))
-            return company;
-        return company
-        .Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase) ||
-        x.CompanyCode.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        if (int.TryParse(val, out var id))
+        {
+            SourceCompanyId = id;
+            selectedSourceCompany = company.FirstOrDefault(c => c.Id == id);
+            selectedEmployee = null;
+            selectedTargetCompany = null;
+            model = new();
+            ErrorSourceCompany = ErrorSourceEmployee = ErrorTargetCompany = string.Empty;
+        }
+        return Task.CompletedTask;
     }
 
     private Company? selectedTargetCompany { get; set; }
-    private async Task<IEnumerable<Company>> TargetCompanySearch(string value)
+    private Task OnTargetCompanyChanged(string val)
     {
-        await Task.Delay(5);
-        if (string.IsNullOrEmpty(value) && selectedSourceCompany != null)
-            return company.Where(o=>o.CompanyCode != selectedSourceCompany.CompanyCode);
-        if (string.IsNullOrEmpty(value) && selectedSourceCompany != null)
+        if (int.TryParse(val, out var id))
         {
-            return company
-            .Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase) ||
-            x.CompanyCode.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+            TargetCompanyId = id;
+            selectedTargetCompany = company.FirstOrDefault(c => c.Id == id);
         }
-        else
-            return null;
+        return Task.CompletedTask;
     }
+
+    private List<KeyValuePair<string, string>> CompanyDropdown =>
+        company.Select(c => new KeyValuePair<string, string>(c.Id.ToString(), $"{c.Name} ({c.CompanyCode})")).ToList();
+
+    private List<KeyValuePair<string, string>> EmployeeDropdown =>
+        selectedSourceCompany == null ? new() :
+        employee.Where(o => o.CompanyCode == selectedSourceCompany.CompanyCode && o.Status != EmployeeStatus.Resigned)
+                .Select(e => new KeyValuePair<string, string>(e.Id.ToString(), $"{e.EmployeeName} - {e.CompanyCode} (EmpID - {e.EmployeeId})"))
+                .ToList();
+
+    private List<KeyValuePair<string, string>> TargetCompanyDropdown =>
+        selectedSourceCompany == null ? CompanyDropdown :
+        company.Where(c => c.CompanyCode != selectedSourceCompany.CompanyCode)
+               .Select(c => new KeyValuePair<string, string>(c.Id.ToString(), $"{c.Name} ({c.CompanyCode})"))
+               .ToList();
 
     public void Back()
     {
