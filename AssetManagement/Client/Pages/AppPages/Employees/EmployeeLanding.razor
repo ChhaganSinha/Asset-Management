@@ -40,29 +40,31 @@
                     <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
-                    <div class="form-group row mb-2">
-                        <label class="col-form-label col-md-2 bold-font required-field">Company Code</label>
-                        <div class="col-md-2">
+                        <div class="accordion-section">
+                            <details class="mb-2"><summary class="fw-bold">Personal Details</summary>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Company Code</label>
                             <InputText id="CompanyCode" @bind-Value="model.CompanyCode" class="form-control" disabled />
                             <ValidationMessage For="() => model.CompanyCode" />
                         </div>
-
-                        <label class="col-form-label col-md-2 bold-font required-field">Employee Id</label>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Employee Id</label>
                             <InputText id="EmployeeId" @bind-Value="model.EmployeeId" class="form-control" disabled />
                             <ValidationMessage For="() => model.EmployeeId" />
                         </div>
-
-                        <label class="col-form-label col-md-1 bold-font required-field">Name</label>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Name</label>
                             <InputText id="EmployeeName" @bind-Value="model.EmployeeName" class="form-control" />
                             <ValidationMessage For="() => model.EmployeeName" />
                         </div>
                     </div>
+                            </details>
+                            <details class="mb-2"><summary class="fw-bold">Employment Details</summary>
 
-                    <div class="form-group row mb-2">
-                        <label class="col-form-label col-md-2 bold-font required-field">Employee Status</label>
-                        <div class="col-md-2">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Employee Status</label>
                             <InputSelect id="Status" @bind-Value="model.Status" class="form-control" disabled>
                                 @foreach (var s in Enum.GetValues(typeof(EmployeeStatus)))
                                 {
@@ -71,59 +73,52 @@
                             </InputSelect>
                             <ValidationMessage For="() => model.Status" />
                         </div>
-
-                        <label class="col-form-label col-md-2 bold-font required-field">Father's Name</label>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Father's Name</label>
                             <InputText id="fatherName" @bind-Value="model.fatherName" class="form-control" />
                             <ValidationMessage For="() => model.fatherName" />
                         </div>
-
-                        <label class="col-form-label col-md-1 bold-font required-field">Email</label>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Email</label>
                             <InputText id="EmailId" @bind-Value="model.EmailId" class="form-control" disabled />
                             <ValidationMessage For="() => model.EmailId" />
                         </div>
                     </div>
 
-                    <div class="form-group row mb-2">
-                        <label class="col-form-label col-md-2 bold-font required-field">Emergency Number</label>
-                        <div class="col-md-2">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Emergency Number</label>
                             <InputText id="EmergencyContactNumber" @bind-Value="model.EmergencyContactNumber" class="form-control" />
                             <ValidationMessage For="() => model.EmergencyContactNumber" />
                         </div>
-
-                        <label class="col-form-label col-md-2 bold-font required-field">Date of join</label>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Date of join</label>
                             <InputDate id="DateOfJoin" @bind-Value="model.DateOfJoin" class="form-control" />
                             <ValidationMessage For="() => model.DateOfJoin" />
                         </div>
-
-                        <label class="col-form-label col-md-1 bold-font required-field">Mobile</label>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Mobile</label>
                             <InputText id="MobileNumber" @bind-Value="model.MobileNumber" class="form-control" />
                             <ValidationMessage For="() => model.MobileNumber" />
                         </div>
                     </div>
 
-                    <div class="form-group row mb-2">
-                        <label class="col-form-label col-md-2 bold-font required-field">Date Of Birth</label>
-                        <div class="col-md-2">
-                            <InputDate id="DateOfBirth" @bind-Value="model.DateOfBirth" class="form-control" />
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Date Of Birth</label>
+                            <InputDate id="DateOfBirth" -Value="model.DateOfBirth" class="form-control" />
                             <ValidationMessage For="() => model.DateOfBirth" />
                         </div>
-
-                        <label class="col-form-label col-md-2 bold-font required-field">Aadhar No</label>
-                        <div class="col-md-2">
-                            <InputText id="AadhaarNumber" @bind-Value="model.AadhaarNumber" class="form-control" />
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Aadhar No</label>
+                            <InputText id="AadhaarNumber" -Value="model.AadhaarNumber" class="form-control" />
                             <ValidationMessage For="() => model.AadhaarNumber" />
                         </div>
-
-                        <label class="col-form-label col-md-1 bold-font">PAN No</label>
-                        <div class="col-md-3">
-                            <InputText id="PANNumber" @bind-Value="model.PANNumber" class="form-control" />
+                        <div class="col-md-4">
+                            <label class="form-label bold-font">PAN No</label>
+                            <InputText id="PANNumber" -Value="model.PANNumber" class="form-control" />
                             <ValidationMessage For="() => model.PANNumber" />
                         </div>
-
                     </div>
 
                     <div class="form-group row mb-2">
@@ -235,7 +230,8 @@
                         </div>
 
                     </div>
-
+                            </details>
+                            <details class="mb-2"><summary class="fw-bold">Document Uploads</summary>
 
                     <div class="form-group row mb-2">
                         <label class="col-form-label col-md-2 bold-font">Upload Aadhaar</label>
@@ -416,6 +412,8 @@
                             <span style="color:red">@ProfilePicFileErrorMsg</span>
                         </div>
                     </div>
+                            </details>
+                        </div>
                     <div class="accordion-section">
                         <details class="mb-2"><summary class="fw-bold"> Permanent Address Details</summary>
                             <div class="form-group row">
