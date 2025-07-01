@@ -8,6 +8,13 @@
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Title</li>
+    </ol>
+</nav>
+
 <div>
     <div class="card">
         <div class="card-header bg-secondary text-center">

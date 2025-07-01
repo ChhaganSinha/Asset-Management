@@ -14,29 +14,32 @@
 @layout NoLayout
 @attribute [AllowAnonymous]
 
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Title</li>
+    </ol>
+</nav>
 
 <div>
-    <div class="card">
-        <div class="card-header bg-secondary text-center">
-            @Title
-        </div>
-        <div class="card-body">
-            @if (model == null && !TaskCompleted)
-            {
-                <div class="loader-container mt-4">
-                    <div class="loader"></div>
-                </div>
+    @if (model == null && !TaskCompleted)
+        {
+            <div class="loader-container mt-4">
+                <div class="loader"></div>
+            </div>
 
-            }
-            else if (model == null && TaskCompleted)
-            {
-                <p>No data found!</p>
-            }
-            else
-            {
-                <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
+        }
+        else if (model == null && TaskCompleted)
+        {
+            <p>No data found!</p>
+        }
+        else
+        {
+            <div class="card" style="background: darkgrey">
+                <div class="card-body">
+                    <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
                     <div class="form-group row mb-2">
                         <label class="col-form-label col-md-2 bold-font required-field">Company Code</label>
                         <div class="col-md-2">
@@ -413,8 +416,8 @@
                             <span style="color:red">@ProfilePicFileErrorMsg</span>
                         </div>
                     </div>
-                    <MudExpansionPanels MultiExpansion="true">
-                        <MudExpansionPanel Text=" Permanent Address Details" MaxHeight="500">
+                    <div class="accordion-section">
+                        <details class="mb-2"><summary class="fw-bold"> Permanent Address Details</summary>
                             <div class="form-group row">
                                 <label class="col-form-label col-md-2 bold-font required-field">Address</label>
                                 <div class="col-md-10 mb-2">
@@ -440,8 +443,8 @@
                                     <ValidationMessage For="() => model.PPin" />
                                 </div>
                             </div>
-                        </MudExpansionPanel>
-                        <MudExpansionPanel Text="Current Address Details" MaxHeight="500">
+                        </details>
+                        <details class="mb-2"><summary class="fw-bold">Current Address Details</summary>
                             <div class="form-group row mb-2">
                                 <label class="col-form-label col-md-5 bold-font">Check if Current Address is same As Permanent Address</label>
                                 <div class="col-md-1">
@@ -473,8 +476,8 @@
                                     <ValidationMessage For="() => model.CPin" />
                                 </div>
                             </div>
-                        </MudExpansionPanel>
-                        <MudExpansionPanel Text="Bank Details" MaxHeight="500">
+                        </details>
+                        <details class="mb-2"><summary class="fw-bold">Bank Details</summary>
                             <div class="form-group row">
                                 <label class="col-form-label col-md-2 bold-font required-field">Bank Name</label>
                                 <div class="col-md-10 mb-2">
@@ -500,8 +503,8 @@
                                     <ValidationMessage For="() => model.EmpBankIfsc" />
                                 </div>
                             </div>
-                        </MudExpansionPanel>
-                        <MudExpansionPanel Text="Insurance Form" MaxHeight="500" Class="custom-header" IsExpanded="true">
+                        </details>
+                        <details class="mb-2"><summary class="fw-bold">Insurance Form</summary>
                             <div class="form-group row mb-2">
                                 <label class="col-form-label col-md-2 bold-font">Name</label>
                                 <div class="col-md-10">
@@ -573,8 +576,8 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </MudExpansionPanel>
-                    </MudExpansionPanels>
+                        </details>
+                    </div>
 
 
                     <div style="text-align:center;" class="mt-4">
@@ -605,6 +608,8 @@
                 @* <PageDialog Title="Add Skills" Show="AddSkill" ClosePageDialog="ClosePopUp">
             <AddSkillComponent />
             </PageDialog>*@
+                </div>
+            </div>
             }
         </div>
     </div>
