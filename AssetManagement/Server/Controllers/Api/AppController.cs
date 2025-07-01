@@ -393,9 +393,9 @@ namespace AssetManagement.Server.Controllers.Api
                     .Replace("<mobile>", employee.MobileNumber).Replace("<paddress>", employee.PermanentAddress).Replace("<pstate>", employee.PState)
                     .Replace("<pcountry>", employee.PCountry).Replace("<ppin>", employee.PPin).Replace("<caddress>", employee.CurrentAddress)
                     .Replace("<cstate>", employee.CState).Replace("<ccountry>", employee.CCountry).Replace("<cpin>", employee.CPin)
-                    .Replace("<dob>", employee.DateOfBirth.ToString("dd/MM/yyyy")).Replace("<adhar>", employee.AadhaarNumber).Replace("<pan>", employee.PANNumber)
+                    .Replace("<dob>", employee.DateOfBirth.ToString("dd/MMM/yyyy")).Replace("<adhar>", employee.AadhaarNumber).Replace("<pan>", employee.PANNumber)
                     .Replace("<uan>", employee.UANNo).Replace("<bank>", employee.EmpBankName).Replace("<accountname>", employee.EmpAccountName).Replace("<account>", employee.EmpBankAccNumber)
-                    .Replace("<ifsc>", employee.EmpBankIfsc).Replace("<doj>", employee.DateOfJoin.ToString("dd/MM/yyyy")).Replace("<emergency>", employee.EmergencyContactNumber)
+                    .Replace("<ifsc>", employee.EmpBankIfsc).Replace("<doj>", employee.DateOfJoin.ToString("dd/MMM/yyyy")).Replace("<emergency>", employee.EmergencyContactNumber)
                     .Replace("<designation>", employee.Designation).Replace("<report>", employee.ReportingTo)
                     .Replace("<###RETURN_URL###>", employee.ReturnUrl);
 
@@ -768,7 +768,7 @@ namespace AssetManagement.Server.Controllers.Api
                     var RawContents = System.IO.File.ReadAllText($"{path}");
                     var Contents = RawContents.Replace("<ccode>", allocation.CompanyCode).Replace("<assettype>", allocation.AssetType).Replace("<asset>", allocation.AssetModel)
                     .Replace("<empname>", allocation.EmployeeName).Replace("<allocationtype>", allocation.AllocationType.ToString())
-                    .Replace("<issuedate>", allocation.IssueDate.ToString("dd/MM/yyyy")).Replace("<issuetill>", allocation.IssueTill?.ToString("dd/MM/yyyy"))
+                    .Replace("<issuedate>", allocation.IssueDate.ToString("dd/MMM/yyyy")).Replace("<issuetill>", allocation.IssueTill?.ToString("dd/MMM/yyyy"))
                     .Replace("<###RETURN_URL###>", allocation.ReturnUrl);
 
 

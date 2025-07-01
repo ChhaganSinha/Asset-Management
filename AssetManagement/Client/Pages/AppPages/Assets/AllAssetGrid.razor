@@ -167,13 +167,13 @@
         c.Add(o => o.SerialNumber).SetWidth("50px").Css("table-bordered");
         c.Add(o => o.MacAddress).SetWidth("50px").Css("table-bordered");
         c.Add(o => o.Status).SetWidth("50px").Css("table-bordered");
-        c.Add(o => o.AcquireDate).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.AcquireDate).Format("{0:dd/MMM/yyyy}").SetWidth("50px").Css("table-bordered");
         c.Add(o => o._AssetStatus)
           .Css("table-bordered")
           .Titled("Asset Status")
           .Filterable(filter)
           .SetCellCssClassesContraint((item) => item._AssetStatus == AssetStatus.Active ? "text-success fw-bold" : item._AssetStatus == AssetStatus.Discarded ? "text-danger fw-bold" : "text-warning fw-bold");
-        c.Add(o => o.DiscardDate).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.DiscardDate).Format("{0:dd/MMM/yyyy}").SetWidth("50px").Css("table-bordered");
     };
 
     protected override async Task OnParametersSetAsync()

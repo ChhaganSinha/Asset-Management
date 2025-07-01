@@ -195,9 +195,9 @@ else
         c.Add(o => o.ExternalEmailId).Css("table-bordered");
         c.Add(o => o.Name).Css("table-bordered");
         c.Add(o => o.MobileNumber).Css("table-bordered");
-        c.Add(o => o.Date).Format("{0:dd/MM/yyyy}").Css("table-bordered").Titled("Initial Date");
+        c.Add(o => o.Date).Format("{0:dd/MMM/yyyy}").Css("table-bordered").Titled("Initial Date");
         c.Add(o => o.IsReplied).Css("table-bordered");
-        c.Add(o => o.ResponceDate).Format("{0:dd/MM/yyyy}").Css("table-bordered").Titled("Responce Date");
+        c.Add(o => o.ResponceDate).Format("{0:dd/MMM/yyyy}").Css("table-bordered").Titled("Responce Date");
         c.Add(o => o.PState).Css("table-bordered").Titled("Region");
         c.Add(o => o.CreatedBy).Css("table-bordered").Titled("InitiatedBy");
         c.Add().Encoded(false).Sanitized(false).RenderComponentAs<EmployeeOnboardEditButton>().SetWidth("50px").Titled("Edit");

@@ -458,13 +458,13 @@
         c.Add(o => o.EmailId).SetWidth("50px").Css("table-bordered").Titled("Email");
         c.Add(o => o.AadhaarNumber).SetWidth("50px").Css("table-bordered").Titled("Aadhaar");
         c.Add(o => o.PANNumber).SetWidth("50px").Css("table-bordered").Titled("Aadhaar");
-        c.Add(o => o.DateOfBirth).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered").Titled("Aadhaar");
+        c.Add(o => o.DateOfBirth).Format("{0:dd/MMM/yyyy}").SetWidth("50px").Css("table-bordered").Titled("Aadhaar");
         
         c.Add(o => o.EmergencyContactNumber).SetWidth("50px").Css("table-bordered").Titled("EmergencyNumber");
         c.Add(o => o.EmployeeEducation).SetWidth("50px").Css("table-bordered").Titled("Education");
         c.Add(o => o.EmployeeCategory).SetWidth("50px").Css("table-bordered").Titled("Category");
         c.Add(o => o.ReportingTo).SetWidth("50px").Css("table-bordered");
-        c.Add(o => o.DateOfJoin).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.DateOfJoin).Format("{0:dd/MMM/yyyy}").SetWidth("50px").Css("table-bordered");
         
         c.Add(o => o.EmpBankName).SetWidth("50px").Css("table-bordered").Titled("Bank");
         c.Add(o => o.EmpAccountName).SetWidth("50px").Css("table-bordered").Titled("AccountName");

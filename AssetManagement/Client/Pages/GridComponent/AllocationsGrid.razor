@@ -42,8 +42,8 @@ else
        // c.Add(o => o.Asset.Model).SetWidth("50px").Css("table-bordered").Titled("Asset").Filterable(filter);
         c.Add(o => o.AssetModel).Css("table-bordered").Titled("Asset").Filterable(filter);
         c.Add(o => o.AllocationType).SetWidth("50px").Css("table-bordered").Titled("Allocation").Filterable(filter);
-        c.Add(o => o.IssueDate).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered").Filterable(filter);
-        c.Add(o => o.IssueTill).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered").Filterable(filter);
+        c.Add(o => o.IssueDate).Format("{0:dd/MMM/yyyy}").SetWidth("50px").Css("table-bordered").Filterable(filter);
+        c.Add(o => o.IssueTill).Format("{0:dd/MMM/yyyy}").SetWidth("50px").Css("table-bordered").Filterable(filter);
         c.Add(o => o.Responce).SetWidth("50px").Css("table-bordered").Filterable(filter);
        // c.Add().Encoded(false).Sanitized(false).RenderComponentAs<AllocationViewButton>().SetWidth("10px").Titled("View");
         c.Add().Encoded(false).Sanitized(false).RenderComponentAs<AllocationEditButton>().SetWidth("10px");

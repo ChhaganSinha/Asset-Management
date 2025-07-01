@@ -122,10 +122,10 @@ namespace AssetManagement.Server.Controllers.Api
                         if (data.EmployeeEmail == true) { dataRow.Append(ConstructCell(log.EmployeeEmail.ToString())); }
                         if (data.EmployeeMobileNumber == true) { dataRow.Append(ConstructCell(log.EmployeeMobileNumber.ToString())); }
                         if (data.EmployeeDesignation == true) { dataRow.Append(ConstructCell(log.EmployeeDesignation.ToString())); }
-                        if (data.IssueDate == true) { dataRow.Append(ConstructCell(log.IssueDate.ToString("dd/MM/yyyy"))); }
+                        if (data.IssueDate == true) { dataRow.Append(ConstructCell(log.IssueDate.ToString("dd/MMM/yyyy"))); }
                         if (data.AllocationType == true) { dataRow.Append(ConstructCell(log.AllocationType.ToString())); }
-                        if (data.IssueTill == true) { dataRow.Append(ConstructCell(log.IssueTill?.ToString("dd/MM/yyyy"))); }
-                        if (data.ReturnDate == true) { dataRow.Append(ConstructCell(log.ReturnDate?.ToString("dd/MM/yyyy"))); }
+                        if (data.IssueTill == true) { dataRow.Append(ConstructCell(log.IssueTill?.ToString("dd/MMM/yyyy"))); }
+                        if (data.ReturnDate == true) { dataRow.Append(ConstructCell(log.ReturnDate?.ToString("dd/MMM/yyyy"))); }
 
                         sheetData.AppendChild(dataRow);
                     }
@@ -222,9 +222,9 @@ namespace AssetManagement.Server.Controllers.Api
                         dataRow.Append(ConstructCell(log.Skills));
                         dataRow.Append(ConstructCell(log.EmployeeCategory));
                         dataRow.Append(ConstructCell(log.Department));
-                        dataRow.Append(ConstructCell(log.DateOfBirth.ToString("dd/MM/yyyy")));
-                        dataRow.Append(ConstructCell(log.DateOfJoin.ToString("dd/MM/yyyy")));
-                        dataRow.Append(ConstructCell(log.DateOfLeaving.ToString("dd/MM/yyyy")));
+                        dataRow.Append(ConstructCell(log.DateOfBirth.ToString("dd/MMM/yyyy")));
+                        dataRow.Append(ConstructCell(log.DateOfJoin.ToString("dd/MMM/yyyy")));
+                        dataRow.Append(ConstructCell(log.DateOfLeaving.ToString("dd/MMM/yyyy")));
                         dataRow.Append(ConstructCell(log.EmpBankName));
                         dataRow.Append(ConstructCell(log.EmpBankAccNumber));
                         dataRow.Append(ConstructCell(log.EmpBankIfsc));
@@ -294,8 +294,8 @@ namespace AssetManagement.Server.Controllers.Api
                         dataRow.Append(ConstructCell(log.EmployeeEmail));
                         dataRow.Append(ConstructCell(log.SerialNumber));
                         dataRow.Append(ConstructCell(log.MacAddress));
-                        dataRow.Append(ConstructCell(log.AcquireDate.ToString("dd/MM/yyyy")));
-                        dataRow.Append(ConstructCell(log.DiscardDate?.ToString("dd/MM/yyyy")));
+                        dataRow.Append(ConstructCell(log.AcquireDate.ToString("dd/MMM/yyyy")));
+                        dataRow.Append(ConstructCell(log.DiscardDate?.ToString("dd/MMM/yyyy")));
 
 
                         sheetData.AppendChild(dataRow);
