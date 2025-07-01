@@ -1,0 +1,288 @@
+﻿@page "/OnBoardingConfirmationDetails/{Id:int}"
+@using AssetManagement.Client.Client
+@using AssetManagement.Dto.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@using MudBlazor
+@inject AppClient client
+@inject HttpClient _httpClient
+@inject ILogger<EmployeeDataConfig> logger
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject IDialogService Dialog
+
+
+
+<div class="card-body">
+    @if (Onload)
+    {
+        <div class="loader-container mt-4">
+            <div class="loader"></div>
+        </div>
+    }
+    else
+    {
+        <EditForm Model="@model" OnValidSubmit="@OnValidOnboardingSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="form-group row mb-2">
+                <div class="form-group row mb-2">
+                    <h3>Onboarding Confirmation Details</h3>
+                </div>
+                <label class="col-form-label col-md-2 bold-font required-field">Name</label>
+                <div class="col-md-2">
+                    <InputText @bind-Value="model.Name" class="form-control" rows="3" />
+                </div>
+
+
+                <label class="col-form-label col-md-2 bold-font required-field">Email Id</label>
+                <div class="col-md-2">
+                    <InputText @bind-Value="model.EmailId" class="form-control" />
+                </div>
+
+                <label class="col-form-label col-md-2 bold-font required-field">Desigation</label>
+                <div class="col-md-2">
+                    <InputText @bind-Value="model.Desigation" class="form-control" rows="3" />
+                </div>
+
+
+            </div>
+            <div class="form-group row mb-2">
+
+                <label class="col-form-label col-md-2 bold-font required-field">Join Status</label>
+                <div class="col-md-2">
+                  
+                    <InputSelect id="Status" @bind-Value="model.JoinStatus" class="form-control" >
+                        @foreach (var s in Enum.GetValues(typeof(joinstatusonboardingconfirmation)))
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                @if (model.JoinStatus == joinstatusonboardingconfirmation.Tentative.ToString())
+                {
+
+                    <label class="col-form-label col-md-2 bold-font required-field">Next Date of Joining</label>
+                    <div class="col-md-2">
+                        <InputDate @bind-Value="model.TempDateOfJoin" class="form-control" />
+                    </div>
+
+                    <label class="col-form-label col-md-2 bold-font required-field">Reason</label>
+                    <div class="col-md-2">
+                        <InputTextArea @bind-Value="model.Reason" class="form-control" rows="3" />
+                    </div>
+                }
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </EditForm>
+
+        @if (show)
+        {
+            <div class="alert @(IsSuccess ? "alert-success" : "alert-danger") mt-3">
+                <strong>@MessageBody</strong> @Message
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private bool Onload = true;
+    private string JoinStatus;
+
+    AssetManagement.Dto.OnBoardingConfirmationDto model = new();
+
+    private EmployeeOnboardingDto EmployeeOnboarding = new();
+    private string Message = string.Empty;
+    private string MessageBody = "Thank you!";
+    private bool IsError = false;
+    private bool IsSuccess = false;
+    private bool TaskCompleted = false;
+    private bool show = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Onload = true;
+
+
+            EmployeeOnboarding = await client.GetEmployeeOnboardingById(Id);
+            if (EmployeeOnboarding != null)
+            {
+                model.Name = EmployeeOnboarding.Name;
+                model.EmailId = EmployeeOnboarding.ExternalEmailId;
+                model.Desigation = EmployeeOnboarding.Designation ?? "NA";
+                model.Id = EmployeeOnboarding.Id;
+
+            }
+         
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error loading onboarding data");
+            IsError = true;
+            MessageBody = "Error!";
+            Message = "Failed to load data.";
+            show = true;
+        }
+        finally
+        {
+            Onload = false;
+        }
+    }
+
+    protected async Task OnValidOnboardingSubmit()
+    {
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        show = true;
+        TaskCompleted = false;
+
+        try
+        {
+            // Submit the data
+            await client.UpsertConfirmOnboardingAsync(model);
+
+            IsSuccess = true;
+            Message = "Details submitted successfully.";
+            TaskCompleted = true;
+
+            // Optional redirect
+            // NavigationManager.NavigateTo("/somewhere");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error submitting onboarding details");
+            IsError = true;
+            MessageBody = "Error!";
+            Message = "Submission failed. Please try again.";
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@* @page "/OnBoardingConfirmationDetails/{Id:int}" *@
+@* @using AssetManagement.Client.Client; *@
+@* @using AssetManagement.Client.Pages.AppPages.Employees.Component *@
+@* @using AssetManagement.Client.Shared.Popup *@
+@* @using AssetManagement.Dto.Models *@
+@* @using AssetManagement.Dto; *@
+@* @using System.Text.Json; *@
+@* @using System.Text.RegularExpressions; *@
+@* @using Microsoft.AspNetCore.Components.Forms *@
+@* @using MudBlazor *@
+@* @inject AppClient client *@
+@* @inject HttpClient _httpClient *@
+@* @inject ILogger<EmployeeDataConfig> logger *@
+@* @inject IJSRuntime JSRuntime; *@
+@* @inject NavigationManager NavigationManager *@
+@* @attribute [AllowAnonymous] *@
+@* @inject IDialogService Dialog *@
+@* <h3>Onboarding Confirmation Details</h3> *@
+
+@* <div class="card-body"> *@
+@*     @if (Onload) *@
+@*     { *@
+@*         <div class="loader-container mt-4"> *@
+@*             <div class="loader"></div> *@
+@*         </div> *@
+@*     } *@
+@*     else *@
+@*     { *@
+
+@*         <EditForm Model="@model" OnValidSubmit="@OnValidSubmit"> *@
+@*             <div class="mt-3"> *@
+@*                 <label>Join Status</label> *@
+@*                 <select @bind="JoinStatus" class="form-control"> *@
+@*                     <option value="">-- Select Status --</option> *@
+@*                     <option value="Yes">Yes</option> *@
+@*                     <option value="No">No</option> *@
+@*                     <option value="Tentative">Tentative</option> *@
+@*                 </select> *@
+@*             </div> *@
+
+@*             @if (JoinStatus == "Tentative") *@
+@*             { *@
+@*                 <div class="mt-3"> *@
+@*                     <label>Next Date of Joining</label> *@
+@*                     <InputDate @bind-Value="model.DateOfJoin" class="form-control" /> *@
+@*                 </div> *@
+@*                 <div class="mt-3"> *@
+@*                     <label>Reason</label> *@
+@*                     <InputTextArea @bind-Value="model.Reason" class="form-control" rows="3" /> *@
+@*                 </div> *@
+@*             } *@
+@*         </EditForm> *@
+
+@*     } *@
+@* </div> *@
+
+@* @code { *@
+@*     [Parameter] *@
+@*     public int Id { get; set; } *@
+@*     bool Onload = false; *@
+@*     private string JoinStatus { get; set; } = ""; *@
+@*     private DateTime? NextDateOfJoining { get; set; } *@
+@*     private string Reason { get; set; } = ""; *@
+@*     EmployeeOnboardingDto model = new(); *@
+@*     string Message = string.Empty; *@
+@*     string MessageBody = "Thank you!"; *@
+@*     bool IsError = false; *@
+@*     bool IsSuccess = false; *@
+@*     bool TaskCompleted = false; *@
+@*     bool show = false; *@
+
+@*     protected override async Task OnInitializedAsync() *@
+@*     { *@
+@*         Onload = false; *@
+@*     } *@
+
+@*     protected async Task OnValidSubmit() *@
+@*     { *@
+
+@*         Message = string.Empty; *@
+@*         MessageBody = "Thank you!"; *@
+@*         IsError = false; *@
+@*         IsSuccess = false; *@
+@*         show = true; *@
+@*         TaskCompleted = false; *@
+@*         try *@
+@*         { *@
+
+@*         } *@
+@*         catch (Exception ex) *@
+@*         { *@
+
+@*         } *@
+@*     } *@
+@* } *@

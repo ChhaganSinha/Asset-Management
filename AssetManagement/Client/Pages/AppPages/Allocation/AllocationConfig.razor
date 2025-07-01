@@ -1,0 +1,457 @@
+﻿@page "/allocation-config"
+@page "/allocation-config/{Id:int}"
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@using MudBlazor
+@inject AppClient client
+@inject ILogger<AllocationConfig> logger
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<style>
+    .view-table {
+        width: 100%;
+        margin: 0 auto;
+        border-collapse: separate;
+        font-size: 1rem;
+    }
+
+        .view-table th, .view-table td {
+            padding: 0.45rem 0.75rem;
+            vertical-align: middle;
+        }
+
+        .view-table th {
+            background: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        .view-table td {
+            background: #fff;
+            color: #222;
+            font-weight: 500;
+            border-bottom: 1px solid #f1f3f6;
+            text-align: left;
+            max-width: 320px;
+            word-break: break-word;
+        }
+
+        .view-table tr:nth-child(even) td {
+            background: #f8f9fa;
+        }
+
+    @@keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(0,123,255,0.7);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(0,123,255,0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(0,123,255,0);
+        }
+    }
+
+    .btn-pulse {
+        animation: pulse 2s infinite;
+    }
+</style>
+
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Asset Transfer</li>
+    </ol>
+</nav>
+
+@if (!canView)
+{
+    <div class="col-12 text-center mt-5">
+        <div class="loader-progress"></div>
+    </div>
+}
+else
+{
+    <div class="card borderd" style="background: darkgrey">
+        <div class="card-body">
+            <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
+                <DataAnnotationsValidator />
+                @*<ValidationSummary/>*@
+                <div class="form-group row mb-2">
+                    <div class="col-md-6">
+                        <label class="col-form-label bold-font required-field">Company Code</label>
+                        <DropdownSelect @bind-Value="model.CompanyId"
+                                        EventDropdown="OnCompanyChanged"
+                                        DataSource="CompanyDropdown"
+                                        EmptyText="-- Select Company --"
+                                        Css="form-select"
+                                        Disabled="@(model.Id > 0)" />
+                        <ValidationMessage For="() => model.CompanyCode" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="col-form-label bold-font required-field">Asset Type</label>
+                        <DropdownSelect @bind-Value="model.AssetType"
+                                        EventDropdown="OnAssetTypeChange"
+                                        DataSource="AssetTypeDropdown"
+                                        EmptyText="-- Select Asset Type --"
+                                        Css="form-select"
+                                        Disabled="@(model.Id > 0 || model.CompanyId == 0)" />
+                        <ValidationMessage For="() => model.AssetType" />
+                    </div>
+                </div>
+
+                <div class="form-group row mb-2">
+                    <div class="col-md-12">
+                        <label class="col-form-label bold-font required-field">Asset</label>
+                        <DropdownSelect @bind-Value="model.AssetId"
+                                        DataSource="AssetDropdown"
+                                        EmptyText="-- Select Asset --"
+                                        Css="form-select"
+                                        Disabled="@(model.Id > 0 || string.IsNullOrEmpty(model.AssetType))" />
+                        <ValidationMessage For="() => model.AssetId" />
+                    </div>
+                </div>
+
+                <div class="form-group row mb-2">
+                    <div class="col-md-12">
+                        <label class="col-form-label bold-font">Asset Details</label>
+                        <div class="card" style="background:darkcyan">
+                            <div class="card-body">
+                                @if (model.AssetId == 0)
+                                {
+                                    <p class="mb-0 text-muted">No Asset Selected!</p>
+                                }
+                                else
+                                {
+                                    <p class="mb-0">@asset.Where(a => a.Id == model.AssetId).Select(d => d.Description).FirstOrDefault()</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row mb-2">
+                    @if (model.Id == 0)
+                    {
+                        <div class="col-md-4">
+                            <label class="col-form-label bold-font" style="margin-top:36px;">Inter Company Allocation</label>
+                            <input class="form-check-input ml-3" style="margin-top:46px;" type="checkbox" @bind="@model.Checkbox" @oninput="IntraAllocation">
+                        </div>
+                    }
+
+                    @if (model.Checkbox)
+                    {
+                        <div class="col-md-4">
+                            <label class="col-form-label bold-font">CompanyOfEmployee</label>
+                            <DropdownSelect @bind-Value="model.EmployeeCompanyCode"
+                                            DataSource="CompanyDropdown"
+                                            EmptyText="-- Select Employee Company --"
+                                            Css="form-select"
+                                            Disabled="@(model.Id > 0)" />
+                        </div>
+                    }
+                    <div class="col-md-4">
+                        <label class="col-form-label bold-font required-field">Employee</label>
+                        <DropdownSelect @bind-Value="model.EmployeeId"
+                                        DataSource="EmployeeDropdown"
+                                        EmptyText="-- Select Employee --"
+                                        Css="form-select"
+                                        Disabled="@(model.Id > 0 || (model.Checkbox && string.IsNullOrEmpty(model.EmployeeCompanyCode)))" />
+                        <ValidationMessage For="() => model.EmployeeId" />
+                    </div>
+                </div>
+                <div class="form-group row mb-2">
+                    <div class="col-md-4">
+                        <label class="col-form-label bold-font required-field">Allocation Type</label>
+                        <InputSelect id="AllocationType" @bind-Value="model.AllocationType" class="form-select">
+                            @foreach (var al in Enum.GetValues<AllocationType>())
+                            {
+                                <option value="@al">@al</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => model.AllocationType" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="col-form-label bold-font required-field">Allocated On</label>
+                        <input type="date" id="allocationdate" name="allocationdate" @bind="model.IssueDate" max="@maxDateAttribute" class="form-control">
+                        <ValidationMessage For="() => model.IssueDate" />
+                    </div>
+                    @if (model.AllocationType == AllocationType.Temporary)
+                    {
+                        <div class="col-md-4">
+                            <label class="col-form-label bold-font required-field">Allocated Till</label>
+                            <input type="date" id="allocationdate" name="allocationdate" @bind="model.IssueTill" min=@model.IssueDate.Date.ToString("yyyy-MM-dd") class="form-control">
+                            <ValidationMessage For="() => model.IssueTill" />
+                        </div>
+                    }
+                </div>
+                <hr />
+                <div style="text-align:center;" class="mt-4">
+                    @if (model.Id > 0)
+                    {
+                        <button type="submit" class="btn btn-success col-md-2 mr-1">
+                            <i class="fa fa-edit"></i> Update
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-success col-md-2 mr-1">
+                            <i class="fa fa-plus"></i> Allocate
+                        </button>
+                    }
+
+                    <button type="button" class="btn btn-secondary col-md-2 mr-1" @onclick="OnClose">
+                        <i class="fa fa-times"></i> Close
+                    </button>
+
+                    @if (model.Id > 0)
+                    {
+                        <button type="button" class="btn btn-danger col-md-2" @onclick="() => unallocate = true">
+                            <i class="fa fa-trash-alt"></i> UnAllocate
+                        </button>
+                    }
+                </div>
+
+                <br />
+            </EditForm>
+
+            <Dailog Title="@Message" Show="@show" OnCloseDialog="ResetForm">
+                @if (show)
+                {
+                    @if (TaskCompleted)
+                    {
+                        <div style="text-align:center;">
+                            @MessageBody
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="text-align:center">
+                            <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                        </div>
+                    }
+                }
+            </Dailog>
+            <SimpleDailog Title="UnAllocate" Show="@unallocate" OnCloseDialog="ResetForm">
+                @if (unallocate)
+                {
+                    @if (!TaskCompleted && !process)
+                    {
+                        <div style="text-align:center;">
+                            <h6>Are you sure want to UnAllocate?</h6>
+                            <div class="mb-3 mr-2 ml-2">
+                                <label class="col-form-label bold-font float-start">ReturnDate</label>
+                                <InputDate class="form-control" @bind-Value="model.ReturnDate" @oninput="DateCheck" />
+                                <p class="text-danger">@ReturnDateValidation</p>
+                            </div>
+
+                            <button class="btn btn-danger" @onclick="UnAllocate">Yes</button>
+                            <button class="btn btn-primary" @onclick="() => unallocate = false">No</button>
+                        </div>
+                    }
+                    else if (TaskCompleted && !process)
+                    {
+                        <div style="text-align:center;">
+                            @MessageBody
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="text-align:center">
+                            <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                        </div>
+                    }
+                }
+            </SimpleDailog>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public string Title
+    {
+        get
+        {
+            return model?.Id > 0 ? "Modify Allocation" : "New Allocation";
+        }
+    }
+    private bool canView;
+    private bool show = false;
+    private bool unallocate = false;
+    bool process = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    string ReturnDateValidation = string.Empty;
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+    Allocation model = new();
+    List<Company> company = new();
+    List<AssetType> assetType = new();
+    List<Asset> asset = new();
+    List<Employee> employee = new();
+
+    private string maxDateAttribute { get; set; } = DateTime.Now.Date.ToString("yyyy-MM-dd");
+
+    protected override async Task OnInitializedAsync()
+    {
+        var perms = await PermissionService.HasPermission("New Allocation");
+        canView = perms?.CanView == true;
+        if (!canView) { NavigationManager.NavigateTo("/unauthorized"); return; }
+
+        company = new List<Company>(await client.GetAllCompany());
+        assetType = new List<AssetType>(await client.GetAllAssetType());
+        employee = new List<Employee>(await client.GetAllEmployee());
+        asset = new List<Asset>(await client.GetAllAsset());
+        if (Id > 0)
+        {
+            model = await client.GetAllocationById(Id);
+        }
+        else
+        {
+            asset = asset.Where(a => a.Status == AllocationStatus.Free && a._AssetStatus == AssetStatus.Active).ToList();
+        }
+    }
+
+    protected async Task OnValidSubmit()
+    {
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        show = true;
+        TaskCompleted = false;
+        try
+        {
+            Message = "Please wait";
+            int Id = model.Id;
+            model.Responce = Responce.NotShared;
+            model.CompanyId = company.Where(o => o.CompanyCode == model.CompanyCode).Select(o => o.Id).First();
+            model.EmployeeName = employee.Where(o => o.Id == model.EmployeeId).Select(o => o.EmployeeName).First();
+            model.EmployeeCompanyCode = employee.Where(o => o.Id == model.EmployeeId).Select(o => o.CompanyCode).First();
+            model.EmployeeEmail = employee.Where(o => o.Id == model.EmployeeId).Select(o => o.EmailId).First();
+            model.AssetModel = $"{asset.Where(o => o.Id == model.AssetId).Select(o => o.Brand).First()} - {asset.Where(o => o.Id == model.AssetId).Select(o => o.Model).First()} (SN - {asset.Where(o => o.Id == model.AssetId).Select(o => o.SerialNumber).First()})";
+            if (!model.Checkbox) { model.EmployeeCompanyCode = model.CompanyCode; }
+
+            var response = await client.UpsertAllocationAsync(model);
+            if (response.IsSuccess)
+            {
+                Message = Id > 0 ? "Successfully Updated" : "Successfully Added";
+                TaskCompleted = true;
+            }
+            else
+            {
+                Message = "Error!";
+                MessageBody = response.Message;
+                TaskCompleted = true;
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            logger.LogCritical(ex, ex.Message);
+            IsError = true;
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+    }
+
+    private async void ResetForm()
+    {
+        show = false;
+        if (Message.Contains("Successfully Added"))
+        {
+            model = new();
+        }
+        asset = new List<Asset>(await client.GetAllAsset());
+        asset = asset.Where(a => a.Status == AllocationStatus.Free && a._AssetStatus == AssetStatus.Active).ToList();
+    }
+
+    private void OnClose() => NavigationManager.NavigateTo("/allocations");
+
+    protected async Task UnAllocate()
+    {
+        ReturnDateValidation = string.Empty;
+        if (model.IssueDate > model.ReturnDate)
+        {
+            ReturnDateValidation = "Return Date is Invalid!";
+            return;
+        }
+        var result = await client.UnAllocation(model.Id);
+        NavigationManager.NavigateTo("/allocations");
+    }
+
+    public void DateCheck()
+    {
+        ReturnDateValidation = model.IssueDate > model.ReturnDate ? "Return Date is Invalid!" : string.Empty;
+    }
+
+    public void IntraAllocation()
+    {
+        model.EmployeeId = null;
+    }
+
+    private void OnCompanyCodeChange(ChangeEventArgs e)
+    {
+        model.AssetType = null;
+        model.AssetId = null;
+    }
+
+    public void OnAssetTypeChange()
+    {
+        model.AssetId = null;
+    }
+
+    private Task OnCompanyChanged(string val)
+    {
+        model.CompanyId = int.Parse(val);
+        model.CompanyCode = company.FirstOrDefault(c => c.Id == model.CompanyId)?.CompanyCode;
+        return Task.CompletedTask;
+    }
+
+    private List<KeyValuePair<string, string>> CompanyDropdown =>
+        company.Select(c => new KeyValuePair<string, string>(c.Id.ToString(), $"{c.Name} ({c.CompanyCode})")).ToList();
+
+    private List<KeyValuePair<string, string>> AssetTypeDropdown =>
+        assetType.Select(a => new KeyValuePair<string, string>(a.Name, a.Name)).ToList();
+
+    private List<KeyValuePair<string, string>> AssetDropdown =>
+        asset.Where(a => a.CompanyCode == model.CompanyCode &&
+                       a.AssetType == model.AssetType &&
+                       a._AssetStatus == AssetStatus.Active)
+             .Select(a => new KeyValuePair<string, string>(a.Id.ToString(), $"{a.Brand} - {a.Model} (SN: {a.SerialNumber})"))
+             .ToList();
+
+    private List<KeyValuePair<string, string>> EmployeeDropdown
+    {
+        get
+        {
+            if (model.Checkbox)
+            {
+                return employee.Where(e => e.CompanyCode == model.EmployeeCompanyCode &&
+                                        e.Status != EmployeeStatus.Resigned)
+                             .Select(e => new KeyValuePair<string, string>(e.Id.ToString(), $"{e.EmployeeName} (EmpID: {e.EmployeeId})"))
+                             .ToList();
+            }
+            else
+            {
+                return employee.Where(e => e.CompanyCode == model.CompanyCode &&
+                                        e.Status != EmployeeStatus.Resigned)
+                             .Select(e => new KeyValuePair<string, string>(e.Id.ToString(), $"{e.EmployeeName} (EmpID: {e.EmployeeId})"))
+                             .ToList();
+            }
+        }
+    }
+}

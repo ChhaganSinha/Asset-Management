@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <tr style="background-color: cornflowerblue;">
+            <th colspan="2" style="text-align:center;">
+                <h4 style="margin: 0;">Allocation Details</h4>
+            </th>
+        </tr>
+        <tr>
+            <td>Company Code</td>
+            <td><ccode></td>
+        </tr>
+        <tr>
+            <td>Asset Type</td>
+            <td><assettype></td>
+        </tr>
+        <tr>
+            <td>Asset</td>
+            <td><asset></td>
+        </tr>
+        <tr>
+            <td>Employee Name</td>
+            <td><empname></td>
+        </tr>
+        <tr>
+            <td>Allocation Type</td>
+            <td><allocationtype></td>
+        </tr>
+        <tr>
+            <td>Allocated On</td>
+            <td><issuedate></td>
+        </tr>
+        <tr>
+            <td>Allocated Till</td>
+            <td><issuetill></td>
+        </tr>        
+    </table>
+    <h3 style="color:red">Note : Please Verfy your Details from  <a href="<###RETURN_URL###>">Here</a> </h3><br><br>
+</body>
+
+</html>

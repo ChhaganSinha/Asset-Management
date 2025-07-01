@@ -1,0 +1,286 @@
+﻿@page "/AssetTransfer"
+
+@using AssetManagement.Client.Client
+@using AssetManagement.Dto.Models
+@inject AppClient client
+@inject PermissionService PermissionService
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<style>
+    .view-table {
+        width: 100%;
+        margin: 0 auto;
+        border-collapse: separate;
+        font-size: 1rem;
+    }
+
+        .view-table th, .view-table td {
+            padding: 0.45rem 0.75rem;
+            vertical-align: middle;
+        }
+
+        .view-table th {
+            background: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        .view-table td {
+            background: #fff;
+            color: #222;
+            font-weight: 500;
+            border-bottom: 1px solid #f1f3f6;
+            text-align: left;
+            max-width: 320px;
+            word-break: break-word;
+        }
+
+        .view-table tr:nth-child(even) td {
+            background: #f8f9fa;
+        }
+    @@keyframes pulse {
+        0%
+
+    {
+        box-shadow: 0 0 0 0 rgba(0,123,255,0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(0,123,255,0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(0,123,255,0);
+    }
+
+    }
+
+    .btn-pulse {
+        animation: pulse 2s infinite;
+    }
+</style>
+
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Asset Transfer</li>
+    </ol>
+</nav>
+
+@if (!canView)
+{
+    <div class="col-12 text-center mt-5">
+        <div class="loader-progress"></div>
+    </div>
+}
+else
+{
+    <div class="card borderd" style="background: darkgrey">
+        <div class="card-body">
+            <EditForm Model="transfer" OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator />
+
+                <!-- Row 1: selectors -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label bold-font required-field">Source Company</label>
+                        <DropdownSelect @bind-Value="SourceCompanyId"
+                                        EventDropdown="OnSourceCompanyChanged"
+                                        DataSource="DropdownSourceCompany"
+                                        EmptyText="-- Select Company --"
+                                        Css="form-select" />
+                        <ValidationMessage For="() => transfer.SourceCompanyId" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label bold-font required-field">Asset</label>
+                        <DropdownSelect @bind-Value="AssetId"
+                                        EventDropdown="OnAssetChanged"
+                                        DataSource="FilteredAssetDropdown"
+                                        EmptyText="-- Select Asset --"
+                                        Css="form-select" />
+                        <ValidationMessage For="() => transfer.AssetID" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label bold-font required-field">Target Company</label>
+                        <DropdownSelect @bind-Value="TargetCompanyId"
+                                        EventDropdown="OnTargetCompanyChanged"
+                                        DataSource="FilteredTargetCompanyDropdown"
+                                        EmptyText="-- Select Company --"
+                                        Css="form-select" />
+                        <ValidationMessage For="() => transfer.TargetCompanyId" />
+                    </div>
+                </div>
+                <br />
+                <hr/>
+                <!-- Row 2: model details -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-12">
+                        <table class="view-table mb-0">
+                            <tr>
+                                <th class="ps-3">Company Code</th>
+                                <td>@model.CompanyCode</td>
+                                <th class="ps-3">Asset Type</th>
+                                <td>@model.AssetType</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-3">Make(Brand)</th>
+                                <td>@model.Brand</td>
+                                <th class="ps-3">Model</th>
+                                <td>@model.Model</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-3">Serial No</th>
+                                <td>@model.SerialNumber</td>
+                                <th class="ps-3">MAC Address</th>
+                                <td>@model.MacAddress</td>
+                            </tr>
+                            <tr>
+                                <th class="ps-3">Description</th>
+                                <td>@model.Description</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <br/>
+                <hr />
+                <!-- Actions -->
+                <div class="row justify-content-center">
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-secondary w-100" @onclick="Back">
+                            <i class="fa fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-primary w-100 btn-pulse" @onclick="Validate">
+                            Transfer <i class="fa fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Confirmation Dialog -->
+                <SimpleDailog Title="@message" Show="@showDialog" OnCloseDialog="ResetForm">
+                    @if (!process)
+                    {
+                        <div class="text-center">Click Go to continue</div>
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn btn-primary w-50">Go <i class="fa fa-arrow-right"></i></button>
+                        </div>
+                    }
+                    else if (taskCompleted)
+                    {
+                        <div class="text-center">@messageBody</div>
+                        <div class="text-center mt-3">
+                            <button type="button" class="btn btn-outline-secondary w-50" @onclick="ResetForm">Close</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
+                    }
+                </SimpleDailog>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    private bool canView;
+    private bool showDialog;
+    private bool process;
+    private bool taskCompleted;
+    private string message = "Process";
+    private string messageBody = "Thank you!";
+
+    private List<KeyValuePair<string, string>> DropdownSourceCompany;
+    private List<KeyValuePair<string, string>> DropdownTargetCompany;
+    private List<Asset> AllAssets;
+
+    private int SourceCompanyId;
+    private int AssetId;
+    private int TargetCompanyId;
+
+    private Asset model = new();
+    private AssetTransferModel transfer = new();
+
+    // Filtered lists
+    private List<KeyValuePair<string, string>> FilteredAssetDropdown =>
+        AllAssets?
+        .Where(a => a.CompanyId == SourceCompanyId)
+        .Select(a => new KeyValuePair<string, string>(a.Id.ToString(), $"{a.Brand} - {a.Model} (SN: {a.SerialNumber})"))
+        .ToList() ?? new();
+
+    private List<KeyValuePair<string, string>> FilteredTargetCompanyDropdown =>
+        DropdownSourceCompany?
+        .Where(kvp => kvp.Key != SourceCompanyId.ToString())
+        .ToList() ?? new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var perms = await PermissionService.HasPermission("Asset Transfer");
+        canView = perms?.CanView == true;
+        if (!canView) { NavigationManager.NavigateTo("/unauthorized"); return; }
+
+        var companies = await client.GetAllCompany();
+        DropdownSourceCompany = companies.Select(c => new KeyValuePair<string, string>(c.Id.ToString(), c.Name)).ToList();
+        DropdownTargetCompany = DropdownSourceCompany;
+
+        AllAssets = (await client.GetAllAsset()).ToList();
+    }
+
+    private Task OnSourceCompanyChanged(string val)
+    {
+        SourceCompanyId = int.Parse(val);
+        AssetId = 0;
+        TargetCompanyId = 0;
+        model = new Asset();
+        transfer.SourceCompanyId = SourceCompanyId;
+        return Task.CompletedTask;
+    }
+
+    private Task OnAssetChanged(string val)
+    {
+        AssetId = int.Parse(val);
+        transfer.AssetID = AssetId;
+        model = AllAssets.Where(x=>x.Id == AssetId).FirstOrDefault();
+        return Task.CompletedTask;
+    }
+
+    private Task OnTargetCompanyChanged(string val)
+    {
+        TargetCompanyId = int.Parse(val);
+        transfer.TargetCompanyId = TargetCompanyId;
+        return Task.CompletedTask;
+    }
+
+    private void Validate()
+    {
+        if (SourceCompanyId == 0 || AssetId == 0 || TargetCompanyId == 0)
+            return;
+        showDialog = true;
+    }
+
+    private async Task OnValidSubmit()
+    {
+        process = true;
+        var resp = await client.AssetTransfer(transfer);
+        message = "Completed";
+        messageBody = resp.Message;
+        taskCompleted = true;
+    }
+
+    private void ResetForm()
+    {
+        showDialog = false;
+        process = false;
+        taskCompleted = false;
+        message = "Process";
+        model = new Asset();
+        SourceCompanyId = AssetId = TargetCompanyId = 0;
+        transfer = new AssetTransferModel();
+    }
+
+    private void Back() => NavigationManager.NavigateTo("/assets");
+}

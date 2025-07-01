@@ -1,0 +1,85 @@
+﻿@inject IJSRuntime JSRuntime
+@inject IdentityAuthenticationStateProvider authStateProvider
+@inject NavigationManager Navigation
+
+<div class="header borderd">
+    <div class="d-flex align-items-center">
+        <button class="btn btn-dark me-3" id="menu-toggle" @onclick="ToggleSidebar"><i class="fa fa-bars"></i></button>
+        <h5 class="ms-2 mb-0" style="font-family:cursive; color:yellow;">V2.0</h5>
+    </div>
+    <div class="icons">
+        <i class="fa @(ToggleScreen ? "fa-compress" : "fa-expand")" style="color:darkslategray" id="fullscreen-toggle" title="Toggle Full Screen" @onclick="ToggleFullScreen"></i>
+        <i class="fa fa-bell" style="color:blue" title="Notification"></i>
+        <i class="fa @(DarkMode ? "fa-moon-o" : "fa-sun-o")" style="color:@(DarkMode ? "white" : "gold")" id="theme-toggle" title="Light/Dark Mode" @onclick="ToggleMode"></i>
+        <div class="dropdown d-inline-block">
+            <i class="fa fa-user-circle dropdown-toggle" data-bs-toggle="dropdown"></i>
+            <ul class="dropdown-menu dropdown-menu-end borderd">
+                <li><a class="dropdown-item" href="user-profile"><i class="fa fa-address-book-o text-warning" style="font-size:medium;margin-left:0;margin-right:10px;"></i>  View Profile</a></li>
+                <li><a class="dropdown-item" @onclick="BeginSignOut"><i class="fa fa-sign-out text-danger" style="font-size:medium;margin-left:0;margin-right:10px; cursor:pointer;"></i>  Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnSidebarToggle { get; set; }
+
+    private bool DarkMode = false;
+    private bool ToggleScreen = false;
+
+    [Parameter]
+    public EventCallback OnModeToggle { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var theme = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "theme");
+
+        if (theme == "dark")
+        {
+            DarkMode = true;
+            await JSRuntime.InvokeVoidAsync("document.body.classList.add", "dark-mode");
+        }
+        else
+        {
+            DarkMode = false;
+            await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "dark-mode");
+        }
+
+
+    }
+
+    private async Task ToggleSidebar()
+    {
+        await OnSidebarToggle.InvokeAsync();
+    }
+
+    private async Task ToggleMode()
+    {
+        DarkMode = !DarkMode;
+        if (DarkMode)
+        {
+            await JSRuntime.InvokeVoidAsync("document.body.classList.add", "dark-mode");
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "theme", "dark");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "dark-mode");
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "theme", "light");
+        }
+
+        await OnModeToggle.InvokeAsync();
+    }
+
+    private async Task ToggleFullScreen()
+    {
+        ToggleScreen = !ToggleScreen;
+        await JSRuntime.InvokeVoidAsync("toggleFullScreen");
+    }
+
+    private async Task BeginSignOut()
+    {
+        await authStateProvider.Logout();
+        Navigation.NavigateTo("/");
+    }
+}

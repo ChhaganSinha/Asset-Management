@@ -1,0 +1,43 @@
+﻿@using AssetManagement.Client.Pages.AppPages.Company;
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models;
+@using GridShared
+@using GridShared.Columns
+@using GridShared.Utility
+@using Microsoft.Extensions.Primitives
+@implements ICustomGridComponent<EmployeeOnboardingDto>
+@inject NavigationManager NavigationManager
+
+<button class='btn btn-sm btn-primary' style="border-radius:15px" @onclick="()=>show=true" title="Add as Employee"><i class="fa fa-rocket"></i></button>
+<BorderlessDialog  Show="@show" OnCloseDialog="ResetForm">
+    @if (show)
+    {
+        <label class="col-form-label col-md-6 bold-font">Joining Date</label>
+        <div class="col-md-12">
+            <InputDate id="DateOfJoin" @bind-Value="Item.DateOfJoin" class="form-control" />
+        </div>
+        <br/>
+        <button class='btn btn-sm btn-primary' style="text-align: center;" @onclick="MyClickHandler" title="Add as Employee">Proceed <i class="fa fa-rocket"></i></button>
+        <button class='btn btn-sm btn-secondary' style="text-align: center;" @onclick="ResetForm" title="Add as Employee">Close</button>
+    }
+</BorderlessDialog>
+@code {
+    [Parameter]
+    public EmployeeOnboardingDto Item { get; set; }
+
+    [Parameter]
+    public CGrid<EmployeeOnboardingDto> Grid { get; set; }
+
+    bool show = false;
+
+    private void MyClickHandler(MouseEventArgs e)
+    {
+        ResetForm();
+        NavigationManager.NavigateTo($"/employee-config/{Item.SecurityStamp}/{Item.DateOfJoin.ToString("MM-dd-yyyy")}");
+    }
+
+    private void ResetForm()
+    {
+        show = false;       
+    }
+}

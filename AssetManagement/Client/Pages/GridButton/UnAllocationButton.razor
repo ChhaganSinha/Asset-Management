@@ -1,0 +1,106 @@
+﻿@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.AppPages.Company;
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models;
+@using GridShared
+@using GridShared.Columns
+@using GridShared.Utility
+@using Microsoft.Extensions.Primitives
+@inject AppClient client
+@implements ICustomGridComponent<Allocation>
+@inject NavigationManager NavigationManager
+
+<button class='btn btn-sm btn-danger' style="border-radius:15px" @onclick="MyClickHandler" title="UnAllocate"><i class="fa fa-trash"></i></button>
+<SimpleDailog Title="@Title" Show="@show" OnCloseDialog="ResetForm">
+    @if (show)
+    {
+        @if (!TaskCompleted && !process)
+        {
+            <div style="text-align:center;">
+                <h6>Are you sure want to UnAllocate?</h6>
+                <div class="mb-3 mr-2 ml-2">
+                    <label class="col-form-label bold-font float-start">ReturnDate</label>
+                    <InputDate class="form-control" @bind-Value="Item.ReturnDate" />
+                    <p class="text-danger">@ReturnDateValidation</p>
+                </div>
+
+                <button class="btn btn-danger" @onclick="UnAllocate">Yes</button>
+                <button class="btn btn-primary" @onclick="ResetForm">No</button>
+            </div>
+        }
+        else if (TaskCompleted && process)
+        {
+            <div style="text-align:center;">
+                @MessageBody
+            </div>
+            <br/>
+        }
+        else
+        {
+            <div style="text-align:center">
+                <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+            </div>
+        }
+    }
+</SimpleDailog>
+
+@code {
+    [Parameter]
+    public Allocation Item { get; set; }
+
+    [Parameter]
+    public CGrid<Allocation> Grid { get; set; }
+
+    [Parameter]
+    public IList<Action<object>> Actions { get; set; }
+
+    bool show = false;
+    bool process = false;
+    bool TaskCompleted = false;
+    string MessageBody = string.Empty;
+    string Title = "UnAllocate";
+    string ReturnDateValidation = string.Empty;
+
+    private async void UnAllocate()
+    {
+        ReturnDateValidation = string.Empty;
+        if (Item.IssueDate >= Item.ReturnDate)
+        {
+            ReturnDateValidation = "Return Date is Invalid!";
+            return;
+        }
+        process = true;
+        var responce = await client.UnAllocation(Item.Id);
+        if (responce == true)
+        {
+            MessageBody = "Successfully UnAllocated!";
+        }
+        else
+        {
+            MessageBody = "Something went wrong while UnAllocation :(";
+        }
+
+        TaskCompleted = true;
+        Actions[0]?.Invoke(Item);
+    }
+    private void MyClickHandler(MouseEventArgs e)
+    {
+        show = true;
+        MessageBody = string.Empty;
+        TaskCompleted = false;
+    }
+
+    public void ResetForm()
+    {
+        show = false;
+        TaskCompleted = false;
+        process = false;
+        MessageBody = string.Empty;
+        StateHasChanged();
+
+    }
+    public void DateCheck()
+    {
+        ReturnDateValidation = Item.IssueDate > Item.ReturnDate ? "Return Date is Invalid!" : string.Empty;
+    }
+}

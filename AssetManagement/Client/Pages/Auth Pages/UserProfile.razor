@@ -1,0 +1,546 @@
+﻿@page "/user-profile"
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.ComponentModel.DataAnnotations
+@using AssetManagement.Client.Services.Contracts
+@using AssetManagement.Dto
+@using AssetManagement.Dto.Auth
+@using AssetManagement.Client.Client
+@using AssetManagement.Dto.Enum
+@inject AppClient client
+@inject NavigationManager navigationManager
+@inject IdentityAuthenticationStateProvider authStateProvider
+@inject IAuthorizeApi authorizeApi
+@inject NavigationManager Navigation
+@attribute [Authorize]
+
+<!-- Breadcrumb Section -->
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Profile</li>
+    </ol>
+</nav>
+
+<div class="">
+    <div class="card-header border-0 p-0">
+        <div class="cover-img-block">
+            <img src="@BgimageDataUrl" alt="User Background Image" class="img-fluid" style="height: 46vh; object-fit: cover;">
+            <div class="change-cover">
+                <div class="dropdown">
+                    <a class="drp-icon dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="icon feather icon-camera"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <label class="dropdown-item" style="cursor: pointer;">
+                            <i class="feather icon-upload-cloud mr-2"></i>Upload new
+                            <InputFile OnChange="BgHandleFileSelected" class="d-none" />
+                        </label>
+                        <a class="dropdown-item" @onclick="RemoveBgImage">
+                            <i class="feather icon-trash-2 mr-2"></i>Remove
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body py-0">
+        <div class="user-about-block">
+            <div class="row">
+                <div class="col-md-4 text-center mt-n5">
+                    <div class="change-profile text-center">
+                        <div class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <div class="profile-dp">
+                                    <img id="imgPreview" class="img-radius img-fluid" src="@imageDataUrl" alt="User image" style="height: 15vh; width: 15vh; object-fit: cover;" />
+                                    <div class="">
+                                        <span>Change</span>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="dropdown-menu">
+                                <label class="dropdown-item" style="cursor: pointer;">
+                                    <i class="feather icon-upload-cloud mr-2"></i>Upload new
+                                    <InputFile OnChange="HandleFileSelected" class="d-none" />
+                                </label>
+                                <a class="dropdown-item" @onclick="RemoveImage">
+                                    <i class="feather icon-trash-2 mr-2"></i>Remove
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <h5 class="mb-1">@userInfo.UserName</h5>
+                </div>
+                <div class="col-md-8 mt-md-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a class="mb-1 text-muted d-flex align-items-end text-h-primary">
+                                <i class="feather icon-globe mr-2 f-18"></i>@userInfo.Email
+                            </a>
+                            <a class="mb-1 text-muted d-flex align-items-end text-h-primary">
+                                <i class="feather icon-phone mr-2 f-18"></i>@userInfo.MobileNo
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="media">
+                                <i class="feather icon-map-pin mr-2 mt-1 f-18"></i>
+                                <div class="media-body">
+                                    @userInfo.Address
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="nav nav-tabs profile-tabs nav-fill" id="myTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">
+                                <i class="feather icon-user mr-2"></i>Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="contact-tab" data-toggle="tab" href="#chnagepwd" role="tab" aria-controls="contact" aria-selected="false">
+                                <i class="feather icon-phone mr-2"></i>Change Password
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="mb-3">Personal Information</h5>
+                        <button type="button" class="btn btn-primary btn-sm rounded" data-toggle="collapse" data-target=".pro-det-edit" aria-expanded="false">
+                            <i class="feather icon-edit"></i>
+                        </button>
+                    </div>
+                    <div class="card-body border-top pro-det-edit collapse show">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bolder">User Name</label>
+                            <div class="col-sm-9">
+                                @userInfo.UserName
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bolder">Email</label>
+                            <div class="col-sm-9">
+                                @userInfo.Email
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bolder">Mobile Number</label>
+                            <div class="col-sm-9">
+                                @userInfo.MobileNo
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bolder">Gender</label>
+                            <div class="col-sm-9">
+                                @userInfo.Gender
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bolder">Birth Date</label>
+                            <div class="col-sm-9">
+                                @userInfo.Dob.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bolder">Address</label>
+                            <div class="col-sm-9">
+                                @userInfo.Address
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body border-top pro-det-edit collapse">
+                        <EditForm OnValidSubmit="OnSubmit" Model="userDetailsUpdateParameters">
+                            <DataAnnotationsValidator />
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label font-weight-bolder">User Name</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" @bind="userDetailsUpdateParameters.NewUserName" placeholder="New Username" />
+                                    <ValidationMessage For="@(() => userDetailsUpdateParameters.NewUserName)" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label font-weight-bolder">User Email</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" @bind="userDetailsUpdateParameters.NewEmail" placeholder="New Email" disabled />
+                                    <ValidationMessage For="@(() => userDetailsUpdateParameters.NewEmail)" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label font-weight-bolder">Mobile No.</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" @bind="userDetailsUpdateParameters.NewMobileNo" placeholder="New Mobile No." />
+                                    <ValidationMessage For="@(() => userDetailsUpdateParameters.NewMobileNo)" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label font-weight-bolder">Gender</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control" @bind="userDetailsUpdateParameters.NewGender">
+                                        <option value="">Select Gender</option>
+                                        @foreach (GenderEnum gender in Enum.GetValues(typeof(GenderEnum)))
+                                        {
+                                            <option value="@gender">@gender.ToString()</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage style="margin-top:-12px" For="@(() => userDetailsUpdateParameters.NewGender)" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label font-weight-bolder">Birth Date</label>
+                                <div class="col-sm-9">
+                                    <InputDate @bind-Value="userDetailsUpdateParameters.NewDob" class="form-control" />
+                                    <ValidationMessage style="margin-top:-12px" For="@(() => userDetailsUpdateParameters.NewDob)" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label font-weight-bolder">Address</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" @bind="userDetailsUpdateParameters.NewAddress" placeholder="New Address" />
+                                    <ValidationMessage style="margin-top:-12px" For="@(() => userDetailsUpdateParameters.NewAddress)" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-12 text-center">
+                                    <button class="btn btn-primary btn-sm" type="submit">
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="chnagepwd" role="tabpanel" aria-labelledby="contact-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="mb-3">Change Password</h5>
+                        <button type="button" class="btn btn-primary btn-sm rounded" data-toggle="collapse" data-target=".pro-pwd-edit" aria-expanded="false">
+                            <i class="feather icon-edit"></i>
+                        </button>
+                    </div>
+                    <div class="card-body border-top pro-pwd-edit collapse show">
+                        <EditForm OnValidSubmit="OnPasswordSubmit" Model="changePassword">
+                            <DataAnnotationsValidator />
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label font-weight-bolder">Old Password</label>
+                                <div class="col-sm-9">
+                                    @* <input type="password" class="form-control" @bind="changePassword." placeholder="Enter old password" /> *@
+                                    @* <ValidationMessage For="@(() => changePassword.OldPassword)" /> *@
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label font-weight-bolder">New Password</label>
+                                <div class="col-sm-9">
+                                    <input type="password" class="form-control" @bind="changePassword.NewPassword" placeholder="Enter new password" />
+                                    <ValidationMessage For="@(() => changePassword.NewPassword)" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label font-weight-bolder">Confirm New Password</label>
+                                <div class="col-sm-9">
+                                    <input type="password" class="form-control" @bind="changePassword.ConfirmPassword" placeholder="Confirm new password" />
+                                    <ValidationMessage For="@(() => changePassword.ConfirmPassword)" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-12 text-center">
+                                    <button class="btn btn-primary btn-sm" type="submit">
+                                        Change Password
+                                    </button>
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+
+    UserInfo userInfo = new();
+
+    string userRoles = string.Empty;
+
+    ResetPassword changePassword = new();
+
+    UserDetailsUpdateParameters userDetailsUpdateParameters = new();
+    [CascadingParameter]
+    protected AlertModel? alert { get; set; }
+
+    private string imageDataUrl;
+    private string BgimageDataUrl;
+    private UserProfilePicUpld profilePic { get; set; } = new UserProfilePicUpld();
+
+    string MessageBody = "Successfully Updated";
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+    bool Loading = false;
+
+    bool showPasswordChange = false;
+    bool showProfileChange = false;
+
+    [CascadingParameter]
+    private AlertModel alerts { get; set; } = new();
+
+    private Timer _timer;
+    private int _delay = 2500;
+    bool show = false;
+    bool process = false;
+    string Title = "Update Profile";
+
+    protected override async Task OnInitializedAsync()
+    {
+        alerts ??= new AlertModel();
+        userInfo = await authorizeApi.GetUserInfo();
+        userDetailsUpdateParameters.NewUserName = userInfo.UserName;
+        userDetailsUpdateParameters.NewEmail = userInfo.Email;
+        userDetailsUpdateParameters.NewMobileNo = userInfo.MobileNo;
+        userDetailsUpdateParameters.NewGender = userInfo.Gender;
+        userDetailsUpdateParameters.NewDob = userInfo.Dob;
+        userDetailsUpdateParameters.NewAddress = userInfo.Address;
+
+
+
+        profilePic = await client.GetProfilePicByEmail(userInfo.Email);
+        if (profilePic != null)
+        {
+
+            if (profilePic.ProfileImage != null && profilePic.ProfileImage.Length > 0)
+            {
+                imageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(profilePic.ProfileImage)}";
+            }
+            else
+            {
+                imageDataUrl = "/assets/img/no-profile.png";
+            }
+            if (profilePic.BackgroundImage != null && profilePic.BackgroundImage.Length > 0)
+            {
+                BgimageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(profilePic.BackgroundImage)}";
+            }
+            else
+            {
+                BgimageDataUrl = "assets/img/cover.jpg";
+            }
+        }
+        else
+        {
+            imageDataUrl = "/assets/ima/no-profile.png";
+            BgimageDataUrl = "/assets/ima/cover.jpg";
+        }
+    }
+
+    private async void ResetForm()
+    {
+        show = false;
+        showPasswordChange = false;
+        showProfileChange = false;
+        userInfo = await authorizeApi.GetUserInfo();
+        StateHasChanged();
+    }
+
+    public void OnPasswordChangeClick()
+    {
+        show = true;
+        showPasswordChange = true;
+        showProfileChange = false;
+        Title = "Change Password";
+        StateHasChanged();
+    }
+    public void OnProfileEditClick()
+    {
+        show = true;
+        showPasswordChange = false;
+        showProfileChange = true;
+        Title = "Modify Profile";
+        StateHasChanged();
+    }
+
+    async Task OnSubmit()
+    {
+        process = true;
+        alert?.Clear();
+        alert?.SetSuccess("Please wait...");
+        try
+        {
+            var res = await authStateProvider.UpdateUserDetails(userDetailsUpdateParameters);
+            if (res.Item1 == true)
+            {
+                userInfo.UserName = userDetailsUpdateParameters.NewUserName;
+                alert?.SetSuccess(MessageBody);
+            }
+
+            else
+                alert?.SetError(res.Item2);
+            process = false;
+
+            StateHasChanged();
+            _timer = new Timer(TimerCallback, null, _delay, Timeout.Infinite);
+
+
+
+        }
+
+        catch (Exception ex)
+        {
+            alert?.SetError(ex.Message);
+        }
+
+    }
+
+    async Task OnPasswordSubmit()
+    {
+
+        //process = true;
+        alert?.Clear();
+        alert?.SetSuccess("Please wait...");
+        try
+        {
+            var changeedPass = await authStateProvider.ChangePassword(changePassword);
+            if (changeedPass.Item1 == true)
+            { alert?.SetSuccess(MessageBody); }
+            else
+                alert?.SetError(changeedPass.Item2);
+            // process = false;
+            changePassword = new();
+            StateHasChanged();
+
+            _timer = new Timer(TimerCallback, null, _delay, Timeout.Infinite);
+            await BeginSignOut();
+
+        }
+
+        catch (Exception ex)
+        {
+            alert?.SetError(ex.Message);
+        }
+    }
+
+
+
+    private void TimerCallback(Object o)
+    {
+        alerts?.Clear();
+        _timer.Dispose();
+        StateHasChanged();
+    }
+
+    private void Clear()
+    {
+        userDetailsUpdateParameters = new();
+        alerts?.Clear();
+    }
+
+    private async Task BeginSignOut()
+    {
+        await authStateProvider.Logout();
+        Navigation.NavigateTo("/");
+    }
+
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+
+
+            // Store the image data in the model
+            profilePic.ProfileImage = buffer;
+
+
+
+            // Convert the image to a data URL for preview
+            imageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
+
+            profilePic.Email = userInfo.Email;
+            var response = await client.UpsertProfilePicAsync(profilePic);
+
+            // if (response.IsSuccess)
+            // {
+            //     alerts.SetSuccess("Profile Pic Updated Successfully");
+            // }
+            // else
+            // {
+            //     // Handle error, e.g., show an alert to the user
+            //    // alerts.SetError("Failed to update profile image.");
+            // }
+
+            StateHasChanged(); // Ensure the UI is updated
+        }
+    }
+
+    private async Task BgHandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+
+
+            // Convert the image to a data URL for preview
+
+            profilePic.BackgroundImage = buffer;
+
+            // Convert the image to a data URL for preview
+            BgimageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
+
+
+            var response = await client.UpsertProfilePicAsync(profilePic);
+
+            // if (response.IsSuccess)
+            // {
+            //     alerts.SetSuccess("Background Pic Updated Successfully");
+            // }
+            // else
+            // {
+            //     // Handle error, e.g., show an alert to the user
+            //     //alerts.SetError("Failed to update Background image.");
+            // }
+
+            StateHasChanged(); // Ensure the UI is updated
+        }
+
+    }
+
+    private async void RemoveImage()
+    {
+        imageDataUrl = "/assets/img/no-profile.png";
+        profilePic.removePp = true;
+        profilePic.removebg = false;
+        profilePic.ProfileImage = null;
+        var responce = await client.DeleteProfBgPic(profilePic);
+
+
+        StateHasChanged();
+    }
+
+    private async void RemoveBgImage()
+    {
+        BgimageDataUrl = "assets/img/cover.jpg";
+        profilePic.removePp = false;
+        profilePic.removebg = true;
+        profilePic.BackgroundImage = null;
+
+        var responce = await client.DeleteProfBgPic(profilePic);
+
+
+        StateHasChanged();
+    }
+}

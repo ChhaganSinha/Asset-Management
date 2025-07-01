@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Email</title>
+</head>
+
+<body>
+    <p>Dear <b><###CandidateName###></b>,</p>
+
+    <p>We are thrilled to extend a warm welcome to you as the newest member of the <b><###CompanyName###></b> team! We are excited to have you on board and look forward to your contributions to our organization.</p>
+
+    <p>To ensure a smooth onboarding process and to gather essential information, we kindly request that you complete our onboarding form. This form will help us gather necessary details to set up your employee profile and make the necessary arrangements for your first day.</p>
+
+    <p>Please find the link to the onboarding form provided below:</p>
+    <p><a href="<###RETURN_URL###>">Click Here</a></p>
+
+    <p>The form consists of a series of questions related to your personal information, emergency contacts, tax and payroll details, and any special requirements you may have. It should only take a few minutes to complete, and your responses will be treated with the utmost confidentiality.</p>
+
+    <p>We kindly ask you to submit the completed onboarding form at your earliest convenience, preferably within this week. This will enable us to prepare for your arrival and ensure a seamless integration into our organization.</p>
+
+    <p>If you have any questions or encounter any issues while completing the form, please do not hesitate to reach out to:</p>
+    <ul>
+        <li>HR: <b><###HRName###></b> at <b><###HRMobile###></b></li>
+    </ul>
+
+    <p>We are here to assist you and provide any necessary guidance throughout the onboarding process.</p>
+
+    <p>Once again, welcome to <b><###CompanyName###></b>! We are excited to have you join our team and are confident that you will make valuable contributions to our organization. We look forward to meeting you in person on your first day.</p>
+
+    <p>Warm regards,</p>
+    <p><b><###ManagerName###></b></p>
+    <p><b><###ManagerMobile###></b></p>
+    <i>Your Manager</i>
+</body>
+
+</html>

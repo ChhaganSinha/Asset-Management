@@ -1,0 +1,63 @@
+﻿@if (Show)
+{
+    string cssClass;
+    if (Title.Contains("Added") || Title.Contains("Submitted") || Title.Contains("Uploaded") || Title.Contains("Registered") || Title.Contains("Saved"))
+    {
+        cssClass = "bg-success";
+    }
+    else if (Title.Contains("Updated") || Title.Contains("Uploading"))
+    {
+        cssClass = "bg-warning";
+    }
+    else if (Title.Contains("Please wait") || Title.Contains("Shar") || Title.Contains("Comment") || Title.Contains("Cleared"))
+    {
+        cssClass = "bg-info";
+    }
+    else
+    {
+        cssClass = "bg-danger";
+    }
+
+    <div class="dialog-container" style="width:100%; height:100vh; z-index: 9999;">
+        <div class="dialog" style="width:320px">
+            @*popup screen size*@
+
+            <div class="card">
+
+                <div class="card-header @cssClass" style="padding: 8px !important; display: flex; align-items: center;">
+                    <h6 style="margin: 0;">@Title</h6>
+                    <a @onclick="onClose" title="Close" style="cursor: pointer; margin-left: auto; color: white;">
+                        <i class="fa fa-times-circle fa-lg" aria-hidden="true"></i>
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="mt-2">
+                            @ChildContent
+                        </div>
+                    </div>
+                    <div style="text-align:center">
+                        <button type="button" class="btn btn-outline-secondary col-md-4 mt-3" @onclick="onClose">Close</button>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+}
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public string Title { get; set; }
+    [Parameter] public EventCallback<bool> OnCloseDialog { get; set; }
+
+    private async Task onClose()
+    {
+        await OnCloseDialog.InvokeAsync(false);
+    }
+
+}

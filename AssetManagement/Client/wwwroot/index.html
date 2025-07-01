@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Asset-Management-App</title>
+    <base href="/" />
+
+    <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/logo.png">
+
+
+    <link href="assets/bootstrap-5.3.3/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/css/app.css" rel="stylesheet" />
+    <link href="assets/css/custom.css" rel="stylesheet" />
+    <link href="assets/css/GridBlazor.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="assets/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="assets/select2-bootstrap-5-theme/select2-bootstrap-5-theme.min.css" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+
+    <!-- Summernote Editor -->
+    <!--<link href="./_content/BlazingComponents.Summernote/summernote/summernote-lite.min.css" rel="stylesheet" />-->
+    <link href="_content/GridBlazor/css/gridblazor.min.css" rel="stylesheet" />
+
+</head>
+
+<body>
+    <div id="app">
+        <div class="loader">
+            <div id="loader1"></div>
+            <div id="loader2"></div>
+            <div id="loader3"></div>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="assets/js/my-chart-js.js"></script>
+    <script src="_content/GridBlazor/js/gridblazor.js"></script>
+
+    <!-- Summernote Editor -->
+    <!--<script src="./_content/BlazingComponents.Summernote/summernote/jquery-3.4.1.slim.min.js"></script>
+    <script src="./_content/BlazingComponents.Summernote/summernote/summernote-lite.min.js"></script>
+    <script type="text/javascript" src="assets/js/SummerEditorHack.js"></script>-->
+    <script type="text/javascript" src="assets/js/tools.js"></script>
+
+    <script type="text/javascript" src="assets/js/Utilities.js"></script>
+    <script type="text/javascript" src="assets/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="assets/select2/js/select2.full.min.js"></script>
+    <script type="text/javascript" src="assets/js/dropdown-select2.js"></script>
+
+    <script>
+        window.registerViewportChangeCallback = (dotnetHelper) => {
+            window.addEventListener('load', () => {
+                dotnetHelper.invokeMethodAsync('OnResize', window.innerWidth, window.innerHeight);
+            });
+            window.addEventListener('resize', () => {
+                dotnetHelper.invokeMethodAsync('OnResize', window.innerWidth, window.innerHeight);
+            });
+        }
+
+        window.getDimensions = function () {
+            return {
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+        };
+
+    </script>
+
+
+    <!-- Add the script tag for dotnet.timezones.blat -->
+    <!--<script src="https://asset.credentinfotech.com/_framework/dotnet.timezones.blat" integrity="sha256-aHk3Pm2JXopn6UPLJtovAqIdIk8GyIMzGm450cli9UE=" crossorigin="anonymous"></script>-->
+</body>
+
+</html>

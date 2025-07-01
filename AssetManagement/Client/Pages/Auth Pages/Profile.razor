@@ -1,0 +1,142 @@
+﻿@page "/profile"
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Auth
+@inject IdentityAuthenticationStateProvider authStateProvider
+@inject IAuthorizeApi authorizeApi
+@attribute [Authorize]
+
+<div class="card">
+    <div class="card-header" style="padding: 8px !important; display: flex; align-items: center;">
+        <div style="margin-left: auto;">
+            <ol class="breadcrumb" style="display: flex; justify-content: flex-end; align-items: center; list-style: none; padding: 0; margin: 0;">
+                <li class="breadcrumb-item"><a href="/"><i class="fa fa-home" aria-hidden="true"></i></a></li>
+                <li class="breadcrumb-item active">User Profile</li>
+            </ol>
+        </div>
+
+    </div>
+    <div class="card-body">
+
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <div class="text-center border-end">
+                    <img style="width: 120px;" src="https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar.png" class="img-fluid avatar-xxl rounded-circle" alt="">
+                    <h4 class="text-primary font-size-20 mt-3 mb-2">@userInfo.UserName</h4>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="ms-3">
+                    <div>
+                        <h4 class="card-title mb-2 p-1 bg-info text-white text-sm-center">Profile ProductType</h4>
+                    </div>
+                    <div class="row my-4">
+                        <div class="col-md-12">
+                            <div class="form-group row mb-2">
+                                <label class="col-form-label col-md-4 bold-font">Email</label>
+                                <div class="col-md-8" style="margin-top: 6px;">
+                                    :  @userEmail
+                                </div>
+                            </div>
+                            <hr class="m-0 mb-2" />
+                            <div class="form-group row mb-2">
+                                <label class="col-form-label col-md-4 bold-font">Role</label>
+                                <div class="col-md-8" style="margin-top: 6px;">
+                                    :  @userRoles
+                                </div>
+                            </div>
+                            <hr class="m-0 mb-2" />
+                            <div class="form-group row mb-2">
+                                <label class="col-form-label col-md-4 bold-font">Allowed Batch</label>
+                                <div class="col-md-8" style="margin-top: 6px;">
+                                    :  @AllowedBatchCreation
+                                </div>
+                            </div>
+                            <hr class="m-0 mb-2" />
+                            <div class="form-group row mb-2">
+                                <label class="col-form-label col-md-4 bold-font">Allowed student/Batch</label>
+                                <div class="col-md-8" style="margin-top: 6px;">
+                                    :  @AllowsStudentPerBatch
+                                </div>
+                            </div>
+                            <hr class="m-0 mb-2" />
+
+                        </div>
+                    </div>
+
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            <a @onclick="OnPasswordChangeClick" class="btn btn-primary btn-sm"><i class="fa fa-key" aria-hidden="true"></i> Change Password</a>
+                            <a @onclick="OnProfileEditClick" class="btn btn-warning btn-sm"><i class="fa fa-user" aria-hidden="true"></i> Edit Profile</a>
+                        </Authorized>
+                    </AuthorizeView>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<PageDialog Title="@Title" Show="@show" OnCloseDialog="ResetForm">
+    @if (show && showPasswordChange)
+    {
+        <ChangePassword />
+    }
+    @if (show && showProfileChange)
+    {
+        <EditProfile userName="@userInfo.UserName" userEmail="@userEmail" />
+    }
+</PageDialog>
+
+@code {
+    UserInfo userInfo = new();
+    string userEmail = string.Empty;
+    string userRoles = string.Empty;
+    int AllowedBatchCreation;
+    int AllowsStudentPerBatch;
+
+    private bool show = false;
+    string Title = string.Empty;
+    string MessageBody = "Thank you!";
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+    bool Loading = false;
+
+    bool showPasswordChange = false;
+    bool showProfileChange = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        userInfo = await authorizeApi.GetUserInfo();
+        userEmail = userInfo.ExposedClaims.Values.ElementAt(2);
+        userRoles = userInfo.Roles.FirstOrDefault();
+    }
+
+    private async void ResetForm()
+    {
+        show = false;
+        showPasswordChange = false;
+        showProfileChange = false;
+        userInfo = await authorizeApi.GetUserInfo();
+        StateHasChanged();
+    }
+
+    public void OnPasswordChangeClick()
+    {
+        show = true;
+        showPasswordChange = true;
+        showProfileChange = false;
+        Title = "Change Password";
+        StateHasChanged();
+    }
+    public void OnProfileEditClick()
+    {
+        show = true;
+        showPasswordChange = false;
+        showProfileChange = true;
+        Title = "Modify Profile";
+        StateHasChanged();
+    }
+}

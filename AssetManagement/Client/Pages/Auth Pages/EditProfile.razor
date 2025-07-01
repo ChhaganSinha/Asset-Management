@@ -1,0 +1,82 @@
+﻿@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Auth
+@inject IdentityAuthenticationStateProvider authStateProvider
+@inject IAuthorizeApi authorizeApi
+@attribute [Authorize]
+
+<div>
+
+    <div class="col-auto" style=" width:100%; text-align:center; line-height:0px; margin-top: 2px;">
+        <UiAlert Model="alert"></UiAlert>
+    </div>
+    <EditForm class="form-signin" OnValidSubmit="OnSubmit" Model="userDetailsUpdateParameters">
+        <DataAnnotationsValidator />
+
+        <div class="form-floating mb-3">
+            <InputText id="Username" class="form-control" @bind-Value="userDetailsUpdateParameters.NewUserName" autofocus placeholder="NewUserName" disabled />
+            <label for="Username">Username</label>
+            <ValidationMessage For="@(() => userDetailsUpdateParameters.NewUserName)" />
+        </div>
+
+        <div class="form-floating mb-3">
+            <InputText id="Username" class="form-control" @bind-Value="userDetailsUpdateParameters.NewEmail" autofocus placeholder="NewUserName" />
+            <label for="email">User Email</label>
+            <ValidationMessage For="@(() => userDetailsUpdateParameters.NewEmail)" />
+        </div>
+
+        <div class="d-grid gap-2">
+            <button class="btn btn-lg btn-primary btn-sm" type="submit">Update</button>
+        </div>
+
+    </EditForm>
+
+</div>
+
+@code {
+    [Parameter]
+    public string userName { get; set; }
+
+    [Parameter]
+    public string userEmail { get; set; }
+
+    UserDetailsUpdateParameters userDetailsUpdateParameters = new();
+    private Timer _timer;
+    private int _delay = 3000;
+
+    [CascadingParameter]
+    protected AlertModel? alert { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        alert ??= new AlertModel();
+        userDetailsUpdateParameters.NewUserName = userName;
+        userDetailsUpdateParameters.NewEmail = userEmail;
+    }
+
+    async Task OnSubmit()
+    {
+        alert?.Clear();
+        alert?.SetSuccess("Please wait...");
+        try
+        {
+            var res = await authStateProvider.UpdateUserDetails(userDetailsUpdateParameters);
+            if (res.Item1 == true)
+            { alert?.SetSuccess(res.Item2); }
+            else
+                alert?.SetError(res.Item2);
+        }
+        catch (Exception ex)
+        {
+            alert?.SetError(ex.Message);
+        }
+        _timer = new Timer(TimerCallback, null, _delay, Timeout.Infinite);
+    }
+
+    private void TimerCallback(Object o)
+    {
+        alert?.Clear();
+        _timer.Dispose();
+        StateHasChanged();
+
+    }
+}

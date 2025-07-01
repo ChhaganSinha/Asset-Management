@@ -1,0 +1,199 @@
+﻿@page "/add-app-user"
+@using AssetManagement.Client.Services.Contracts
+@using AssetManagement.Dto.Auth
+@using AssetManagement.Dto.Enum
+@using AssetManagement.Dto.RBAC
+@inject IdentityAuthenticationStateProvider authStateProvider
+@inject PermissionService PermissionService
+@inject NavigationManager navigationManager
+@inject IAuthorizeApi authorizeApi
+@attribute [Authorize(Roles = "SuperAdmin,Admin")]
+
+<!-- Breadcrumb Section -->
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item">Settings</li>
+        <li class="breadcrumb-item active" aria-current="page">Add Users</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-md-center">
+        <div class="card borderd col-sm-8" style="width:100%;">
+            <h4 class="text-center">Create User Account</h4>
+            <EditForm class="form-signin" OnValidSubmit="OnSubmit" Model="registerParameters">
+                <DataAnnotationsValidator />
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="inputUsername">Username</label>
+                        <input type="text" id="inputUsername" class="form-control" placeholder="Username" @bind="registerParameters.UserName">
+                        <ValidationMessage For="@(() => registerParameters.UserName)" />
+                    </div>
+                    <div class="col">
+                        <label for="inputUserEmail">Email address</label>
+                        <input type="email" id="inputUserEmail" class="form-control" placeholder="Email address" @bind="registerParameters.Email">
+                        <ValidationMessage For="@(() => registerParameters.Email)" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="inputMobileNo">Mobile No.</label>
+                        <input type="text" id="inputMobileNo" class="form-control" placeholder="Mobile No." @bind="registerParameters.MobileNo">
+                        <ValidationMessage For="@(() => registerParameters.MobileNo)" />
+                    </div>
+                    <div class="col">
+                        <label for="inputPassword">Password</label>
+                        <input type="password" id="inputPassword" class="form-control" placeholder="Password" @bind="registerParameters.Password">
+                        <ValidationMessage For="@(() => registerParameters.Password)" />
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col">
+                        <label for="inputPasswordConfirm">Confirm Password</label>
+                        <input type="password" id="inputPasswordConfirm" class="form-control" placeholder="Confirm Password" @bind="registerParameters.PasswordConfirm">
+                        <ValidationMessage For="@(() => registerParameters.PasswordConfirm)" />
+                    </div>
+                    <div class="col">
+                        <label for="inputGender">Gender</label>
+                        <select id="inputGender" class="form-control" @bind="registerParameters.Gender">                        
+                            @foreach (GenderEnum gender in Enum.GetValues(typeof(GenderEnum)))
+                            {
+                                <option value="@gender">@gender.ToString()</option>
+                            }
+                        </select>
+                        <ValidationMessage For="@(() => registerParameters.Gender)" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="inputDob">Date of Birth</label>
+                        <input type="date" id="inputDob" class="form-control" placeholder="Date of Birth" @bind="registerParameters.Dob">
+                        <ValidationMessage For="@(() => registerParameters.Dob)" />
+                    </div>
+                    <div class="col">
+                        <label for="inputAddress">Address</label>
+                        <input type="text" id="inputAddress" class="form-control" placeholder="Address" @bind="registerParameters.Address">
+                        <ValidationMessage For="@(() => registerParameters.Address)" />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mb-2" style="width:100%;">Add</button>
+
+                <UiAlert Model="alert"></UiAlert>
+                <label class="text-danger">@error</label>
+
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    protected AlertModel? alert { get; set; }
+    private Timer _timer;
+    private int _delay = 2500;
+
+    private List<UserViewModel> users;
+    private List<RoleViewModel> Roles;
+    string Title = "Admin Control Panel";
+    private bool show = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    bool TaskCompleted = false;
+    int Tab = 1;
+
+    // Permission flags
+    private static bool canView = false;
+    private static bool canEdit = false;
+    private static bool hasFullAccess = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        alert ??= new();
+        alert?.Clear();
+        users = await authorizeApi.GetUsers();
+        Roles = await authStateProvider.GetRoles();
+
+        var permissions = await PermissionService.HasPermission("User Registrations");
+        if (permissions != null)
+        {
+            canView = permissions.CanView;
+            canEdit = permissions.CanEdit;
+            hasFullAccess = permissions.HasFullAccess;
+        }
+    }
+
+    private async Task UpdateUserRole(UserViewModel user)
+    {
+        try
+        {
+            Message = string.Empty;
+            MessageBody = "Thank you!";
+            show = true;
+            TaskCompleted = false;
+            Message = "Please wait";
+            await authorizeApi.UpdateUserRole(user);
+            Message = "Successfully Updated";
+            TaskCompleted = true;
+        }
+        catch (Exception ex)
+        {
+            Message = "Error";
+            Message = ex.Message;
+            TaskCompleted = true;
+        }
+    }
+
+    RegisterParameters registerParameters { get; set; } = new RegisterParameters();
+    string error { get; set; }
+
+    async Task OnSubmit()
+    {
+        error = null;
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        show = true;
+        TaskCompleted = false;
+        try
+        {
+            Message = "Please wait";
+            alert?.SetSuccess(Message);
+            await authorizeApi.Register(registerParameters);
+            Message = "Successfully Registered";
+            alert?.SetSuccess(Message);
+            TaskCompleted = true;
+            ResetForm(); // Reset the form after successful registration
+            StateHasChanged();
+            _timer = new Timer(TimerCallback, null, _delay, Timeout.Infinite);
+        }
+        catch (Exception ex)
+        {
+            //error = ex.Message;
+            alert?.SetSuccess(ex.Message);
+            TaskCompleted = true;
+        }
+    }
+
+    private async void ResetForm()
+    {
+        show = false;
+        if (Message.Contains("Successfully Registered"))
+        {
+            registerParameters = new();
+        }
+        users = await authorizeApi.GetUsers();
+        StateHasChanged();
+    }
+    
+    private void TimerCallback(Object o)
+    {
+        alert?.Clear();
+        _timer.Dispose();
+        StateHasChanged();
+    }
+}

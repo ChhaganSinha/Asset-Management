@@ -1,0 +1,228 @@
+﻿@page "/assets"
+@page "/assets/{cmp}/{label?}"
+@using AssetManagement.Client.Pages.GridComponent
+@using AssetManagement.Dto.Models
+@using AssetManagement.Client.Shared.Popup
+@inject ILogger<AllAssetGrid> logger
+@inject AppClient client
+@inject HttpClient HttpClient
+@inject IJSRuntime JSRuntime
+
+<!-- Breadcrumb Section -->
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Assets</li>
+    </ol>
+</nav>
+
+<!-- Action Buttons Row -->
+<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+    <a href="asset-config" class="btn btn-primary p-1">
+        <i class="fa fa-plus fa-lg" aria-hidden="true"></i> Asset
+    </a>
+    <InputFile OnChange="OnFileChange" accept=".xlsx" style="display:none" id="assetFileInput" />
+    <label for="assetFileInput" class="btn btn-outline-primary btn-sm mb-0">
+        <i class="fa fa-upload me-1"></i> Import Assets
+    </label>
+    <a href="sample-data/AssetImportTemplate.xlsx" title="Download Asset Import Template" class="btn btn-outline-info btn-sm mb-0">
+        <i class="fa fa-cloud-download me-1"></i> Template
+    </a>
+    <a href="AssetTransfer" class="btn btn-outline-warning btn-sm mb-0">
+        <i class="fa fa-exchange me-1"></i> Asset Transfer
+    </a>
+</div>
+
+<div class="card borderd" style="padding: 0 10px;">
+    <div class="card-body">
+        @if (cmp != null)
+        {
+            @if (_task?.IsCompleted == true)
+            {
+                <div class="row">
+                    <div class="col-sm-12">
+                        <GridComponent T="Asset" Grid="@_grid"></GridComponent>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="loader-container mt-4">
+                    <div class="loader"></div>
+                </div>
+            }
+        }
+        else
+        {
+            <AssetsGrid @ref="assetsGridRef" />
+        }
+    </div>
+
+    <ImportViewDailog Title="Import Assets" Show="show" OnCloseDialog="CloseDailogBox">
+        @if (assets?.Count > 0)
+        {
+            <div style="padding-top: -45%">
+                @if (!Imported)
+                {
+                    <ImportAsset DataList="assets"></ImportAsset>
+                    <div style="text-align:center;" class="mt-4">
+                        <button @onclick="ImportAssetAsync" class="btn btn-outline-primary">Import</button>
+                        <button @onclick="CloseDailogBox" class="btn btn-outline-danger"> Close </button>
+                    </div>
+                }
+                else
+                {
+                    @Message
+                    <div style="text-align:center;" class="mt-4">
+                        <button @onclick="CloseDailogBox" class="btn btn-outline-danger"> Close.</button>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            @if (string.IsNullOrEmpty(Message))
+            {
+                <div>No data found</div>
+            }
+            else
+            {
+                @Message
+            }
+            <br />
+            <div style="text-align:center;" class="mt-4">
+                <button @onclick="CloseDailogBox" class="btn btn-outline-danger"> Close </button>
+            </div>
+        }
+    </ImportViewDailog>
+</div>
+
+@code {
+    [Parameter]
+    public string cmp { get; set; }
+    [Parameter]
+    public string label { get; set; }
+
+    private AssetsGrid assetsGridRef;
+    private bool show = false;
+    string Message = string.Empty;
+    bool Imported = false;
+    List<AssetImport> assets = new List<AssetImport>();
+    int MaxAllowedFileSize = 512000;
+    int NumberOfColumnInSheet = 10;
+    static bool filter = true;
+    IBrowserFile files;
+
+    private async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            await UploadFiles(file);
+        }
+    }
+
+    private async Task UploadFiles(IBrowserFile file)
+    {
+        // Place your adapted UploadFiles logic here, using the IBrowserFile file parameter.
+        // This should be refactored from your previous UploadFiles method.
+    }
+
+    public async Task ImportAssetAsync()
+    {
+        var response = await client.UpsertImportAssetAsync(assets);
+        if (response.IsSuccess)
+        {
+            assets = response.Result;
+            Message = "Successfully Imported/Updated";
+            Imported = true;
+        }
+        else
+        {
+            Message = response.Message;
+            Imported = true;
+        }
+    }
+    private void CloseDailogBox()
+    {
+        show = false;
+        Message = string.Empty;
+        assets.Clear();
+        Imported = false;
+        assetsGridRef?.RefreshGrid();
+    }
+
+    private CGrid<Asset> _grid;
+    private Task _task;
+
+    Action<IGridColumnCollection<Asset>> columns = c =>
+    {
+        c.Add(o => o.Id).SetWidth("50px").Css("table-bordered").Titled("SN.");
+        c.Add(o => o.CompanyCode).SetWidth("50px").Css("table-bordered").Titled("Company");
+        c.Add(o => o.AssetType).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.SubAssetType).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.Brand).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.Model).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.Description).Css("table-bordered");
+        c.Add(o => o.SerialNumber).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.MacAddress).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.Status).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.AcquireDate).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered");
+        c.Add(o => o._AssetStatus)
+          .Css("table-bordered")
+          .Titled("Asset Status")
+          .Filterable(filter)
+          .SetCellCssClassesContraint((item) => item._AssetStatus == AssetStatus.Active ? "text-success fw-bold" : item._AssetStatus == AssetStatus.Discarded ? "text-danger fw-bold" : "text-warning fw-bold");
+        c.Add(o => o.DiscardDate).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered");
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        string url = $"odata/Asset";
+        var query = new QueryDictionary<Microsoft.Extensions.Primitives.StringValues>();
+
+        if (cmp != null)
+        {
+            if (label == "Allocated Assets")
+            {
+                var values = new string[] { $"Status__1__Allocated", $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new Microsoft.Extensions.Primitives.StringValues(values));
+            }
+            else if (label == "Free Assets")
+            {
+                var values = new string[] { $"Status__1__Free", $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new Microsoft.Extensions.Primitives.StringValues(values));
+            }
+            else if (label == "Active Assets")
+            {
+                var values = new string[] { $"_AssetStatusActive", $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new Microsoft.Extensions.Primitives.StringValues(values));
+            }
+            else if (label == "Discarded Assets")
+            {
+                var values = new string[] { $"_AssetStatusDiscarded", $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new Microsoft.Extensions.Primitives.StringValues(values));
+            }
+            else
+            {
+                var values = new string[] { $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new Microsoft.Extensions.Primitives.StringValues(values));
+            }
+        }
+        var client = new GridODataClient<Asset>(HttpClient, url, query, false, "AssetGrid", columns, 10)
+        .Sortable(false)
+        .Filterable(false)
+        .ClearFiltersButton(true)
+        .SetStriped(true)
+        .WithGridItemsCount()
+        .SetExcelExport(true, true, "Asset.xlsx")
+        .ChangePageSize(true)
+        .EmptyText("No data available")
+        .SetKeyboard(true)
+        .Searchable(true, false, false);
+
+        _grid = client.Grid;
+        _task = client.UpdateGrid();
+        await _task;
+    }
+}

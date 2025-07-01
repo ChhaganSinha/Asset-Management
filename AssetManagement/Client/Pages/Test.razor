@@ -1,0 +1,33 @@
+﻿@page "/trackss/{key}"
+
+@inject HttpClient Http
+
+<h3>Email Tracking</h3>
+
+@code {
+    [Parameter]
+    public string key { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Call the API to log the email open event
+        await LogEmailOpenedAsync(key);
+
+        // Optionally, you can return a small transparent image or handle UI updates
+    }
+
+    private async Task LogEmailOpenedAsync(string key)
+    {
+        var url = $"https://localhost:44316/api/App/track/{key}";
+        var response = await Http.GetAsync(url);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Handle successful logging
+        }
+        else
+        {
+            // Handle errors if needed
+        }
+    }
+}

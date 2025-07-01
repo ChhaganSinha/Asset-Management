@@ -1,0 +1,45 @@
+﻿
+@inject NavigationManager NavigationManager
+
+@if (Show)
+{
+    <div class="dialog-container" style="width:100%; min-height:100vh; z-index: 9999;">
+
+        <div class="dialog" style="width:@Width%;">
+            @*popup screen size*@
+
+            <div class="card">
+
+                <div class="card-header bg-info" style="padding: 8px !important; display: flex; align-items: center;">
+                    <h6 class="text-white" style="margin:0">@Title</h6>
+                    <a @onclick="onClose" title="Close" style="cursor: pointer; margin-left: auto; color: white;">
+                        <i class="fa fa-times-circle" aria-hidden="true"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="mt-2" style="max-height:70vh; overflow:auto">
+                            @ChildContent
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+}
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string Width { get; set; } = "70";
+    [Parameter] public EventCallback<bool> OnCloseDialog { get; set; }
+
+    private async Task onClose()
+    {
+        await OnCloseDialog.InvokeAsync(false);
+    }
+}

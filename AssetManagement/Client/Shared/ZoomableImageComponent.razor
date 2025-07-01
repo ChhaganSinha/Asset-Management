@@ -1,0 +1,345 @@
+﻿@using System.Text;
+@inject IJSRuntime JSRuntime
+
+<div id="mainImageContainer" style="display: block;width:@($"{ImageWidthInPx}px");height:@($"{ImageHeightInPx}px");overflow: hidden; position: relative;">
+    <div id="imageMover" @onmousewheel="MouseWheelZooming" style="@MoveImageStyle">
+        <div id="imageContainer" @onmousemove="MouseMoving" style="@ZoomImageStyle">
+            @*this div is used just for moving around when zoomed*@
+        </div>
+    </div>
+    @if (ShowResetButton)
+    {
+        <div class="btn-group-sm" style="position: absolute; top: 0; right: 30%;">
+            <button class="text-warning p-1" @onclick="ResetImgage" title="Reset" style="text-decoration:none;cursor:pointer;"><i class="fa fa-ban fa-lg" aria-hidden="true"></i></button>
+            <button class="text-info p-1" style="text-decoration:none;cursor:pointer;" @onclick="ZoomIn" title="Zoom In"><i class="fa fa-search-plus fa-lg" aria-hidden="true"></i></button>
+            <button class="text-info p-1" style="text-decoration:none;cursor:pointer;" @onclick="ZoomOut" title="Zoom Out"><i class="fa fa-search-minus fa-lg" aria-hidden="true"></i></button>
+            <button class="text-secondary p-1" style="text-decoration:none;cursor:pointer;" @onclick="RotateCW" title="Rotate CW"><i class="fa fa-repeat fa-lg" aria-hidden="true"></i></button>
+            <button class="text-secondary p-1" style="text-decoration:none;cursor:pointer;" @onclick="RotateCCW" title="Rotate CCW"><i class="fa fa-undo fa-lg" aria-hidden="true"></i></button>
+            <button class="text-primary p-1" style="text-decoration:none;cursor:pointer;" @onclick="DownloadImage" title="Download"><i class="fa fa-download fa-lg" aria-hidden="true"></i></button>
+        </div>
+    }
+</div>
+
+
+@code {
+
+    /// <summary>
+    /// The path or url of the image
+    /// </summary>
+    [Parameter]
+    public string ImageUrlPath { get; set; }
+
+    /// <summary>
+    /// The width of the image
+    /// </summary>
+    [Parameter]
+    public int ImageWidthInPx { get; set; }
+
+    /// <summary>
+    /// The height of the image
+    /// </summary>
+    [Parameter]
+    public int ImageHeightInPx { get; set; }
+
+    /// <summary>
+    /// Set to true to show the reset button
+    /// </summary>
+    [Parameter]
+    public bool ShowResetButton { get; set; }
+
+    /// <summary>
+    /// Set the amount the image is scaled by, default is 0.1f
+    /// </summary>
+    [Parameter]
+    public double DefaultScaleBy { get; set; } = 0.1f;
+
+    /// <summary>
+    /// The Maximum the image can scale to, default = 5f
+    /// </summary>
+    [Parameter]
+    public double ScaleToMaximum { get; set; } = 5f;
+
+    /// <summary>
+    /// Set the speed at which the image is moved by, default 2.
+    /// 2 or 3 seems to work best.
+    /// </summary>
+    [Parameter]
+    public double DefaultMoveBy { get; set; } = 2;
+
+    //defaults
+    double _CurrentScale = 1.0f;
+    double _RotationAngle = 0; // Keep track of the rotation angle.
+    double _PositionLeft = 0;
+    double _PositionTop = 0;
+    double _OldClientX = 0;
+    double _OldClientY = 0;
+    double _DefaultMinPosition = 0;//to the top and left
+    double _DefaultMaxPosition = 0;//to the right and down
+
+    //the default settings used to display the image in the child div
+    private Dictionary<string, string> _ImageContainerStyles;
+    Dictionary<string, string> ImageContainerStyles
+    {
+        get
+        {
+            if (_ImageContainerStyles == null)
+            {
+                _ImageContainerStyles = new Dictionary<string, string>();
+                _ImageContainerStyles.Add("width", "100%");
+                _ImageContainerStyles.Add("height", "100%");
+                _ImageContainerStyles.Add("position", "relative");
+                _ImageContainerStyles.Add("background-size", "contain");
+                _ImageContainerStyles.Add("background-repeat", "no-repeat");
+                _ImageContainerStyles.Add("background-position", "50% 50%");
+                _ImageContainerStyles.Add("background-image", $"url({ImageUrlPath})");
+            }
+            return _ImageContainerStyles;
+        }
+    }
+
+    private Dictionary<string, string> _MovingContainerStyles;
+    Dictionary<string, string> MovingContainerStyles
+    {
+        get
+        {
+            if (_MovingContainerStyles == null)
+            {
+                InvokeAsync(ResetImgage);
+            }
+            return _MovingContainerStyles;
+        }
+    }
+
+    protected async Task ResetImgage()
+    {
+        _PositionLeft = 0;
+        _PositionTop = 0;
+        _RotationAngle = 0; // Reset rotation angle.
+        _DefaultMinPosition = 0;
+        _DefaultMaxPosition = 0;
+        _CurrentScale = 1.0f;
+
+        _MovingContainerStyles = new Dictionary<string, string>();
+        _MovingContainerStyles.Add("width", "100%");
+        _MovingContainerStyles.Add("height", "100%");
+        _MovingContainerStyles.Add("position", "relative");
+        _MovingContainerStyles.Add("left", $"{_PositionLeft}%");
+        _MovingContainerStyles.TryAdd("top", $"{_PositionTop}%");
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    string ZoomImageStyle { get => DictionaryToCss(ImageContainerStyles); }
+    string MoveImageStyle { get => DictionaryToCss(MovingContainerStyles); }
+
+
+    private string DictionaryToCss(Dictionary<string, string> styleDictionary)
+    {
+        StringBuilder sb = new StringBuilder();
+        foreach (var kvp in styleDictionary.AsEnumerable())
+        {
+            sb.AppendFormat("{0}:{1};", kvp.Key, kvp.Value);
+        }
+        return sb.ToString();
+    }
+
+
+    protected async void MouseMoving(MouseEventArgs e)
+    {
+        //if the mouse button 1 is not down exit the function
+        if (e.Buttons != 1)
+        {
+            _OldClientX = e.ClientX;
+            _OldClientY = e.ClientY;
+            return;
+        }
+
+        //get the % of the current scale to move by at least the default move speed plus any scaled changes
+        //basically the bigger the image the faster it moves..
+        double scaleFrac = (_CurrentScale / ScaleToMaximum);
+        double scaleMove = (DefaultMoveBy * (DefaultMoveBy * scaleFrac));
+
+        //moving mouse right
+        if (_OldClientX < e.ClientX)
+        {
+            if ((_PositionLeft - DefaultMoveBy) <= _DefaultMaxPosition)
+            {
+                _PositionLeft += scaleMove;
+            }
+        }
+
+        //moving mouse left
+        if (_OldClientX > e.ClientX)
+        {
+            //if (_DefaultMinPosition < (_PositionLeft - DefaultMoveBy))
+            if ((_PositionLeft + DefaultMoveBy) >= _DefaultMinPosition)
+            {
+                _PositionLeft -= scaleMove;
+            }
+        }
+
+        //moving mouse down
+        if (_OldClientY < e.ClientY)
+        {
+            //if ((_PositionTop + DefaultMoveBy) <= _DefaultMaxPosition)
+            if ((_PositionTop - DefaultMoveBy) <= _DefaultMaxPosition)
+            {
+                _PositionTop += scaleMove;
+            }
+        }
+
+        //moving mouse up
+        if (_OldClientY > e.ClientY)
+        {
+            //if ((_PositionTop - DefaultMoveBy) > _DefaultMinPosition)
+            if ((_PositionTop + DefaultMoveBy) >= _DefaultMinPosition)
+            {
+                _PositionTop -= scaleMove;
+            }
+        }
+
+        _OldClientX = e.ClientX;
+        _OldClientY = e.ClientY;
+
+        await UpdateScaleAndPosition();
+    }
+
+    async Task<double> IncreaseScale()
+    {
+        return await Task.Run(() =>
+        {
+            //increase the scale first then calculate the max and min positions
+            _CurrentScale += DefaultScaleBy;
+            double scaleFrac = (_CurrentScale / ScaleToMaximum);
+            double scaleDiff = (DefaultMoveBy + (DefaultMoveBy * scaleFrac));
+            double scaleChange = DefaultMoveBy + scaleDiff;
+            _DefaultMaxPosition += scaleChange;
+            _DefaultMinPosition -= scaleChange;
+
+            return _CurrentScale;
+        });
+    }
+
+    async Task<double> DecreaseScale()
+    {
+        return await Task.Run(() =>
+        {
+            _CurrentScale -= DefaultScaleBy;
+
+            double scaleFrac = (_CurrentScale / ScaleToMaximum);
+            double scaleDiff = (DefaultMoveBy + (DefaultMoveBy * scaleFrac));
+            double scaleChange = DefaultMoveBy + scaleDiff;
+            _DefaultMaxPosition -= scaleChange;
+            _DefaultMinPosition += scaleChange;//DefaultMoveBy;
+
+            //fix descaling, move the image back into view when descaling (zoomin out)
+            if (_CurrentScale <= 1)
+            {
+                _PositionLeft = 0;
+                _PositionTop = 0;
+            }
+            else
+            {
+                //left can not be more than max position
+                _PositionLeft = (_DefaultMaxPosition < _PositionLeft) ? _DefaultMaxPosition : _PositionLeft;
+
+                //top can not be more than max position
+                _PositionTop = (_DefaultMaxPosition < _PositionTop) ? _DefaultMaxPosition : _PositionTop;
+
+                //left can not be less than min position
+                _PositionLeft = (_DefaultMinPosition > _PositionLeft) ? _DefaultMinPosition : _PositionLeft;
+
+                //top can not be less than min position
+                _PositionTop = (_DefaultMinPosition > _PositionTop) ? _DefaultMinPosition : _PositionTop;
+            }
+            return _CurrentScale;
+        });
+    }
+
+    protected async void MouseWheelZooming(WheelEventArgs e)
+    {
+        //holding shift stops the page from scrolling
+        if (e.ShiftKey == true)
+        {
+            if (e.DeltaY > 0)
+            {
+                _CurrentScale = ((_CurrentScale + DefaultScaleBy) >= 5) ? _CurrentScale = 5f : await IncreaseScale();
+            }
+            if (e.DeltaY < 0)
+            {
+                _CurrentScale = ((_CurrentScale - DefaultScaleBy) <= 0) ? _CurrentScale = DefaultScaleBy : await DecreaseScale();
+            }
+
+            await UpdateScaleAndPosition();
+        }
+    }
+
+    /// <summary>
+    /// Refresh the values in the moving style dictionary that is used to position the image.
+    /// </summary>
+    async Task UpdateScaleAndPosition()
+    {
+        await Task.Run(() =>
+        {
+            string transform = $"scale({_CurrentScale}) rotate({_RotationAngle}rad)";
+
+            if (!MovingContainerStyles.TryAdd("transform", transform))
+            {
+                MovingContainerStyles["transform"] = transform;
+            }
+
+            if (!MovingContainerStyles.TryAdd("left", $"{_PositionLeft}%"))
+            {
+                MovingContainerStyles["left"] = $"{_PositionLeft}%";
+            }
+
+            if (!MovingContainerStyles.TryAdd("top", $"{_PositionTop}%"))
+            {
+                MovingContainerStyles["top"] = $"{_PositionTop}%";
+            }
+        });
+    }
+
+    private async Task ZoomIn()
+    {
+        _CurrentScale = ((_CurrentScale + DefaultScaleBy) >= ScaleToMaximum) ? ScaleToMaximum : _CurrentScale + DefaultScaleBy;
+        await UpdateScaleAndPosition();
+    }
+
+    private async Task ZoomOut()
+    {
+        _CurrentScale = ((_CurrentScale - DefaultScaleBy) <= DefaultScaleBy) ? DefaultScaleBy : _CurrentScale - DefaultScaleBy;
+        await UpdateScaleAndPosition();
+    }
+
+    private async Task RotateCW()
+    {
+        // Rotate clockwise by 90 degrees (pi/2 radians).
+        _RotationAngle += Math.PI / 2;
+        await UpdateScaleAndPosition();
+    }
+
+    private async Task RotateCCW()
+    {
+        // Rotate counterclockwise by 90 degrees (pi/2 radians).
+        _RotationAngle -= Math.PI / 2;
+        await UpdateScaleAndPosition();
+    }
+
+    private async Task DownloadImage()
+    {
+        // Use JavaScript interop to trigger a download of the image.
+        await JSRuntime.InvokeVoidAsync("downloadImage", ImageUrlPath);
+    }
+
+
+    private void DisableBodyScroll()
+    {
+        JSRuntime.InvokeVoidAsync("disableBodyScroll");
+    }
+
+    private void EnableBodyScroll()
+    {
+        JSRuntime.InvokeVoidAsync("enableBodyScroll");
+    }
+}

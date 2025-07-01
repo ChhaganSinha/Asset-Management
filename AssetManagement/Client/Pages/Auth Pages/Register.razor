@@ -1,0 +1,117 @@
+﻿@page "/register"
+@layout LoginLayout
+@inject NavigationManager navigationManager
+@inject IdentityAuthenticationStateProvider authStateProvider
+@using AssetManagement.Dto.Auth
+@using AssetManagement.Dto.Enum
+@* @attribute [Authorize] *@
+@* @attribute [Authorize(Roles = "SuperAdmin,Admin")] *@
+
+@if (userCount == 0)
+{
+    <div class="d-flex justify-content-center align-items-center vh-100 auth-bg">
+        <div class="card borderd shadow-lg w-100" style="max-width: 600px; opacity:0.92;">
+            <div class="card-body" style="max-height: 90vh; overflow-y: auto;">
+                <!-- Title -->
+                <div class="text-center mb-4">
+                    <img src="/assets/img/logo.png" alt="Logo" class="img-fluid mb-3" width="70" />
+                    <h3 class="mb-3">Sign Up</h3>
+                    <p class="text-warning">Create your account to get started.</p>
+                </div>
+
+                <!-- Registration Form -->
+                <EditForm OnValidSubmit="OnSubmit" Model="registerParameters">
+                    <DataAnnotationsValidator />
+
+                    <!-- First row of inputs (Username, Email, Mobile No.) -->
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" placeholder="Enter your username" @bind="registerParameters.UserName">
+                            <ValidationMessage For="@(() => registerParameters.UserName)" />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" placeholder="Enter your email" @bind="registerParameters.Email">
+                            <ValidationMessage For="@(() => registerParameters.Email)" />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Mobile No.</label>
+                            <input type="text" class="form-control" placeholder="Enter your mobile number" @bind="registerParameters.MobileNo">
+                            <ValidationMessage For="@(() => registerParameters.MobileNo)" />
+                        </div>
+                    </div>
+
+                    <!-- Second row of inputs (Password, Confirm Password, Gender) -->
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" placeholder="Enter your password" @bind="registerParameters.Password">
+                            <ValidationMessage For="@(() => registerParameters.Password)" />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" placeholder="Confirm your password" @bind="registerParameters.PasswordConfirm">
+                            <ValidationMessage For="@(() => registerParameters.PasswordConfirm)" />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Gender</label>
+                            <select class="form-control" @bind="registerParameters.Gender">
+                                @foreach (GenderEnum gender in Enum.GetValues(typeof(GenderEnum)))
+                                {
+                                    <option value="@gender">@gender.ToString()</option>
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => registerParameters.Gender)" />
+                        </div>
+                    </div>
+
+                    <!-- Third row of inputs (DOB, Address) -->
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" @bind="registerParameters.Dob">
+                            <ValidationMessage For="@(() => registerParameters.Dob)" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-control" placeholder="Enter your address" @bind="registerParameters.Address">
+                            <ValidationMessage For="@(() => registerParameters.Address)" />
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+
+                    <!-- Error Message -->
+                    <p class="text-danger mt-2">@error</p>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    RegisterParameters registerParameters { get; set; } = new RegisterParameters();
+    string error { get; set; }
+    int userCount = 1;
+
+    async Task OnSubmit()
+    {
+        error = null;
+        try
+        {
+            await authStateProvider.Register(registerParameters);
+            navigationManager.NavigateTo("");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        userCount = await authStateProvider.GetUserCount();
+    }
+}

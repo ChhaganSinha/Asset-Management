@@ -1,0 +1,440 @@
+﻿@page "/"
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Helpers;
+@using AssetManagement.Client.Shared.ChartJs
+@using AssetManagement.Dto.Dashboard;
+@using AssetManagement.Dto.Models;
+@inject PermissionService PermissionService
+@inject NavigationManager NavigationManager
+@inject AppClient client
+@attribute [Authorize]
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Asset | Dashboard</PageTitle>
+<!-- Breadcrumb Section -->
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+    </ol>
+</nav>
+
+@if (IsLoading)
+{
+    <div class="col-sm-12" style="margin-top:40vh">
+        <div class="loader-progress"></div>
+    </div>
+}
+else
+{
+    @if (canView)
+    {
+
+        <div style="padding: 10px;">
+            <div class="row">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card borderd stats-card bg-info-custom mb-4">
+                        <div class="curved-bg"></div>
+                        <div class="card-body" style="height:56px">
+                            <i class="fa fa-building-o icon" aria-hidden="true"></i>
+                            Companies <span class="count-value">@dashboardStatics.Companies</span>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small stretched-link" href="companies">View Details</a>
+                            <div class="small"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="card borderd stats-card bg-warning-custom mb-4">
+                        <div class="curved-bg"></div>
+                        <div class="card-body" style="height:56px">
+                            <i class="fa fa-users icon" aria-hidden="true"></i>
+                            Total Employees <span class="count-value">@dashboardStatics.Employees</span>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small stretched-link" href="employees">View Details</a>
+                            <div class="small"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="card borderd stats-card bg-success-custom mb-4">
+                        <div class="curved-bg"></div>
+                        <div class="card-body" style="height:56px">
+                            <i class="fa fa-laptop icon" aria-hidden="true"></i>
+                            Total Assets <span class="count-value">@dashboardStatics.Assets</span>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small stretched-link" href="assets">View Details</a>
+                            <div class="small"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="card borderd stats-card bg-danger-custom mb-4">
+                        <div class="curved-bg"></div>
+                        <div class="card-body" style="height:56px">
+                            <i class="fa fa-pencil-square-o icon" aria-hidden="true"></i>
+                            Total Allocations <span class="count-value">@dashboardStatics.Allocations</span>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small stretched-link" href="allocations">View Details</a>
+                            <div class="small"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6" style="width: 49% !important;">
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-primary" id="company-select-label">Showing for</span>
+                    <select @bind-value="SelectedCompany"
+                            class="form-select bg-light border-primary"
+                            @onchange="FilterChart"
+                            @bind-value:event="oninput"
+                            aria-labelledby="company-select-label">
+                        @if (CompanyCodes != null && CompanyCodes.Any())
+                        {
+                            @foreach (var cc in CompanyCodes)
+                            {
+                                <option value="@cc" selected="@(cc == SelectedCompany)">@cc</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6">
+                    <div class="col-xl-12">
+                        <div class="card borderd chart-card mb-4">
+                            <div class="card-header">
+                                <i class="fa fa-area-chart mr-1"></i>
+                                Company Data Chart
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <Chart Id="companybar" Type="@AssetManagement.Dto.Dashboard.ChartType.bar"
+                                           Datasets="@CompanyStatics"
+                                           Labels="@CompanyStaticsLabels"
+                                           AspectRatio="false"
+                                           IndexAxis="y"
+                                           borderRadius="0"
+                                           IsStacked="false">
+                                    </Chart>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-12">
+                        <div class="card borderd chart-card mb-4">
+                            <div class="card-header">
+                                <i class="fa fa-pie-chart mr-1"></i>
+                                Allocation Statistics
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <GaugeChart Id="allocationguage" Type="@AssetManagement.Dto.Dashboard.ChartType.doughnut"
+                                                Data="@AllocationChartData.ToArray()"
+                                                Company="@AllocationCompanyCode"
+                                                BackgroundColor="@AllocationChartBackground.ToArray()"
+                                                IsStacked="false"
+                                                borderRadius="0"
+                                                Labels="@(new[] { "Temporary Allocation","Permanent Allocation" })">
+                                    </GaugeChart>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6">
+                    <div class="col-xl-12">
+                        <div class="card borderd chart-card mb-4">
+                            <div class="card-header">
+                                <i class="fa fa-users mr-1"></i>
+                                Employee's Data Chart
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <StackedBarChart Id="employeebar" Type="@AssetManagement.Dto.Dashboard.ChartType.bar"
+                                                     Datasets="@EmployeeStatics"
+                                                     Labels="@EmployeeStaticsLabels"
+                                                     AspectRatio="false"
+                                                     borderRadius="0"
+                                                     IsStacked="false">
+                                    </StackedBarChart>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-12">
+                        <div class="card borderd chart-card mb-4">
+                            <div class="card-header">
+                                <i class="fa fa-laptop mr-1"></i>
+                                Asset Statistics
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <Chart Id="assetbar" Type="@AssetManagement.Dto.Dashboard.ChartType.bar"
+                                           Datasets="@AssetsStatics"
+                                           Labels="@AssetsStaticsLabels"
+                                           AspectRatio="false"
+                                           IndexAxis="x"
+                                           borderRadius="0"
+                                           IsStacked="false">
+                                    </Chart>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+
+}
+
+@code {
+
+    public string SelectedCompany = string.Empty;
+    public List<ChartJsDataset> CompanyStatics { get; set; } = new List<ChartJsDataset>();
+    public string[]? CompanyStaticsLabels { get; set; }
+
+    public List<ChartJsDataset> AssetsStatics { get; set; } = new List<ChartJsDataset>();
+    public string[]? AssetsStaticsLabels { get; set; }
+
+    public List<ChartJsDataset> EmployeeStatics { get; set; } = new List<ChartJsDataset>();
+    public string[]? EmployeeStaticsLabels { get; set; }
+
+    public string AllocationCompanyCode { get; set; } = string.Empty;
+    public List<string> AllocationChartData { get; set; } = new List<string>();
+    public List<string> AllocationChartBackground { get; set; } = new List<string>() { "#A9CCE3", "#82E0AA ", "#DE3163", "#40E0D0", "#FF7F50", "#E6B0AA", "#D7BDE2", "#CCD1D1", "#FF5370", "#0e9e4a", "#FFB64D", "#00E396", "#775DD0", "#4099ff", "#f2930a", "#00bcd4" };
+    public List<string> AllocationChartLabels { get; set; } = new List<string>();
+
+    public List<string> AssetChartData { get; set; } = new List<string>();
+    public List<string> AssetChartBackground { get; set; } = new List<string>() { "#CCD1D1", "#FF5370", "#0e9e4a", "#FFB64D", "#00E396", "#775DD0", "#4099ff", "#f2930a", "#00bcd4" };
+    public List<string> AssetChartLabels { get; set; } = new List<string>();
+
+    public List<string> CompanyCodes = new();
+    DashboardStatics dashboardStatics = new();
+    MasterStatics MasterStatics = new();
+    private static bool canView = false;
+    private static bool canEdit = false;
+    private static bool hasFullAccess = false;
+    bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+        var permissions = await PermissionService.HasPermission("Dashboard");
+        if (permissions != null)
+        {
+            canView = permissions.CanView;
+            canEdit = permissions.CanEdit;
+            hasFullAccess = permissions.HasFullAccess;
+        }
+
+        if (!canView)
+        {
+            NavigationManager.NavigateTo("/unauthorized");
+            return;
+        }
+        var StartDate = new DateTime(DateTime.Now.Year, 1, 1);
+        var EndDate = new DateTime(DateTime.Now.Year, 12, 31).AddHours(24).AddSeconds(-1);
+
+        dashboardStatics = await client.GetLatestStats();
+        CompanyCodes = dashboardStatics.CompanyCodes;
+        SelectedCompany = CompanyCodes.First() ?? "Not Found";
+        MasterStatics = await client.GetMasterStaticsEntires();
+
+        if (MasterStatics != null && CompanyCodes.Count() > 0)
+            DisplayCharts(MasterStatics, CompanyCodes[0].Trim());
+
+        IsLoading = false;
+
+    }
+
+    Random random = new Random();
+    List<string> generatedColors = new List<string>();
+    public string GenerateRandomColor()
+    {
+        string hexColor;
+        do
+        {
+            byte[] rgb = new byte[3];
+            random.NextBytes(rgb);
+
+            hexColor = "#" + BitConverter.ToString(rgb).Replace("-", string.Empty);
+        } while (generatedColors.Contains(hexColor));
+
+        generatedColors.Add(hexColor);
+        return hexColor;
+    }
+
+    public async void FilterChart()
+    {
+        var CompanyCode = SelectedCompany;
+        CompanyStatics.Clear();
+        AssetsStatics.Clear();
+        EmployeeStatics.Clear();
+        AllocationChartData.Clear();
+        await DestroyChart("companybar");
+        await DestroyChart("allocationguage");
+        await DestroyChart("employeebar");
+        await DestroyChart("assetbar");
+        DisplayCharts(MasterStatics, CompanyCode.Trim());
+        StateHasChanged();
+    }
+
+    private async Task DestroyChart(string id)
+    {
+        await JSRuntime.InvokeVoidAsync("window.destroyChart", id);
+    }
+
+    public void DisplayCharts(MasterStatics masterStatics, string CompanyCode)
+    {
+        try
+        {
+            #region Allocation
+            var a = masterStatics.AllocationStatics.Where(c => c.CompanyCode == CompanyCode);
+            foreach (var entry in masterStatics.AllocationStatics.Where(c => c.CompanyCode == CompanyCode))
+            {
+                if (entry != null)
+                {
+                    if (entry.allocation.Count() > 0)
+                    {
+                        AllocationCompanyCode = entry.CompanyCode;
+                        AllocationChartData.Add(entry.allocation.Count(o => o.AllocationType.Equals(AllocationType.Temporary)).ToString());
+                        AllocationChartData.Add(entry.allocation.Count(o => o.AllocationType.Equals(AllocationType.Permanent)).ToString());
+                        //AllocationChartData.Add(entry.TemporaryAlloction.ToString());
+                        //AllocationChartData.Add(entry.PermanentAlloction.ToString());
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Company
+            CompanyStaticsLabels = masterStatics.CompaniesStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.CompanyCode).ToArray();
+
+            CompanyStatics.Add(new ChartJsDataset
+                {
+                    Label = "TotalAssets",
+                    Data = masterStatics.CompaniesStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.TotalAssets.ToString()).ToArray(),
+                    BackgroundColor = ColorHelper.GetBackgroundColors("#ffb1c1", masterStatics.CompaniesStatics.Count()),
+
+                });
+
+            CompanyStatics.Add(new ChartJsDataset
+                {
+                    Label = "TotalEmployees",
+                    Data = masterStatics.CompaniesStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.TotalEmployees.ToString()).ToArray(),
+                    BackgroundColor = ColorHelper.GetBackgroundColors("#9ad0f5", masterStatics.CompaniesStatics.Count()),
+
+                });
+
+            CompanyStatics.Add(new ChartJsDataset
+                {
+                    Label = "TotalAllocations",
+                    Data = masterStatics.CompaniesStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.TotalAllocations.ToString()).ToArray(),
+                    BackgroundColor = ColorHelper.GetBackgroundColors("#b5e48c", masterStatics.CompaniesStatics.Count()),
+
+                });
+            #endregion
+
+            #region Asset
+            AssetsStaticsLabels = masterStatics.AssetsStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.CompanyCode).ToArray();
+            AssetsStatics.Add(new ChartJsDataset
+                {
+                    Label = "Total Assets",
+                    Data = masterStatics.AssetsStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.TotalAssets.ToString()).ToArray(),
+                //BackgroundColor = ColorHelper.GetBackgroundColors(System.Drawing.Color.DarkBlue, MasterStatics.CompaniesStatics.Count()),
+                    BackgroundColor = ColorHelper.GetBackgroundColors("#a5dfdf", masterStatics.CompaniesStatics.Count()),
+                });
+
+            AssetsStatics.Add(new ChartJsDataset
+                {
+                    Label = "Free Assets",
+                    Data = masterStatics.AssetsStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.FreeAssets.ToString()).ToArray(),
+                    BackgroundColor = ColorHelper.GetBackgroundColors("#ccb2ff", masterStatics.CompaniesStatics.Count()),
+                });
+
+            AssetsStatics.Add(new ChartJsDataset
+                {
+                    Label = "Allocated Assets",
+                    Data = masterStatics.AssetsStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.AllocatedAssets.ToString()).ToArray(),
+                    BackgroundColor = ColorHelper.GetBackgroundColors("#ffcf9f", masterStatics.CompaniesStatics.Count()),
+                });
+            AssetsStatics.Add(new ChartJsDataset
+                {
+                    Label = "Active Assets",
+                    Data = masterStatics.AssetsStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.ActiveAssets.ToString()).ToArray(),
+                    BackgroundColor = ColorHelper.GetBackgroundColors("#afcf9f", masterStatics.CompaniesStatics.Count()),
+                });
+            AssetsStatics.Add(new ChartJsDataset
+                {
+                    Label = "Discarded Assets",
+                    Data = masterStatics.AssetsStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.DiscardedAssets.ToString()).ToArray(),
+                    BackgroundColor = ColorHelper.GetBackgroundColors("#cfcf9f", masterStatics.CompaniesStatics.Count()),
+                });
+            #endregion
+
+            #region Employee
+            EmployeeStaticsLabels = masterStatics.EmployeeStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.CompanyCode).ToArray();
+            EmployeeStatics.Add(new ChartJsDataset
+                {
+                    Label = "Total Employee",
+                    Data = masterStatics.EmployeeStatics.Where(c => c.CompanyCode == CompanyCode).Select(o => o.TotalEmployee.ToString()).ToArray(),
+                    BackgroundColor = ColorHelper.GetBackgroundColors("#ff477e", masterStatics.CompaniesStatics.Count()),
+                    Stack = "stack 0"
+                });
+
+            foreach (var data in masterStatics.EmployeeStatics.Where(c => c.CompanyCode == CompanyCode))
+            {
+                foreach (var d in data.EmployeeByDepartment)
+                {
+                    EmployeeStatics.Add(new ChartJsDataset
+                        {
+                            Label = d.Department,
+                            Data = new[] { d.Count.ToString() },
+                            BackgroundColor = ColorHelper.GetBackgroundColors(GenerateRandomColor(), data.EmployeeByDepartment.Count()),
+                            Stack = "stack 1"
+                        });
+                }
+                foreach (var s in data.EmployeeByStatus)
+                {
+                    EmployeeStatics.Add(new ChartJsDataset
+                        {
+                            Label = s.Status,
+                            Data = new[] { s.Count.ToString() },
+                            BackgroundColor = ColorHelper.GetBackgroundColors(GenerateRandomColor(), data.EmployeeByStatus.Count()),
+                            Stack = $"stack {s.Status}"
+                        });
+                }
+            }
+
+            //foreach (var entry in masterStatics.AssetsStatics.Where(c => c.CompanyCode == CompanyCode))
+            //{
+            //    if (entry != null)
+            //    {
+            //        AssetChartData.Add(entry.TotalAssets.ToString());
+            //        AssetChartData.Add(entry.FreeAssets.ToString());
+            //        AssetChartData.Add(entry.AllocatedAssets.ToString());
+            //    }
+            //}
+            #endregion
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+}

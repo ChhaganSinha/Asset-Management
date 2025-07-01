@@ -1,0 +1,28 @@
+﻿@using MudBlazor
+<MudDialog DefaultFocus="DefaultFocus.LastChild">
+@*     <DialogContent>
+        Click to export you data
+    </DialogContent> *@
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Pdf">PDF</MudButton>
+        <MudButton Color="Color.Success" OnClick="Excel">EXCEL</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    //void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+    void Excel()
+    {
+        MudDialog.Close(DialogResult.Ok("Excel"));
+    }
+
+    void Pdf()
+    {
+        MudDialog.Close(DialogResult.Ok("PDF"));
+    }
+}

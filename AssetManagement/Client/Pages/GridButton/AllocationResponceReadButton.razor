@@ -1,0 +1,64 @@
+﻿@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.AppPages.Company;
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models;
+@using GridBlazor;
+@using GridShared
+@using GridShared.Columns
+@using GridShared.Utility
+@using Microsoft.AspNetCore.Components.Web;
+@using Microsoft.Extensions.Primitives
+@inject AppClient client
+@implements ICustomGridComponent<Allocation>
+@inject NavigationManager NavigationManager
+
+<button class='btn btn-sm btn-info' style="border-radius:15px" @onclick="MyClickHandler" title="Message"><i class="fa fa-comment-o" aria-hidden="true"></i></button>
+<Dailog Title="@Title" Show="@show" OnCloseDialog="ResetForm">
+    @if (show)
+    {
+        @if (TaskCompleted)
+        {
+            <div style="text-align:center;">
+                @MessageBody
+            </div>
+        }
+        else
+        {
+            <div style="text-align:center">
+                <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+            </div>
+        }
+    }
+</Dailog>
+@code {
+    [Parameter]
+    public Allocation Item { get; set; }
+
+    [Parameter]
+    public CGrid<Allocation> Grid { get; set; }
+
+    bool show = false;
+    bool TaskCompleted = false;
+    string MessageBody = string.Empty;
+    string Title = "Comment";
+    private async void MyClickHandler(MouseEventArgs e)
+    {
+        show = true;
+        MessageBody = string.Empty;
+        TaskCompleted = false;
+        
+        var responce = await client.ReadAllocationCommentById(Item.Id);
+        if (responce != null)
+        {
+            MessageBody = responce;
+        }
+        TaskCompleted = true;
+        StateHasChanged();
+    }
+    public void ResetForm()
+    {
+        show = false;
+        TaskCompleted = false;
+        MessageBody = string.Empty;
+    }
+}

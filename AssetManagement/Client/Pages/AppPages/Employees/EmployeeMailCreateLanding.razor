@@ -1,0 +1,545 @@
+﻿@page "/emp/mailupdate/{key}"
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.AppPages.Employees.Component
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@using System.Text.Json;
+@using AssetManagement.Dto;
+@using Microsoft.AspNetCore.Authorization
+@inject AppClient client
+@inject HttpClient httpClient
+@inject ILogger<EmployeeDataConfig> logger
+@inject IJSRuntime JSRuntime;
+@inject NavigationManager NavigationManager
+@layout NoLayout
+@attribute [AllowAnonymous]
+
+
+<div>
+    <div class="card">
+        <div class="card-header bg-secondary text-center">
+            @Title
+        </div>
+        <div class="card-body">
+            @if (model == null && !TaskCompleted)
+            {
+                <div class="loader-container mt-4">
+                    <div class="loader"></div>
+                </div>
+
+            }
+            else if (model == null && TaskCompleted)
+            {
+                <p>No data found!</p>
+            }
+            else
+            {
+                <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="form-group row mb-2">
+                        <label class="col-form-label col-md-2 bold-font required-field">Company Code</label>
+                        <div class="col-md-4">
+                            <InputText id="CompanyCode" @bind-Value="model.CompanyCode" class="form-control" disabled />
+                            <ValidationMessage For="() => model.CompanyCode" />
+                        </div>
+
+                        <label class="col-form-label col-md-2 bold-font required-field">Employee Id</label>
+                        <div class="col-md-4">
+                            <InputText id="EmployeeId" @bind-Value="model.EmployeeId" class="form-control" disabled />
+                            <ValidationMessage For="() => model.EmployeeId" />
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-2">
+                        <label class="col-form-label col-md-2 bold-font required-field">Name</label>
+                        <div class="col-md-4">
+                            <InputText id="EmployeeName" @bind-Value="model.EmployeeName" class="form-control" disabled />
+                            <ValidationMessage For="() => model.EmployeeName" />
+                        </div>
+                        <label class="col-form-label col-md-2 bold-font required-field">Email</label>
+                        <div class="col-md-4">
+                            <InputText id="EmailId" @bind-Value="model.EmailId" class="form-control" />
+                            <ValidationMessage For="() => model.EmailId" />
+                        </div>
+                    </div>
+
+                    <div style="text-align:center;" class="mt-4">
+                        <button type="submit" class="btn btn-success col-md-2">Submit</button>
+                        @*<button type="button" class="btn btn-danger col-md-2" @onclick="OnClose">Close</button>*@
+                    </div>
+                </EditForm>
+                <Dailog Title="@Message" Show="@show" OnCloseDialog="ResetForm">
+                    @if (show)
+                    {
+                        @if (TaskCompleted)
+                        {
+                            <div style="text-align:center;">
+                                @MessageBody
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="text-align:center">
+                                <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                            </div>
+                        }
+                    }
+                </Dailog>
+                <FilePreviewDailog Title="Preview" Show="ShowPreview" ClosePreview="ClosePreview">
+                    <iframe src="@filePath" style="height:400px; width:100%"></iframe>
+                </FilePreviewDailog>
+                @* <PageDialog Title="Add Skills" Show="AddSkill" ClosePageDialog="ClosePopUp">
+            <AddSkillComponent />
+            </PageDialog>*@
+            }
+        </div>
+    </div>
+
+
+</div>
+
+@code {
+    [Parameter]
+    public string Key { get; set; } = string.Empty;
+
+    public string Title = "Update Email details";
+
+    public bool AddSkill = false;
+
+    Dictionary<int, List<int>> EmployeeSkillIds = new Dictionary<int, List<int>>();
+    private List<int> SelectedSkill { get; set; } = new();
+
+    string filePath = string.Empty;
+    public bool ShowPreview = false;
+    private bool show = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+    Employee model = new Employee();
+    List<EmployeeSkills> SkillOptions = new();
+
+    EmployeeFilesMapping employeeFiles = new();
+    EmployeeOnboardingDto employeeOnboardingDto = new();
+
+    private IBrowserFile? aadhaarFile;
+    private IBrowserFile? panCardFile;
+    private IBrowserFile? bankPassbookFile;
+    private IBrowserFile? certificateFiles;
+    private IBrowserFile? employeeProfilePhoto;
+
+    string AdharFileErrorMsg = string.Empty;
+    string PanFileErrorMsg = string.Empty;
+    string BankPassFileErrorMsg = string.Empty;
+    string CertificateFileErrorMsg = string.Empty;
+    string ProfilePicFileErrorMsg = string.Empty;
+
+
+    long FileSizeLimit = 1024 * 2048; //2Mb
+    private List<File> files = new();
+    private List<UploadResult> uploadResults = new();
+    private int maxAllowedFiles = 3;
+
+    private async Task LoadAadhaarFiles(InputFileChangeEventArgs e)
+    {
+        SizeLimitInfoAadhar = string.Empty;
+        AdharFileErrorMsg = string.Empty;
+        //if(e.File.Size > 2097152)
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoAadhar = "File size is more then 2MB";
+            aadhaarFile = null;
+        }
+        else
+        {
+            aadhaarFile = e.File;
+        }
+    }
+
+    private async Task LoadPanFiles(InputFileChangeEventArgs e)
+    {
+        panCardFile = e.File;
+        SizeLimitInfoPan = string.Empty;
+        PanFileErrorMsg = string.Empty;
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoPan = "File size is more then 2MB";
+            panCardFile = null;
+        }
+        else
+        {
+            panCardFile = e.File;
+        }
+    }
+
+    private async Task LoadBankFiles(InputFileChangeEventArgs e)
+    {
+        SizeLimitInfoPassbook = string.Empty;
+        BankPassFileErrorMsg = string.Empty;
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoPassbook = "File size is more then 2MB";
+            bankPassbookFile = null;
+        }
+        else
+        {
+            bankPassbookFile = e.File;
+        }
+    }
+
+    private async Task LoadCertificateFiles(InputFileChangeEventArgs e)
+    {
+        SizeLimitInfoCertificate = string.Empty;
+        CertificateFileErrorMsg = string.Empty;
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoCertificate = "File size is more then 2MB";
+            certificateFiles = null;
+        }
+        else
+        {
+            certificateFiles = e.File;
+        }
+    }
+
+    private async Task LoademployeeProfilePhoto(InputFileChangeEventArgs e)
+    {
+        SizeLimitInfoProfilePic = string.Empty;
+        ProfilePicFileErrorMsg = string.Empty;
+        //if(e.File.Size > 2097152)
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoProfilePic = "File size is more then 2MB";
+            employeeProfilePhoto = null;
+        }
+        else
+        {
+            employeeProfilePhoto = e.File;
+        }
+    }
+    string SizeLimitInfoAadhar = string.Empty;
+    string SizeLimitInfoPan = string.Empty;
+    string SizeLimitInfoPassbook = string.Empty;
+    string SizeLimitInfoCertificate = string.Empty;
+    string SizeLimitInfoProfilePic = string.Empty;
+
+    private string BaseUri = string.Empty;
+    string AdharView = string.Empty;
+    string PanView = string.Empty;
+    string BankPassView = string.Empty;
+    string CertificateView = string.Empty;
+    string ProfilePicView = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        BaseUri = NavigationManager.BaseUri;
+        TaskCompleted = false;
+        try
+        {
+            SkillOptions = new List<EmployeeSkills>(await client.GetAllSkill());
+            var responce = await client.EmployeeGetSelfDetail(Key);
+            if (responce.IsSuccess)
+            {
+                model = responce.Result;
+                TaskCompleted = true;
+            }
+            else
+            {
+                show = true;
+                Message = "Error!";
+                MessageBody = responce.Message;
+                TaskCompleted = true;
+            }
+            var skillOption = await client.GetEmployeeSkillsIDs(model.Id);
+            SelectedSkill.AddRange(skillOption.Select(tc => tc.EmployeeSkillId));
+            employeeFiles = await GetEmployeeFiles(model.Id);
+            if (employeeFiles != null)
+            {
+                if (employeeFiles.AadhaarFile != "")
+                    AdharView = $"{BaseUri}EmployeesZone/{employeeFiles.AadhaarFile}";
+                if (employeeFiles.PanFile != "")
+                    PanView = $"{BaseUri}EmployeesZone/{employeeFiles.PanFile}";
+                if (employeeFiles.BankPassbookFile != "")
+                    BankPassView = $"{BaseUri}EmployeesZone/{employeeFiles.BankPassbookFile}";
+                if (employeeFiles.CertificateFile != "")
+                    CertificateView = $"{BaseUri}EmployeesZone/{employeeFiles.CertificateFile}";
+                if (employeeFiles.ProfilePhotoFile != "")
+                    ProfilePicView = $"{BaseUri}EmployeesZone/{employeeFiles.ProfilePhotoFile}";
+            }
+        }
+        catch (Exception ex)
+        {
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+
+    }
+    public async Task<EmployeeFilesMapping> GetEmployeeFiles(int id)
+    {
+        return await client.GetEmployeeFilesById(id);
+    }
+    protected async Task OnValidSubmit()
+    {
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        TaskCompleted = false;
+        bool FileError = false;
+
+        AdharFileErrorMsg = string.Empty;
+        PanFileErrorMsg = string.Empty;
+        BankPassFileErrorMsg = string.Empty;
+        CertificateFileErrorMsg = string.Empty;
+        ProfilePicFileErrorMsg = string.Empty;
+
+
+        if (aadhaarFile == null && AdharView == "") { AdharFileErrorMsg = "File is required!"; FileError = true; }
+        if (panCardFile == null && PanView == "") { PanFileErrorMsg = "File is required!"; FileError = true; }
+        if (bankPassbookFile == null && BankPassView == "") { BankPassFileErrorMsg = "File is required!"; FileError = true; }
+        if (certificateFiles == null && CertificateView == "") { CertificateFileErrorMsg = "File is required!"; FileError = true; }
+        if (employeeProfilePhoto == null && ProfilePicView == "") { ProfilePicFileErrorMsg = "File is required!"; FileError = true; }
+        if (FileError == true)
+            return;
+
+        show = true;
+        try
+        {
+            Message = "Please wait";
+            int Id = model.Id;
+            var response = await client.EmployeeDetailSeftUpdate(model);
+
+            if (response.IsSuccess)
+            {
+                if (EmployeeSkillIds.ContainsKey(model.Id))
+                {
+                    EmployeeSkillIds[model.Id] = SelectedSkill.Select(id => id).ToList();
+                }
+                else
+                {
+                    EmployeeSkillIds.Add(model.Id, SelectedSkill.Select(id => id).ToList());
+                }
+
+                var result = await client.UpsertEmployeeSkillsIDsMap(EmployeeSkillIds);
+                EmployeeFilesMapping employeeFilesMapping = new EmployeeFilesMapping();
+
+                string[] propertyNames = { "Aadhaar", "Pan", "BankPassbook", "Certificate", "ProfilePhoto" };
+
+                foreach (string propertyName in propertyNames)
+                {
+                    IBrowserFile file = null;
+                    switch (propertyName)
+                    {
+                        case "Aadhaar":
+                            file = aadhaarFile;
+                            break;
+                        case "Pan":
+                            file = panCardFile;
+                            break;
+                        case "BankPassbook":
+                            file = bankPassbookFile;
+                            break;
+                        case "Certificate":
+                            file = certificateFiles;
+                            break;
+                        case "ProfilePhoto":
+                            file = employeeProfilePhoto;
+                            break;
+                    }
+
+                    if (file != null)
+                    {
+                        var uploadedFile = await FileUpload(file, propertyName);
+                        // employeeFilesMapping.GetType().GetProperty(propertyName + "File")?.SetValue(employeeFilesMapping, uploadedFile);
+
+
+                        var propertyInfo = typeof(EmployeeFilesMapping).GetProperty(propertyName + "File");
+                        if (propertyInfo != null)
+                        {
+                            propertyInfo.SetValue(employeeFilesMapping, uploadedFile);
+                        }
+                    }
+                }
+
+                employeeFilesMapping.EmployeeId = model.Id;
+
+                var UploadResponse = await client.UpsertEmployeeFiles(employeeFilesMapping);
+
+                Message = Id > 0 ? "Successfully Updated" : "Successfully Added";
+                TaskCompleted = true;
+            }
+            else
+            {
+                Message = "Error!";
+                MessageBody = response.Message;
+                TaskCompleted = true;
+            }
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogCritical(ex, ex.Message);
+            IsError = true;
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+    }
+
+    private void CopyAddress(ChangeEventArgs args)
+    {
+        if (!model.checkbox)
+        {
+            model.CurrentAddress = model.PermanentAddress;
+            model.CState = model.PState;
+            model.CCountry = model.PCountry;
+            model.CPin = model.PPin;
+        }
+        else
+        {
+            model.CurrentAddress = string.Empty;
+            model.CState = string.Empty;
+            model.CCountry = string.Empty;
+            model.CPin = string.Empty;
+        }
+    }
+    private void ResetForm()
+    {
+        show = false;
+        if (Message.Contains("Successfully Added"))
+        {
+            // Init();
+        }
+    }
+    public void OnClose()
+    {
+        NavigationManager.NavigateTo("/employees");
+    }
+    public async void ClosePopUp()
+    {
+        show = false;
+        AddSkill = false;
+        ShowPreview = false;
+        //SkillOptions = new List<EmployeeSkills>(await client.GetAllSkill());
+        StateHasChanged();
+    }
+
+    //protected override bool ShouldRender() => shouldRender;
+
+    private async Task<string> FileUpload(IBrowserFile file, string type)
+    {
+        //shouldRender = false;
+        long maxFileSize = 1024 * 2048;
+        var upload = false;
+        files.Clear();
+        using var content = new MultipartFormDataContent();
+
+        string newFileName = $"{model.EmployeeName} - {model.EmployeeId} - {type} - {file.Name}";
+
+        if (uploadResults.SingleOrDefault(
+            f => f.FileName == file.Name) is null)
+        {
+            try
+            {
+                files.Add(new() { Name = file.Name });
+
+                var fileContent =
+                    new StreamContent(file.OpenReadStream(maxFileSize));
+
+                fileContent.Headers.ContentType =
+                    new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+
+                content.Add(
+                    content: fileContent,
+                    name: "\"files\"",
+                    fileName: newFileName);
+
+                upload = true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogInformation(
+                    "{FileName} not uploaded (Err: 6): {Message}",
+                    file.Name, ex.Message);
+
+                uploadResults.Add(
+                    new()
+                        {
+                            FileName = file.Name,
+                            ErrorCode = 6,
+                            Uploaded = false
+                        });
+            }
+        }
+
+        string FilePath = string.Empty;
+        if (upload)
+        {
+            try
+            {
+
+                var response = await httpClient.PostAsync("/Filesave", content);
+
+                var newUploadResults = await response.Content
+                    .ReadFromJsonAsync<IList<UploadResult>>();
+
+                if (newUploadResults is not null)
+                {
+                    uploadResults = uploadResults.Concat(newUploadResults).ToList();
+                    foreach (var r in uploadResults)
+                    {
+                        FilePath = r.FileName;
+                        if (FilePath.Contains("Aadhaar"))
+                            aadhaarFile = null;
+                        else if (FilePath.Contains("Pan"))
+                            panCardFile = null;
+                        else if (FilePath.Contains("BankPassbook"))
+                            bankPassbookFile = null;
+                        else if (FilePath.Contains("certificate"))
+                            certificateFiles = null;
+                        else if (FilePath.Contains("ProfilePhoto"))
+                            employeeProfilePhoto = null;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //throw;
+            }
+        }
+
+        //shouldRender = true;
+        return FilePath;
+    }
+
+    private static bool FileUpload(IList<UploadResult> uploadResults,
+        string? fileName, ILogger<EmployeeDataConfig> logger, out UploadResult result)
+    {
+        result = uploadResults.SingleOrDefault(f => f.FileName == fileName) ?? new();
+
+        if (!result.Uploaded)
+        {
+            logger.LogInformation("{FileName} not uploaded (Err: 5)", fileName);
+            result.ErrorCode = 5;
+        }
+
+        return result.Uploaded;
+    }
+
+    private class File
+    {
+        public string? Name { get; set; }
+    }
+
+    public async void ClosePreview()
+    {
+        show = false;
+        AddSkill = false;
+        ShowPreview = false;
+        StateHasChanged();
+    }
+}

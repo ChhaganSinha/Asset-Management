@@ -1,0 +1,116 @@
+﻿@page "/unallocation/{Id:int}"
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@inject AppClient client
+@inject ILogger<AllocationConfig> logger
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<div>
+    <div class="card">
+        <div class="card-header bg-secondary text-center">
+            @Title
+        </div>
+        <div class="card-body">
+            @if (model == null)
+            {
+                <div class="loader-container mt-4">
+                    <div class="loader"></div>
+                </div>
+
+            }
+            else
+            {
+                <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="form-group mb-2">
+                        <label class="col-form-label col-md-2 bold-font required-field">Company Code</label>
+                        <div class="col-md-10">
+                            <InputSelect id="CompanyCode" @bind-Value="model.CompanyCode" class="form-control" disabled>
+                                <option>- Select -</option>
+                                @foreach (var c in company)
+                                {
+                                    <option value="@c.CompanyCode">@c.CompanyCode (@c.Name)</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <label class="col-form-label col-md-2 bold-font required-field">Asset</label>
+                        <div class="col-md-4">
+                            <InputSelect id="AssetId" @bind-Value="model.AssetId" class="form-control" disabled>
+                                <option>- Select -</option>
+                                @foreach (var a in asset.Where(o => o.AssetType == model.AssetType && o.CompanyCode == model.CompanyCode))
+                                {
+                                    <option value="@a.Id">@a.Brand (@a.Model)</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <label class="col-form-label col-md-2 bold-font required-field">Employee</label>
+                        <div class="col-md-10">
+                            <InputSelect id="EmployeeName" @bind-Value="model.EmployeeId" class="form-control" disabled>
+                                <option>- Select -</option>
+                                @if (model.CompanyCode != "")
+                                {
+                                    @foreach (var e in employee.Where(o => o.CompanyCode == model.CompanyCode))
+                                    {
+                                        <option value="@e.Id">@e.EmployeeName (@e.CompanyCode)</option>
+                                    }
+                                }
+                            </InputSelect>
+                        </div>
+                    </div>
+                    <div style="text-align:center;" class="mt-4">
+                        <button type="submit" class="btn btn-success col-md-2">Submit</button>
+                        @*<button type="button" class="btn btn-danger col-md-2" @onclick="OnClose">Close</button>*@
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private bool show = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+    string Title = "UnAllocate";
+
+    Allocation model = new();
+    List<Company> company = new();
+    List<AssetType> assetType = new();
+    List<Asset> asset = new();
+    List<Employee> employee = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        model = await client.GetAllocationById(Id);
+        company = new List<Company>(await client.GetAllCompany());
+        assetType = new List<AssetType>(await client.GetAllAssetType());
+        employee = new List<Employee>(await client.GetAllEmployee());
+    }
+    protected async Task OnValidSubmit()
+    {
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        show = true;
+        TaskCompleted = false;
+        try
+        {
+            Message = "Please wait";
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+}

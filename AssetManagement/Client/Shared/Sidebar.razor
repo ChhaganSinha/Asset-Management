@@ -1,0 +1,331 @@
+﻿@inject IJSRuntime JSRuntime
+@using AssetManagement.Client.Services
+@inject IdentityAuthenticationStateProvider authStateProvider
+@inject NavigationManager Navigation
+@inject PermissionService PermissionService
+
+<div class="sidebar @GetContentClass() borderd" id="sidebar" style="scrollbar-width: thin;">
+    <div class="sidebar-content">
+        <div class="app-info borderd" style="display: flex; align-items: center;">
+            <img src="/assets/img/logo.png" width="34" height="34" alt="Logo" />
+
+            <div style="margin-left: 8px; display: flex; flex-direction: column; justify-content: center; line-height: 1.1;">
+                <span style="font-family: sans-serif; font-size: 16px; font-weight: 900; color: #b8860b;">
+                    Asset Management
+                </span>
+                <i style="font-size: 12px; color: #666;">powered by credent</i>
+            </div>
+
+            @if (dimensions?.Width <= 768)
+            {
+                <i class="fa fa-times-circle-o mobile-only text-danger" style="margin-left: auto;" @onclick="ToggleSidebar"></i>
+            }
+        </div>
+
+        @if (isLoading)
+        {
+            <div style="margin-top: 50%;place-items: anchor-center;">
+                <div class="loader-menu"></div>
+            </div>
+        }
+        else
+        {
+            <div>
+
+                @if (canViewDashboard)
+                {
+                    <a href="/" title="Home/Dashboard"><i class="fa fa-bar-chart" style="color:orange;"></i> <span>Dashboard</span></a>
+                }
+                @if (canViewCompanies || canViewAddCompany)
+                {
+                    <a class="borderd has-submenu @(_company ? "active" : "")" @onclick="()=>_company =!_company"><i class="fa fa-building" style="color:dodgerblue;"></i> <span>Companies</span> <i class="fa fa-chevron-right arrow"></i></a>
+                    <ul class="submenu">
+                        @if (canViewCompanies)
+                        {
+                            <li><a href="companies">Companies</a></li>
+                        }
+                        @if (canViewAddCompany)
+                        {
+                            <li><a href="company-config">Add Company</a></li>
+                        }
+                    </ul>
+                }
+                @if (canViewEmployees || canViewAddEmployee || canViewOnboardings)
+                {
+                    <a class="borderd has-submenu @(_employee ? "active" : "")" @onclick="()=>_employee =!_employee"><i class="fa fa-users" style="color:#40e0d0;"></i> <span>Employees</span> <i class="fa fa-chevron-right arrow"></i></a>
+                    <ul class="submenu">
+                        @if (canViewEmployees)
+                        {
+                            <li><a href="employees">Employees</a></li>
+                        }
+                        @if (canViewAddEmployee)
+                        {
+                            <li><a href="employee-config">Add Employee</a></li>
+                        }
+                        @if (canViewOnboardings)
+                        {
+                            <li><a href="newOnboarding">Onbardings</a></li>
+                        }
+                    </ul>
+                }
+
+                @if (canViewAssets || canViewAddAsset || canViewAssetTransfer)
+                {
+                    <a class="borderd has-submenu @(_assetStore ? "active" : "")" @onclick="()=>_assetStore =!_assetStore"><i class="fa fa-laptop" style="color:silver;"></i> <span>Asset Store</span> <i class="fa fa-chevron-right arrow"></i></a>
+                    <ul class="submenu">
+                        @if (canViewAssets)
+                        {
+                            <li><a href="assets">Assets</a></li>
+                        }
+                        @if (canViewAddAsset)
+                        {
+                            <li><a href="asset-config">Add Asset</a></li>
+                        }
+                        @if (canViewAssetTransfer)
+                        {
+                            <li><a href="AssetTransfer">Asset Transfer</a></li>
+                        }
+                    </ul>
+                }
+                @if (canViewAllocations || canViewNewAlloction)
+                {
+                    <a class="borderd has-submenu @(_allocationCenter ? "active" : "")" @onclick="()=>_allocationCenter =!_allocationCenter"><i class="fa fa-pencil-square-o" style="color:cornflowerblue;"></i> <span>Allocation Center</span> <i class="fa fa-chevron-right arrow"></i></a>
+                    <ul class="submenu">
+                        @if (canViewAllocations)
+                        {
+                            <li><a href="allocations">Allocations</a></li>
+                        }
+                        @if (canViewNewAlloction)
+                        {
+                            <li><a href="allocation-config">New Allocation</a></li>
+                        }
+                    </ul>
+                }
+                @if (canViewReport)
+                {
+                    <a href="reports" title="Reports">
+                        <i class="fa fa-file-text" style="color:goldenrod;"></i> <span>Report</span>
+                    </a>
+                }
+
+                @if (canViewSettings)
+                {
+                    <a href="settings" title="Reports">
+                        <i class="fa fa-cog" style="color:#007bff;"></i> <span>Settings</span>
+                    </a>
+                }
+
+                @if (canViewAddUsers || canViewUserManagement || canViewPagePermission || IsSuperAdmin)
+                {
+                    <a class="borderd has-submenu @(_users ? "active" : "")" @onclick="() => _users = !_users"><i class="fa fa-universal-access" style="color:cornflowerblue"></i> <span>Users Management</span> <i class="fa fa-chevron-right arrow"></i></a>
+                    <ul class="submenu">
+                        @if (canViewAddUsers || IsSuperAdmin)
+                        {
+                            <li><a href="add-app-user">Add Users</a></li>
+                        }
+                        @if (canViewUserManagement || IsSuperAdmin)
+                        {
+                            <li><a href="user-management">User Management</a></li>
+                        }
+                        @if (canViewPagePermission || IsSuperAdmin)
+                        {
+                            <li><a href="role-management">Access Control</a></li>
+                        }
+                    </ul>
+                }
+
+            </div>
+        }
+    </div>
+    <div class="logout borderd" title="Logout">
+        <a @onclick="BeginSignOut"><i class="fa fa-sign-out text-danger"></i> <span class="">Logout</span></a>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public bool IsSidebarCollapsed { get; set; }
+
+    bool _company = false;
+    bool _employee = false;
+    bool _assetStore = false;
+    bool _allocationCenter = false;
+    bool _settings = false;
+    bool _users = false;
+
+    public BrowserDimension dimensions;
+    private BrowserService BS;
+
+    private bool canViewDashboard = false;
+    private bool canViewCompanies = false;
+    private bool canViewAddCompany = false;
+    private bool canViewEmployees = false;
+    private bool canViewEmployeetransfer = false;
+    private bool canViewAddEmployee = false;
+    private bool canViewOnboardings = false;
+    private bool canViewAssets = false;
+    private bool canViewAddAsset = false;
+    private bool canViewAssetTransfer = false;
+    private bool canViewAllocations = false;
+    private bool canViewNewAlloction = false;
+    private bool canViewReport = false;
+    private bool canViewSettings = false;
+    private bool canViewPermissions = false;
+
+    private bool canViewAddUsers = false;
+    private bool canViewUserManagement = false;
+    private bool canViewPagePermission = false;
+    bool IsSuperAdmin = false;
+    private bool isLoading = true; // Track loading state
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        BS = new BrowserService(JSRuntime);
+        dimensions = await BS.GetDimensions();
+        await BS.RegisterResizeListener();
+        BS.DimensionsChanged += UpdateDimensions;
+        //var role = await authStateProvider.GetUserInfo();
+
+        var roles = authStateProvider.GetUserInfo().Result.Roles[0];
+
+        IsSuperAdmin = (roles.Contains("SuperAdmin") || roles.Contains("Admin"));
+
+        // Check permissions for each section
+        var dashboardPermissions = await PermissionService.HasPermission("Dashboard");
+        if (dashboardPermissions != null)
+        {
+            canViewDashboard = dashboardPermissions.CanView;
+        }
+
+        var AllCompanyPermissions = await PermissionService.HasPermission("All Company");
+        if (AllCompanyPermissions != null)
+        {
+            canViewCompanies = AllCompanyPermissions.CanView;
+        }
+
+        var AddCompanyPermissions = await PermissionService.HasPermission("Add Company");
+        if (AddCompanyPermissions != null)
+        {
+            canViewAddCompany = AddCompanyPermissions.CanView;
+        }
+
+        var AllEmployeePermissions = await PermissionService.HasPermission("All Employees");
+        if (AllEmployeePermissions != null)
+        {
+            canViewEmployees = AllEmployeePermissions.CanView;
+        }
+
+        var AddEmployeePermissions = await PermissionService.HasPermission("Add Employee");
+        if (AddEmployeePermissions != null)
+        {
+            canViewAddEmployee = AddEmployeePermissions.CanView;
+        }
+
+        var OnboardingPermissions = await PermissionService.HasPermission("Employee Onboardings");
+        if (OnboardingPermissions != null)
+        {
+            canViewOnboardings = OnboardingPermissions.CanView;
+        }
+
+        var EmployeeTransferPermissions = await PermissionService.HasPermission("Employee Transfer");
+        if (EmployeeTransferPermissions != null)
+        {
+            canViewEmployeetransfer = EmployeeTransferPermissions.CanView;
+        }
+
+        var AllAssetPermissions = await PermissionService.HasPermission("All Assets");
+        if (AllAssetPermissions != null)
+        {
+            canViewAssets = AllAssetPermissions.CanView;
+        }
+
+        var AddAssetPermissions = await PermissionService.HasPermission("Add Asset");
+        if (AddAssetPermissions != null)
+        {
+            canViewAddAsset = AddAssetPermissions.CanView;
+        }
+
+        var AssetTransferPermissions = await PermissionService.HasPermission("Asset Transfer");
+        if (AssetTransferPermissions != null)
+        {
+            canViewAssetTransfer = AssetTransferPermissions.CanView;
+        }
+
+
+        var ReportPermissions = await PermissionService.HasPermission("Reports");
+        if (ReportPermissions != null)
+        {
+            canViewReport = ReportPermissions.CanView;
+        }
+
+        var SettingsPermissions = await PermissionService.HasPermission("App Settings");
+        if (SettingsPermissions != null)
+        {
+            canViewSettings = SettingsPermissions.CanView;
+        }
+
+        var AllAllocationPermissions = await PermissionService.HasPermission("All Allocations");
+        if (AllAllocationPermissions != null)
+        {
+            canViewAllocations = AllAllocationPermissions.CanView;
+        }
+
+        var NewAllocationPermissions = await PermissionService.HasPermission("New Allocation");
+        if (NewAllocationPermissions != null)
+        {
+            canViewNewAlloction = NewAllocationPermissions.CanView;
+        }
+
+        var AddUsersPermissions = await PermissionService.HasPermission("User Registrations");
+        if (AddUsersPermissions != null)
+        {
+            canViewAddUsers = AddUsersPermissions.CanView;
+        }
+
+        var UserManagementPermissions = await PermissionService.HasPermission("User Management");
+        if (UserManagementPermissions != null)
+        {
+            canViewUserManagement = UserManagementPermissions.CanView;
+        }
+
+        var AccessControlPermissions = await PermissionService.HasPermission("Page Permissions");
+        if (AccessControlPermissions != null)
+        {
+            canViewPagePermission = AccessControlPermissions.CanView;
+        }
+        // Set loading to false after permissions are loaded
+        isLoading = false;
+    }
+
+    private string GetContentClass()
+    {
+        if (dimensions?.Width <= 768)
+            return IsSidebarCollapsed ? "active" : "";
+        return IsSidebarCollapsed ? "collapsed" : "";
+    }
+
+    private void UpdateDimensions(BrowserDimension newDimensions)
+    {
+        dimensions = newDimensions;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from the event when the component is disposed
+        BS.DimensionsChanged -= UpdateDimensions;
+    }
+
+    public void ToggleSidebar()
+    {
+        IsSidebarCollapsed = !IsSidebarCollapsed;
+    }
+
+    private async Task BeginSignOut()
+    {
+        await authStateProvider.Logout();
+        Navigation.NavigateTo("/");
+    }
+
+}

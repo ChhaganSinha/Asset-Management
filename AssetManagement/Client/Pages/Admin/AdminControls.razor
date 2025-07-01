@@ -1,0 +1,277 @@
+﻿@page "/user-management"
+@using AssetManagement.Client.Services.Contracts
+@using AssetManagement.Dto.Auth
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Pages.Admin
+@using AssetManagement.Dto.RBAC
+@inject IdentityAuthenticationStateProvider authStateProvider
+@inject PermissionService PermissionService
+@inject NavigationManager navigationManager
+@inject IAuthorizeApi authorizeApi
+@inject IRoleService RoleService
+@attribute [Authorize(Roles = "SuperAdmin,Admin")]
+
+
+<!-- Breadcrumb Section -->
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item">Settings</li>
+        <li class="breadcrumb-item active" aria-current="page">User Management</li>
+    </ol>
+</nav>
+
+@if (users == null)
+{
+    <div style="margin-top:40vh">
+        <div class="loading-bar"></div>
+    </div>
+}
+else if (users.Count == 0)
+{
+    <p>No users found.</p>
+}
+else
+{
+    <div class="bt-wizard">
+        <ul class="nav nav-pills">
+            <li class="nav-item"><a @onclick="()=>SwitchTab(1)" style="cursor:pointer" class="nav-link rounded-0 @(Tab == 1 ? "active" : "")" data-toggle="tab">Roles</a></li>
+            <li class="nav-item"><a @onclick="()=>SwitchTab(2)" style="cursor:pointer" class="nav-link rounded-0 @(Tab == 2 ? "active" : "")" data-toggle="tab">Users</a></li>
+            <li class="nav-item"><a @onclick="()=>SwitchTab(3)" style="cursor:pointer" class="nav-link rounded-0 @(Tab == 3 ? "active" : "")" data-toggle="tab">Manage Password</a></li>
+        </ul>
+        <div class="tab-content card borderd">
+            <div class="pt-1 bg-primary"></div>
+            @if (Tab == 1)
+            {
+
+                <!-- Table to Show Available Roles -->
+                <div class="card borderd mt-4">
+                    <div class="card-header">
+                        <form @onsubmit="CreateRole">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-auto">
+                                    <input type="text" @bind="newRoleName" class="form-control" placeholder="Enter role name" required />
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary" style="padding: 6px !important;">Create Role</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-body">
+                        @if (Roles == null || Roles.Count == 0)
+                        {
+                            <p>No roles available.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th style="width:10px;">SN</th>
+                                        <th>Role Name</th>
+                                        <th style="width:10px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        SN = 1;
+                                    } <!-- Reset SN before the loop -->
+                                    @foreach (var role in Roles)
+                                    {
+                                        <tr>
+                                            <td>@SN</td>
+                                            <td>@role.Name</td>
+                                            <td>
+                                                <button class="btn btn-danger btn-sm" @onclick="() => DeleteRole(role.Name)">Delete</button>
+                                            </td>
+                                        </tr>
+                                        SN++;
+                                        <!-- Increment SN correctly -->
+                                    }
+                                </tbody>
+
+                            </table>
+                        }
+                    </div>
+                </div>
+            }
+
+
+            @if (Tab == 2)
+            {
+                <UiAlert Model="alert"></UiAlert>
+                <div class="tab-pane card-body pt-4 active show p-2">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered nowrap">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Current Role</th>
+                                    <th style="min-width: 115px;">Update Role</th>
+                                    <th>IsActive</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in users)
+                                {
+                                    <tr>
+                                        <td>@user.UserName</td>
+                                        <td>@user.Email</td>
+                                        <td>@user.Role</td>
+                                        <td>
+                                            <select @bind="user.Role" class="form-control">
+                                                @foreach (var role in Roles)
+                                                {
+                                                    <option value="@role.Name">@role.Name</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <InputCheckbox disabled="@(user.Role == "Admin")" @bind-Value="user.IsActive" />
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary"  @onclick="() => UpdateUserRole(user)">
+                                                Update
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            @if (Tab == 3)
+            {
+                <div class="tab-pane card-body pt-4 active show p-2">
+                    <div class="container">
+                        <div class="row justify-content-md-center">
+                            <div class="col-sm-6">
+                                <div class="card">
+                                    <i class="text-warning bg-secondary" style="text-align:center">You can change the password of any user from here</i>
+                                    <ChangeUserPasswordByAdmin />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <Dailog Title="@Message" Show="@show" OnCloseDialog="ResetForm">
+        @if (show)
+        {
+            @if (TaskCompleted)
+            {
+                <div style="text-align:center;">
+                    @MessageBody
+                </div>
+            }
+            else
+            {
+                <div style="text-align:center">
+                    <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                </div>
+            }
+        }
+    </Dailog>
+}
+
+@code {
+    [CascadingParameter]
+    protected AlertModel? alert { get; set; }
+    private List<UserViewModel> users;
+    private List<RoleViewModel> Roles;
+    string Title = "Admin Control Panel";
+    private bool show = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    bool TaskCompleted = false;
+    int Tab = 1;
+    int SN = 0;
+    bool process = false;
+    private Timer _timer;
+    private int _delay = 2500;
+
+    // Permission flags
+    private static bool canView = false;
+    private static bool canEdit = false;
+    private static bool hasFullAccess = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            alert ??= new();
+            alert?.Clear();
+            users = await authorizeApi.GetUsers();
+            Roles = await authStateProvider.GetRoles();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error loading data: " + ex.Message);
+            // Handle error loading initial data
+        }
+    }
+
+    private async Task UpdateUserRole(UserViewModel user)
+    {
+        try
+        {
+            alert?.Clear();
+
+            Message = "Please wait";
+            alert?.SetSuccess(Message);
+            await authorizeApi.UpdateUserRole(user);
+            Message = "Successfully Updated";
+            alert?.SetSuccess(Message);
+            TaskCompleted = true;
+            // Refresh user list after update
+            users = await authorizeApi.GetUsers();
+            _timer = new Timer(TimerCallback, null, _delay, Timeout.Infinite);
+        }
+        catch (Exception ex)
+        {
+            Message = "Error: " + ex.Message;
+            TaskCompleted = true;
+        }
+    }
+
+    private void SwitchTab(int tabNumber)
+    {
+        Tab = tabNumber;
+    }
+
+    private async void ResetForm()
+    {
+        show = false;
+        users = await authorizeApi.GetUsers();
+        StateHasChanged();
+    }
+    private void TimerCallback(Object o)
+    {
+        alert?.Clear();
+        _timer.Dispose();
+        StateHasChanged();
+    }
+
+    private string newRoleName;
+    private async Task CreateRole()
+    {
+        await RoleService.CreateRole(newRoleName);
+        Roles = await RoleService.GetRoles();
+
+        newRoleName = string.Empty;
+    }
+
+    private async Task DeleteRole(string roleName)
+    {
+        await RoleService.DeleteRole(roleName);
+        Roles = await authStateProvider.GetRoles();
+    }
+}

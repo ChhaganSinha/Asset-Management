@@ -1,0 +1,74 @@
+﻿@using AssetManagement.Client.Pages.GridButton;
+@using AssetManagement.Dto.Models;
+@using GridBlazor
+@using GridBlazor.Pages
+@using GridShared
+@using GridShared.Utility
+@using Microsoft.Extensions.Primitives
+@using AssetManagement.Dto
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
+@if (_task.IsCompleted)
+{
+    <div class="row">
+        <div class="col-sm-12">
+            <GridComponent T="AllocationLog" Grid="@_grid"></GridComponent>
+        </div>
+    </div>
+}
+else
+{
+    <div class="loader-container mt-4">
+        <div class="loader"></div>
+    </div>
+}
+
+@code
+{
+    private CGrid<AllocationLog> _grid;
+    private Task _task;
+
+    Action<IGridColumnCollection<AllocationLog>> columns = c =>
+    {
+        c.Add(o => o.Id).SetWidth("50px").Css("table-bordered").Titled("SN.");
+        c.Add(o => o.CompanyCode).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.AssetType).Css("table-bordered");
+        c.Add(o => o.AssetBrand).Css("table-bordered").Titled("Brand");
+        c.Add(o => o.AssetModel).Css("table-bordered").Titled("Model");
+        c.Add(o => o.EmployeeName).Css("table-bordered").Titled("Employee");
+        c.Add(o => o.EmployeeEmail).Css("table-bordered").Titled("Email");
+        c.Add(o => o.EmployeeCompanyCode).Css("table-bordered").Titled("EmployeeCompany");
+        c.Add(o => o.AllocationType).Css("table-bordered");
+        c.Add(o => o.IssueDate).Format("{0:dd/MM/yyyy}").Css("table-bordered");
+        c.Add(o => o.AllocationStatus).Css("table-bordered").Titled("CurrentStatus");
+        c.Add(o => o.IssueTill).Format("{0:dd/MM/yyyy}").Css("table-bordered");
+        c.Add(o => o.ReturnDate).Format("{0:dd/MM/yyyy}").Css("table-bordered");
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        string url = $"odata/Report";
+        var query = new QueryDictionary<StringValues>();
+        query.Add("grid-sorting", "Id__1__1");
+
+        var client = new GridODataClient<AllocationLog>(HttpClient, url, query, false, "reportsGrid", columns, 5)
+            .Sortable(true)
+            .Filterable(true)
+            .ClearFiltersButton(true)
+            .SetStriped(true)
+            .WithMultipleFilters()
+            .WithGridItemsCount()
+            .SetExcelExport(true,true, "Reports")
+            .ChangePageSize(true)
+            .EmptyText("No data available")
+            .SetKeyboard(true)
+            .Searchable(true, false, false);
+
+        _grid = client.Grid;
+        _task = client.UpdateGrid();
+        await _task;
+    }
+
+
+}

@@ -1,0 +1,1143 @@
+﻿@page "/EmployeeOnBoarding/{param}/{key}"
+@page "/EmployeeOnBoarding/{key}"
+
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.AppPages.Employees.Component
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@using AssetManagement.Dto;
+@using System.Text.Json;
+@using Microsoft.AspNetCore.Authorization
+@using Newtonsoft.Json;
+@inject AppClient client
+@inject HttpClient _httpClient
+@inject ILogger<EmployeeOnBoardingLanding> logger
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@attribute [AllowAnonymous]
+@*@attribute [Authorize]*@
+@inject ILocalStorageService _localstorage;
+
+
+<div class="card" style="width:100%">
+
+    <div class="card-header bg-secondary text-center">
+        Onboarding Details
+    </div>
+    <div class="card-body">
+        @if (model == null && !TaskCompleted)
+        {
+            <div class="loader-container mt-4">
+                <div class="loader"></div>
+            </div>
+
+        }
+        else if (model == null && TaskCompleted)
+        {
+            <p class="alert-info"> You have already submitted. For any further assistance, please contact your administrator.</p>
+        }
+        else
+        {
+            @if(Onload)
+            {
+                <div style="text-align:center">
+                    <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                </div>
+            }
+            else
+            {
+               
+                <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <MudExpansionPanels MultiExpansion="true">
+                    <MudExpansionPanel Text=" Personal Details" IsExpanded="true">
+                        @if (param != null)
+                        {
+                            <div class="form-group row mb-2">
+                                <label class="col-form-label col-md-2 bold-font required-field">CompanyCode</label>
+                                <div class="col-md-4">
+                                    <InputSelect id="CompanyCode" @bind-Value="model.CompanyCode" class="form-control">
+                                        <option selected>- Select -</option>
+                                        @foreach (var c in company.ToList())
+                                        {
+                                            <option value="@c.CompanyCode">@c.CompanyCode</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="() => model.CompanyCode" />
+
+                                </div>
+
+                                  
+                                </div>
+                        }
+
+                        
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-2 bold-font required-field">Name</label>
+                            <div class="col-md-4">
+                                <InputText id="name" @bind-Value="model.Name" class="form-control" />
+                                <ValidationMessage For="() => model.Name" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font required-field">Father Name</label>
+                            <div class="col-md-4">
+                                <InputText id="fatherName" @bind-Value="model.fatherName" class="form-control" />
+                                <ValidationMessage For="() => model.fatherName" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-2 bold-font required-field">Email</label>
+                            <div class="col-md-4">
+                                <InputText id="ExternalEmailId" @bind-Value="model.ExternalEmailId" class="form-control" />
+                                <ValidationMessage For="() => model.ExternalEmailId" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font required-field">Mobile No.</label>
+                            <div class="col-md-4">
+                                <InputText id="MobileNumber" @bind-Value="model.MobileNumber" class="form-control" />
+                                <ValidationMessage For="() => model.MobileNumber" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-2 bold-font required-field">Emergency No.</label>
+                            <div class="col-md-4">
+                                <InputText id="EmergencyContactNumber" @bind-Value="model.EmergencyContactNumber" class="form-control" />
+                                <ValidationMessage For="() => model.EmergencyContactNumber" />
+                            </div>
+                            <label class="col-form-label col-md-2 bold-font required-field">Date Of Birth</label>
+                            <div class="col-md-4">
+                                <InputDate id="DateOfBirth" @bind-Value="model.DateOfBirth" class="form-control" />
+                                <ValidationMessage For="() => model.DateOfBirth" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-2 bold-font required-field">PAN No.</label>
+                            <div class="col-md-4">
+                                <InputText id="PANNumber" @bind-Value="model.PANNumber" class="form-control" />
+                                <ValidationMessage For="() => model.PANNumber" />
+                            </div>
+                            <label class="col-form-label col-md-2 bold-font">UAN No.</label>
+                            <div class="col-md-4">
+                                <InputText id="UANNo" @bind-Value="model.UANNo" class="form-control" />
+                                <ValidationMessage For="() => model.UANNo" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-2 bold-font required-field">Qualification</label>
+                            <div class="col-md-4">
+                                <InputSelect id="EmployeeGraduation" @bind-Value="model.EmployeeGraduation" class="form-control">
+                                    <option>- Select -</option>
+                                    <option value="Graduate">Graduate</option>
+                                    <option value="Postgraduate">Postgraduate</option>
+                                    <option value="Undergraduate">Undergraduate</option>
+                                </InputSelect>
+                                <ValidationMessage For="() => model.EmployeeGraduation" />
+                            </div>
+                            <label class="col-form-label col-md-2 bold-font required-field">AadhaarNumber</label>
+                            <div class="col-md-4">
+                                <InputText id="AadhaarNumber" @bind-Value="model.AadhaarNumber" class="form-control" />
+                                <ValidationMessage For="() => model.AadhaarNumber" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-2 bold-font required-field">Educations</label>
+                            <div class="col-md-4">
+                                <InputTextArea id="EmployeeEducationDetails" @bind-Value="model.EmployeeEducationDetails" class="form-control" />
+                                <ValidationMessage For="() => model.EmployeeEducationDetails" />
+                            </div>
+
+
+                            <label class="col-form-label col-md-2 bold-font">Skills</label>
+                            <div class="col-md-4">
+                                <HxMultiSelect TItem="EmployeeSkills"
+                                               AutoSort="false"
+                                               TValue="int"
+                                               Data="@SkillOptions"
+                                               @bind-Value="@SelectedSkill"
+                                               TextSelector="@(p => p.Skill)"
+                                               ValueSelector="@(p => p.Id)"
+                                               EmptyText="- select -"
+                                               NullDataText="Loading..." />
+                            </div>
+
+                        </div>
+                        @if (param != null)
+                        {
+                            <div class="form-group row mb-2">
+                                <label class="col-form-label col-md-2 bold-font">Reporting To</label>
+                                <div class="col-md-4">
+                                    <MudGrid>
+                                        <MudItem xs="12" sm="12" md="12">
+                                            <MudAutocomplete Label="Select" T="Employee" @bind-Value="selectedManager" SearchFunc="@ManagerSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                             ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} ({e.EmailId})")"
+                                                             Required="false"
+                                                             ResetValueOnEmptyText="true"
+                                                             CoerceText="true"
+                                                             CoerceValue="true"
+                                                             MaxItems="null">
+
+                                            </MudAutocomplete>
+                                        </MudItem>
+                                    </MudGrid>
+                                    @if (selectedManager != null) { model.ReportingTo = selectedManager.EmployeeId; }
+                                    <ValidationMessage For="() => model.ReportingTo" />
+                                </div>
+
+                                <label class="col-form-label col-md-2 bold-font">Designation</label>
+                                <div class="col-md-3">
+                                    <MudGrid>
+                                        <MudItem xs="12" sm="12" md="12">
+                                            <MudAutocomplete Label="Select" T="DesignationDTO" @bind-Value="selectedDesigantion" SearchFunc="@DesignationSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                             ToStringFunc="@(e => e == null ? null : $"{e.Designation}")"
+                                                             Required="false"
+                                                             ResetValueOnEmptyText="true"
+                                                             CoerceText="true"
+                                                             CoerceValue="true"
+                                                             MaxItems="null">
+
+                                            </MudAutocomplete>
+                                        </MudItem>
+                                    </MudGrid>
+                                    @if (selectedDesigantion != null) { model.Designation = selectedDesigantion.Designation; }
+                                    <ValidationMessage For="() => model.Designation" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group row mb-2">
+                                <label class="col-form-label col-md-2 bold-font required-field">ReportingTo</label>
+                                <div class="col-md-4">
+                                    <span style="min-height: 34px;" class="form-control">@model.ReportingTo</span>
+                                </div>
+                                <label class="col-form-label col-md-2 bold-font">Designation</label>
+                                <div class="col-md-4">
+                                    <span style="min-height: 34px;" class="form-control">@model.Designation</span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-2 bold-font">Other Skill's</label>
+                            <div class="col-md-10">
+                                <InputTextArea id="OtherSkills" @bind-Value="model.OtherSkills" class="form-control" />
+                                <ValidationMessage For="() => model.OtherSkills" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-2 bold-font">Upload Profile Pic</label>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <InputFile id="ProfilePicfile" OnChange="@LoademployeeProfilePhoto" class="form-control" accept="image/jpeg, image/jpg, image/png" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" style="height:100%">
+                                            @if (employeeProfilePhoto == null && ProfilePicView == string.Empty)
+                                            {
+                                                <i class="fa fa-exclamation-circle" aria-hidden="true" title="No file to preview"></i>
+                                            }
+                                            else if ((model.Id > 0) && ProfilePicView != string.Empty)
+                                            {
+
+
+                                                if (IsImageFile(filePath))
+                                                {
+                                                    <a @onclick="()=>{ShowPreview = true; filePath = Uri.EscapeUriString(ProfilePicView);}"><i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i></a>
+                                                }
+                                                else
+                                                {
+
+                                                    <a href="@Uri.EscapeUriString(ProfilePicView)" target="_blank" rel="noopener noreferrer"> <i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i> </a>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-check text-success" title="Selected"></i>
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="text-primary"> Max allowed file size 2Mb</p>
+                                <p class="text-danger" style="margin-top:-18px;"> @SizeLimitInfoProfilePic</p>
+                                <span style="color:red">@ProfilePicFileErrorMsg</span>
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font">Upload Certificate</label>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <InputFile id="panfile" OnChange="@LoadCertificateFiles" class="form-control" accept=".pdf, image/jpeg, image/jpg, image/png" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" style="height:100%">
+                                            @if (certificateFiles == null && CertificateView == string.Empty)
+                                            {
+                                                <i class="fa fa-exclamation-circle" aria-hidden="true" title="No file to preview"></i>
+                                            }
+                                            else if ((model.Id > 0) && CertificateView != string.Empty)
+                                            {
+                                                if (IsImageFile(filePath))
+                                                {
+                                                    <a @onclick="()=>{ShowPreview = true; filePath = Uri.EscapeUriString(CertificateView);}"><i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i></a>
+                                                }
+                                                else
+                                                {
+
+                                                    <a href="@Uri.EscapeUriString(CertificateView)" target="_blank" rel="noopener noreferrer"> <i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i> </a>
+                                                }
+
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-check text-success" title="Selected"></i>
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="text-primary"> Max allowed file size 2Mb</p>
+                                <p class="text-danger" style="margin-top:-18px;"> @SizeLimitInfoCertificate</p>
+                                <span style="color:red">@CertificateFileErrorMsg</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-2 bold-font">Upload Aadhaar</label>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <InputFile id="aadharfile" OnChange="@LoadAadhaarFiles" class="form-control" accept=".pdf, image/jpeg, image/jpg, image/png" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" style="height:100%">
+                                            @if (aadhaarFile == null && AdharView == string.Empty)
+                                            {
+                                                <i class="fa fa-exclamation-circle" aria-hidden="true" title="No file to preview"></i>
+                                            }
+                                            else if ((model.Id > 0) && AdharView != string.Empty)
+                                            {
+                                                if (IsImageFile(filePath))
+                                                {
+                                                    <a @onclick="()=>{ShowPreview = true; filePath = Uri.EscapeUriString(AdharView);}"><i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i></a>
+                                                }
+                                                else
+                                                {
+
+                                                    <a href="@Uri.EscapeUriString(AdharView)" target="_blank" rel="noopener noreferrer"> <i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i> </a>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-check text-success" title="Selected"></i>
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="text-primary">Max allowed file size 2Mb</p>
+                                <p class="text-danger" style="margin-top: -18px;">@SizeLimitInfoAadhar</p>
+                                <span style="color:red">@AdharFileErrorMsg</span>
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font">Upload PAN Card</label>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <InputFile id="panfile" OnChange="@LoadPanFiles" class="form-control" accept=".pdf, image/jpeg, image/jpg, image/png" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" style="height:100%">
+                                            @if (panCardFile == null && PanView == string.Empty)
+                                            {
+                                                <i class="fa fa-exclamation-circle" aria-hidden="true" title="No file to preview"></i>
+                                            }
+                                            else if ((model.Id > 0) && PanView != string.Empty)
+                                            {
+                                                if (IsImageFile(filePath))
+                                                {
+                                                    <a @onclick="()=>{ShowPreview = true; filePath = Uri.EscapeUriString(PanView);}"><i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i></a>
+                                                }
+                                                else
+                                                {
+
+                                                    <a href="@Uri.EscapeUriString(PanView)" target="_blank" rel="noopener noreferrer"> <i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i> </a>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-check text-success" title="Selected"></i>
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="text-primary">Max allowed file size 2Mb</p>
+                                <p class="text-danger" style="margin-top: -18px;">@SizeLimitInfoPan</p>
+                                <span style="color:red">@PanFileErrorMsg</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-2 bold-font">Upload Resume</label>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <InputFile id="resumefile" OnChange="@LoadEmployeeResume" class="form-control" accept=".pdf, image/jpeg, image/jpg, image/png" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" style="height:100%">
+                                            @if (employeeResume == null && ResumeView == string.Empty)
+                                            {
+                                                <i class="fa fa-exclamation-circle" aria-hidden="true" title="No file to preview"></i>
+                                            }
+                                            else if ((model.Id > 0) && ResumeView != string.Empty)
+                                            {
+                                                if (IsImageFile(filePath))
+                                                {
+                                                    <a @onclick="()=>{ShowPreview = true; filePath = Uri.EscapeUriString(ResumeView);}"><i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i></a>
+                                                }
+                                                else
+                                                {
+
+                                                    <a href="@Uri.EscapeUriString(ResumeView)" target="_blank" rel="noopener noreferrer"> <i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i> </a>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-check text-success" title="Selected"></i>
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="text-primary">Max allowed file size 2Mb</p>
+                                <p class="text-danger" style="margin-top: -18px;">@SizeLimitInfoResume</p>
+                                <span style="color:red">@ResumeFileErrorMsg</span>
+                            </div>
+                        </div>
+
+
+                    </MudExpansionPanel>
+                    <MudExpansionPanel Text=" Permanent Address Details" MaxHeight="500">
+                        <div class="form-group row">
+                            <label class="col-form-label col-md-2 bold-font required-field">Address</label>
+                            <div class="col-md-10 mb-2">
+                                <InputText id="PermanentAddress" @bind-Value="model.PermanentAddress" class="form-control" />
+                                <ValidationMessage For="() => model.PermanentAddress" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font required-field">State</label>
+                            <div class="col-md-2">
+                                <InputText id="PState" @bind-Value="model.PState" class="form-control" />
+                                <ValidationMessage For="() => model.PState" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font required-field">Country</label>
+                            <div class="col-md-2">
+                                <InputText id="PCountry" @bind-Value="model.PCountry" class="form-control" />
+                                <ValidationMessage For="() => model.PCountry" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font required-field">PIN Code</label>
+                            <div class="col-md-2">
+                                <InputText id="PPin" @bind-Value="model.PPin" class="form-control" />
+                                <ValidationMessage For="() => model.PPin" />
+                            </div>
+                        </div>
+                    </MudExpansionPanel>
+                    <MudExpansionPanel Text="Current Address Details" MaxHeight="500">
+                        <div class="form-group row mb-2">
+                            <label class="col-form-label col-md-5 bold-font">Check if Current Address is same As Permanent Address</label>
+                            <div class="col-md-1">
+                                <input class="form-check-input mt-3" type="checkbox" @bind="@model.checkbox" @oninput="CopyAddress">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-md-2 bold-font ">Address</label>
+                            <div class="col-md-10 mb-2">
+                                <InputText id="CurrentAddress" @bind-Value="model.CurrentAddress" class="form-control" />
+                                <ValidationMessage For="() => model.CurrentAddress" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font ">State</label>
+                            <div class="col-md-2">
+                                <InputText id="CState" @bind-Value="model.CState" class="form-control" />
+                                <ValidationMessage For="() => model.CState" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font ">Country</label>
+                            <div class="col-md-2">
+                                <InputText id="CCountry" @bind-Value="model.CCountry" class="form-control" />
+                                <ValidationMessage For="() => model.CCountry" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font ">PIN Code</label>
+                            <div class="col-md-2">
+                                <InputText id="PPin" @bind-Value="model.CPin" class="form-control" />
+                                <ValidationMessage For="() => model.CPin" />
+                            </div>
+                        </div>
+                    </MudExpansionPanel>
+                    <MudExpansionPanel Text="Bank Details" MaxHeight="500">
+                        <div class="form-group row">
+                            <label class="col-form-label col-md-2 bold-font required-field">Bank Name</label>
+                            <div class="col-md-10 mb-2">
+                                <InputText id="EmpBankName" @bind-Value="model.EmpBankName" class="form-control" />
+                                <ValidationMessage For="() => model.EmpBankName" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font">Account Name</label>
+                            <div class="col-md-2">
+                                <InputText id="PPin" @bind-Value="model.EmpAccountName" class="form-control" />
+                                <ValidationMessage For="() => model.EmpAccountName" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font required-field">Account Number</label>
+                            <div class="col-md-2">
+                                <InputText id="EmpBankAccNumber" @bind-Value="model.EmpBankAccNumber" class="form-control" />
+                                <ValidationMessage For="() => model.EmpBankAccNumber" />
+                            </div>
+
+                            <label class="col-form-label col-md-2 bold-font required-field">IFSC Code</label>
+                            <div class="col-md-2">
+                                <InputText id="EmpBankIfsc" @bind-Value="model.EmpBankIfsc" class="form-control" />
+                                <ValidationMessage For="() => model.EmpBankIfsc" />
+                            </div>
+                        </div>
+                        <div class="form-group row mb-2 mt-2">
+                            <label class="col-form-label col-md-2 bold-font">Upload BankPassbook</label>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <InputFile id="aadharfile" OnChange="@LoadBankFiles" class="form-control" accept=".pdf, image/jpeg, image/jpg, image/png" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" style="height:100%">
+                                            @if (bankPassbookFile == null && BankPassView == string.Empty)
+                                            {
+                                                <i class="fa fa-exclamation-circle" aria-hidden="true" title="No file to preview"></i>
+                                            }
+                                            else if ((model.Id > 0) && BankPassView != string.Empty)
+                                            {
+
+                                                if (IsImageFile(filePath))
+                                                {
+                                                    <a @onclick="()=>{ShowPreview = true; filePath = Uri.EscapeUriString(BankPassView);}"><i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i></a>
+                                                }
+                                                else
+                                                {
+
+                                                    <a href="@Uri.EscapeUriString(BankPassView)" target="_blank" rel="noopener noreferrer"> <i class="fa fa-file text-warning" style="cursor: pointer" aria-hidden="true" title="View"></i> </a>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-check text-success" title="Selected"></i>
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="text-primary"> Max allowed file size 2Mb</p>
+                                <p class="text-danger" style="margin-top:-18px;"> @SizeLimitInfoPassbook</p>
+                                <span style="color:red">@BankPassFileErrorMsg</span>
+                            </div>
+                        </div>
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+
+
+                <div style="text-align:center;" class="mt-4 btn-group flex-wrap">
+                    <button type="submit" class="btn btn-success mr-1 mb-1">Submit</button>
+                    <button type="button" class="btn btn-danger mr-1 mb-1" @onclick="OnClose">Close</button>
+                    <button type="button" class="btn btn-info mr-1 mb-1" @onclick="OnDraft">Save</button>
+                    <button type="button" class="btn btn-secondary mr-1 mb-1" @onclick="OnClearCookie">Clear Cookie</button>
+                </div>
+            </EditForm>
+            }
+        }
+        <Dailog Title="@Message" Show="@show" OnCloseDialog="ResetForm">
+            @if (show)
+            {
+                @if (TaskCompleted)
+                {
+                    <div style="text-align:center;">
+                        @MessageBody
+                    </div>
+                }
+                else
+                {
+                    <div style="text-align:center">
+                        <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                    </div>
+                }
+            }
+        </Dailog>
+        <FilePreviewDailog Title="Preview" Show="ShowPreview" ClosePreview="ClosePreview">
+            <iframe src="@filePath" style="height:400px; width:100%"></iframe>
+        </FilePreviewDailog>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string key { get; set; }
+    [Parameter]
+    public string param { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+
+    private bool show = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+    bool validate = true;
+
+    List<EmployeeSkills> SkillOptions = new();
+    private List<int> SelectedSkill { get; set; } = new();
+
+    EmployeeOnboardingDto model = new();
+    List<Company> company = new();
+
+    private List<File> files = new();
+    long FileSizeLimit = 1024 * 2048;
+    private List<UploadResult> uploadResults = new();
+    private int maxAllowedFiles = 3;
+    public bool ShowPreview = false;
+    public bool Onload = false;
+    string filePath = string.Empty;
+
+    private string BaseUri = string.Empty;
+    string AdharView = string.Empty;
+    string PanView = string.Empty;
+    string BankPassView = string.Empty;
+    string CertificateView = string.Empty;
+    string ProfilePicView = string.Empty;
+    string ResumeView = string.Empty;
+
+    string AdharFileErrorMsg = string.Empty;
+    string PanFileErrorMsg = string.Empty;
+    string BankPassFileErrorMsg = string.Empty;
+    string CertificateFileErrorMsg = string.Empty;
+    string ProfilePicFileErrorMsg = string.Empty;
+    string ResumeFileErrorMsg = string.Empty;
+
+    private IBrowserFile? aadhaarFile;
+    private IBrowserFile? panCardFile;
+    private IBrowserFile? bankPassbookFile;
+    private IBrowserFile? certificateFiles;
+    private IBrowserFile? employeeProfilePhoto;
+    private IBrowserFile? employeeResume;
+
+    string SizeLimitInfoAadhar = string.Empty;
+    string SizeLimitInfoPan = string.Empty;
+    string SizeLimitInfoPassbook = string.Empty;
+    string SizeLimitInfoCertificate = string.Empty;
+    string SizeLimitInfoProfilePic = string.Empty;
+    string SizeLimitInfoResume = string.Empty;
+
+    private DesignationDTO? selectedDesigantion { get; set; }
+    private Employee? selectedManager { get; set; }
+    List<DesignationDTO> designation = new();
+    List<Employee> employee = new();
+
+    private async Task<IEnumerable<DesignationDTO>> DesignationSearch(string value)
+    {
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return designation;
+        return designation
+        .Where(x => x.Designation.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task<IEnumerable<Employee>> ManagerSearch(string value)
+    {
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return employee;
+        return employee
+        .Where(x => x.EmployeeName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task LoadAadhaarFiles(InputFileChangeEventArgs e)
+    {
+        SizeLimitInfoAadhar = string.Empty;
+        AdharFileErrorMsg = string.Empty;
+        //if(e.File.Size > 2097152)
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoAadhar = "File size is more then 2MB";
+            aadhaarFile = null;
+        }
+        else
+        {
+            aadhaarFile = e.File;
+        }
+    }
+    private async Task LoadPanFiles(InputFileChangeEventArgs e)
+    {
+        panCardFile = e.File;
+        PanFileErrorMsg = string.Empty;
+        SizeLimitInfoPan = string.Empty;
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoPan = "File size is more then 2MB";
+            panCardFile = null;
+        }
+        else
+        {
+            panCardFile = e.File;
+        }
+    }
+    private async Task LoadBankFiles(InputFileChangeEventArgs e)
+    {
+        SizeLimitInfoPassbook = string.Empty;
+        BankPassFileErrorMsg = string.Empty;
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoPassbook = "File size is more then 2MB";
+            bankPassbookFile = null;
+        }
+        else
+        {
+            bankPassbookFile = e.File;
+        }
+    }
+    private async Task LoadCertificateFiles(InputFileChangeEventArgs e)
+    {
+        SizeLimitInfoCertificate = string.Empty;
+        CertificateFileErrorMsg = string.Empty;
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoCertificate = "File size is more then 2MB";
+            certificateFiles = null;
+        }
+        else
+        {
+            certificateFiles = e.File;
+        }
+    }
+    private async Task LoademployeeProfilePhoto(InputFileChangeEventArgs e)
+    {
+        SizeLimitInfoProfilePic = string.Empty;
+        ProfilePicView = string.Empty;
+        //if(e.File.Size > 2097152)
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoProfilePic = "File size is more then 2MB";
+            employeeProfilePhoto = null;
+        }
+        else
+        {
+            employeeProfilePhoto = e.File;
+        }
+    }
+
+    private async Task LoadEmployeeResume(InputFileChangeEventArgs e)
+    {
+        SizeLimitInfoResume = string.Empty;
+        ResumeView = string.Empty;
+        //if(e.File.Size > 2097152)
+        if (e.File.Size > FileSizeLimit)
+        {
+            SizeLimitInfoResume = "File size is more then 2MB";
+            employeeResume = null;
+        }
+        else
+        {
+            employeeResume = e.File;
+        }
+    }
+
+    public string Title
+    {
+        get
+        {
+            return model?.Id > 0 ? "Modify Data" : "Add Data";
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Onload = true;
+        if (param != null)
+        {
+            validate = false;
+            company = new List<Company>(await client.GetAllCompany());
+            employee = new List<Employee>(await client.GetAllEmployee());
+            designation = new List<DesignationDTO>(await client.GetAllDesignations());
+            selectedManager = employee.FirstOrDefault(x => x.EmployeeId == model.ReportingTo);
+            selectedDesigantion = designation.FirstOrDefault(x=>x.Designation == model.Designation);
+        }
+
+
+        var responce = param == null ? await client.GetOnboardingDataByKey(key) : await client.GetOnboardingDataById(key);
+        SkillOptions = new List<EmployeeSkills>(await client.GetAllSkill());
+
+        if (responce.IsSuccess)
+        {
+            model = responce.Result;
+            TaskCompleted = true;
+
+            if (model.SkillIDs != "")
+                SelectedSkill = new List<int>(Array.ConvertAll(model.SkillIDs.Split(','), int.Parse));
+
+            var localStorageData = await _localstorage.GetItemAsStringAsync("model");
+            if (localStorageData != null)
+            {
+                model = JsonConvert.DeserializeObject<EmployeeOnboardingDto>(localStorageData);
+            }
+
+            if (model.AadhaarFile != "")
+                AdharView = $"{BaseUri}EmployeesZone/{model.AadhaarFile}";
+            if (model.PanFile != "")
+                PanView = $"{BaseUri}EmployeesZone/{model.PanFile}";
+            if (model.BankPassbookFile != "")
+                BankPassView = $"{BaseUri}EmployeesZone/{model.BankPassbookFile}";
+            if (model.CertificateFile != "")
+                CertificateView = $"{BaseUri}EmployeesZone/{model.CertificateFile}";
+            if (model.ProfilePhotoFile != "")
+                ProfilePicView = $"{BaseUri}EmployeesZone/{model.ProfilePhotoFile}";
+            if (model.ResumeFile != "")
+                ResumeView = $"{BaseUri}EmployeesZone/{model.ResumeFile}";
+        }
+        else
+        {
+            show = true;
+            Message = "Error!";
+            MessageBody = responce.Message;
+            TaskCompleted = true;
+        }
+        Onload = false;
+    }
+    protected async Task OnValidSubmit()
+    {
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        TaskCompleted = false;
+        bool FileError = false;
+
+        AdharFileErrorMsg = string.Empty;
+        PanFileErrorMsg = string.Empty;
+        BankPassFileErrorMsg = string.Empty;
+        CertificateFileErrorMsg = string.Empty;
+        ProfilePicFileErrorMsg = string.Empty;
+
+        if (validate)
+        {
+            if (aadhaarFile == null) { AdharFileErrorMsg = "File is required!"; FileError = true; }
+            if (panCardFile == null) { PanFileErrorMsg = "File is required!"; FileError = true; }
+            if (bankPassbookFile == null) { BankPassFileErrorMsg = "File is required!"; FileError = true; }
+            if (certificateFiles == null) { CertificateFileErrorMsg = "File is required!"; FileError = true; }
+            if (employeeProfilePhoto == null) { ProfilePicFileErrorMsg = "File is required!"; FileError = true; }
+            if (employeeResume == null) { ResumeFileErrorMsg = "File is required!"; FileError = true; }
+            if (FileError == true)
+                return;
+        }
+
+        show = true;
+        try
+        {
+            Message = "Please wait";
+            int Id = model.Id;
+
+            string[] propertyNames = { "Aadhaar", "Pan", "BankPassbook", "Certificate", "ProfilePhoto","Resume" };
+
+            foreach (string propertyName in propertyNames)
+            {
+                IBrowserFile file = null;
+                switch (propertyName)
+                {
+                    case "Aadhaar":
+                        file = aadhaarFile;
+                        break;
+                    case "Pan":
+                        file = panCardFile;
+                        break;
+                    case "BankPassbook":
+                        file = bankPassbookFile;
+                        break;
+                    case "Certificate":
+                        file = certificateFiles;
+                        break;
+                    case "ProfilePhoto":
+                        file = employeeProfilePhoto;
+                        break;
+                    case "Resume":
+                        file = employeeResume;
+                        break;
+                }
+
+                if (file != null)
+                {
+                    var uploadedFile = await FileUpload(file, propertyName);
+
+                    var propertyInfo = typeof(EmployeeOnboardingDto).GetProperty(propertyName + "File");
+                    if (propertyInfo != null)
+                    {
+                        propertyInfo.SetValue(model, uploadedFile);
+                    }
+                }
+            }
+
+            model.SkillIDs = string.Join(",", SelectedSkill);
+
+            var response = await client.UpsertEmployeeOnboarding(model);
+            if (response.IsSuccess)
+            {
+                Message = Id > 0 ? "Successfully Updated" : "Successfully Added";
+                await _localstorage.RemoveItemAsync("model"); //clear saved local storage data of key model
+                TaskCompleted = true;
+            }
+            else
+            {
+                Message = "Error!";
+                MessageBody = response.Message;
+                TaskCompleted = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogCritical(ex, ex.Message);
+            IsError = true;
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+
+    }
+
+    private void CopyAddress(ChangeEventArgs args)
+    {
+        if (!model.checkbox)
+        {
+            model.CurrentAddress = model.PermanentAddress;
+            model.CState = model.PState;
+            model.CCountry = model.PCountry;
+            model.CPin = model.PPin;
+        }
+        else
+        {
+            model.CurrentAddress = string.Empty;
+            model.CState = string.Empty;
+            model.CCountry = string.Empty;
+            model.CPin = string.Empty;
+        }
+    }
+
+    public async void ClosePreview()
+    {
+        show = false;
+        ShowPreview = false;
+        StateHasChanged();
+    }
+
+    private async void ResetForm()
+    {
+        show = false;
+        if (Message.Contains("Successfully Added"))
+        {
+            await JSRuntime.InvokeVoidAsync("blazorCloseTab");
+        }
+
+    }
+    private async void OnClearCookie()
+    {
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        TaskCompleted = false;
+        Message = "Please wait";
+        try
+        {
+            show = true;
+            await _localstorage.RemoveItemAsync("model"); //clear saved local storage data of key model
+            if (param != null)
+            {
+                validate = false;
+                company = new List<Company>(await client.GetAllCompany());
+            }
+
+
+            var responce = param == null ? await client.GetOnboardingDataByKey(key) : await client.GetOnboardingDataById(key);
+            SkillOptions = new List<EmployeeSkills>(await client.GetAllSkill());
+
+            if (responce.IsSuccess)
+            {
+                model = responce.Result;
+                TaskCompleted = true;
+
+                if (model.SkillIDs != "")
+                    SelectedSkill = new List<int>(Array.ConvertAll(model.SkillIDs.Split(','), int.Parse));
+
+                if (model.AadhaarFile != "")
+                    AdharView = $"{BaseUri}EmployeesZone/{model.AadhaarFile}";
+                if (model.PanFile != "")
+                    PanView = $"{BaseUri}EmployeesZone/{model.PanFile}";
+                if (model.BankPassbookFile != "")
+                    BankPassView = $"{BaseUri}EmployeesZone/{model.BankPassbookFile}";
+                if (model.CertificateFile != "")
+                    CertificateView = $"{BaseUri}EmployeesZone/{model.CertificateFile}";
+                if (model.ProfilePhotoFile != "")
+                    ProfilePicView = $"{BaseUri}EmployeesZone/{model.ProfilePhotoFile}";
+                if (model.ResumeFile != "")
+                    ProfilePicView = $"{BaseUri}EmployeesZone/{model.ResumeFile}";
+            }
+            Message = "Data Cleared!";
+            TaskCompleted = true;
+
+        }
+        catch (Exception ex)
+        {
+            IsError = true;
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    public async void OnClose()
+    {
+        if (param != null)
+            NavigationManager.NavigateTo("/newOnboarding");
+        else
+            await JSRuntime.InvokeVoidAsync("blazorCloseTab");
+    }
+
+
+    private async Task<string> FileUpload(IBrowserFile file, string type)
+    {
+        //shouldRender = false;
+        long maxFileSize = 1024 * 2048; //2Mb
+        var upload = false;
+        files.Clear();
+        using var content = new MultipartFormDataContent();
+
+        string newFileName = $"{model.ExternalEmailId} - {model.Id} - {type} - {file.Name}";
+
+        if (uploadResults.SingleOrDefault(
+            f => f.FileName == file.Name) is null)
+        {
+            try
+            {
+                files.Add(new() { Name = file.Name });
+
+                var fileContent =
+                    new StreamContent(file.OpenReadStream(maxFileSize));
+
+                fileContent.Headers.ContentType =
+                    new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+
+                content.Add(
+                    content: fileContent,
+                    name: "\"files\"",
+                    fileName: newFileName);
+
+                upload = true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogInformation(
+                    "{FileName} not uploaded (Err: 6): {Message}",
+                    file.Name, ex.Message);
+
+                uploadResults.Add(
+                    new()
+                        {
+                            FileName = file.Name,
+                            ErrorCode = 6,
+                            Uploaded = false
+                        });
+            }
+        }
+
+        string FilePath = string.Empty;
+        if (upload)
+        {
+            try
+            {
+
+                var response = await _httpClient.PostAsync("/Filesave", content);
+
+                var newUploadResults = await response.Content
+                    .ReadFromJsonAsync<IList<UploadResult>>();
+
+                if (newUploadResults is not null)
+                {
+                    uploadResults = uploadResults.Concat(newUploadResults).ToList();
+                    foreach (var r in uploadResults)
+                    {
+                        FilePath = r.FileName;
+                        if (FilePath.Contains("Aadhaar"))
+                            aadhaarFile = null;
+                        else if (FilePath.Contains("Pan"))
+                            panCardFile = null;
+                        else if (FilePath.Contains("BankPassbook"))
+                            bankPassbookFile = null;
+                        else if (FilePath.Contains("certificate"))
+                            certificateFiles = null;
+                        else if (FilePath.Contains("ProfilePhoto"))
+                            employeeProfilePhoto = null;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //throw;
+            }
+        }
+
+        //shouldRender = true;
+        return FilePath;
+    }
+
+    private static bool FileUpload(IList<UploadResult> uploadResults,
+       string? fileName, ILogger<EmployeeOnBoardingLanding> logger, out UploadResult result)
+    {
+        result = uploadResults.SingleOrDefault(f => f.FileName == fileName) ?? new();
+
+        if (!result.Uploaded)
+        {
+            logger.LogInformation("{FileName} not uploaded (Err: 5)", fileName);
+            result.ErrorCode = 5;
+        }
+
+        return result.Uploaded;
+    }
+
+    private class File
+    {
+        public string? Name { get; set; }
+    }
+
+    public async void OnDraft()
+    {
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        TaskCompleted = false;
+        Message = "Please wait";
+        try
+        {
+            show = true;
+            model.SkillIDs = string.Join(",", SelectedSkill);
+            await _localstorage.SetItemAsync("model", model);
+            Message = "Data Saved Locally";
+            TaskCompleted = true;
+
+        }
+        catch (Exception ex)
+        {
+            IsError = true;
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+        StateHasChanged();
+    }
+
+    private bool IsImageFile(string filePath)
+    {
+        string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" }; // Add more extensions if needed
+
+        string extension = System.IO.Path.GetExtension(filePath);
+        return imageExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
+    }
+}

@@ -1,0 +1,82 @@
+﻿@page "/view-alloacation/{Id:int}"
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.AppPages.Assets.Component
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@inject AppClient client
+@inject IJSRuntime JSRuntime;
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<div>
+    <div class="card">
+        <div class="card-header bg-secondary text-center">
+            @Title
+        </div>
+        <div class="card-body">
+            @if (model == null)
+            {
+                <div class="loader-container mt-4">
+                    <div class="loader"></div>
+                </div>
+
+            }
+            else
+            {
+                <EditForm Model="@model">
+                    <br />
+                    <form class="row g-2">
+
+                        <div class="col-md-6">
+                            <label for="CompanyCode">Company Code : @model.CompanyCode </label>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="AssetType">Asset Type : @model.AssetType </label>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="Asset">Asset : @model.AssetId</label>
+                        </div> 
+                        <div class="col-md-6">
+                            <label for="status">Employee : @model.EmployeeId </label>
+                        </div>
+             
+                        <div class="col-md-6">
+                            <label for="IssueDate">Allocated On : @model.IssueDate</label>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="IssueTill">Allocation Till : @model.IssueTill </label>
+                        </div>
+                        <hr style="color:orange" />
+
+                        <div style="text-align:center;" class="mt-4">
+                            <button type="button" class="btn btn-danger col-md-2" @onclick="OnClose">Close</button>
+                            @*<button type="buton" class="btn btn-info col-md-2" @onclick="Print">Print</button>*@
+                        </div>
+                    </form>
+                </EditForm>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    Allocation model = new();
+    public string Title = "Allocations Details";
+
+    protected override async Task OnInitializedAsync()
+    {
+        model = await client.GetAllocationById(Id);
+    }
+    public void OnClose()
+    {
+        NavigationManager.NavigateTo("/allocations");
+    }
+    public void Print()
+    {
+
+    }
+}

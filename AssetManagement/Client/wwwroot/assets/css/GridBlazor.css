@@ -1,0 +1,259 @@
+
+/**/
+.required-field::after {
+    content: "*";
+    color: red;
+}
+
+.bold-font {
+    font-weight: bold;
+}
+.grid-change-page-size {
+    margin: 0;
+}
+
+.table-bordered > :not(caption) > * {
+    border-width: 0;
+}
+
+    .table-bordered > :not(caption) > * > * {
+        border-width: 0px 0px;
+    }
+
+
+table.striped > tbody > tr.grid-row:nth-of-type(odd) {
+    background-color: #dee2e6 !important;
+}
+
+.table td {
+    padding: 0.30rem 0.75rem !important;
+    vertical-align: middle !important;
+}
+
+.gridtitle {
+    background-color: lightskyblue !important;
+    font-size: 16px !important;
+    background: border-box;
+}
+
+table.grid-table .grid-header > .grid-header-group > .grid-header-title > button {
+    color: #0056b3 !important;
+    font-size: 16px !important;
+}
+
+.grid-header-title button {
+    text-decoration: none !important;
+    background-color: transparent !important;
+    font-size: large !important;
+    cursor: pointer;
+}
+
+table.grid-table .grid-header {
+    color: #00264e !important;
+}
+/*.table thead th {
+            border: 1px solid black !important;
+            background: aliceblue !important;
+        }*/
+.table-bordered td, .table-bordered th {
+    border: 1px solid #e2e5e8;
+}
+
+
+/**/
+
+.dialog {
+    width: 320px;
+    margin: auto;
+    position: relative;
+}
+
+.dialog-container {
+    width: 100%;
+    height: 100vh;
+    z-index: 999 !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0,0,0,0.5);
+    animation: dialog-container-entry 0.2s;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black color */
+    z-index: 90; /* Make sure the overlay is behind the popup */
+}
+
+/**/
+table.striped > tbody > tr.grid-row:nth-of-type(odd) {
+    background-color: #dee2e6 !important;
+}
+
+table.grid-table .grid-header > .grid-header-group > .grid-header-title > button {
+    color: #0056b3 !important;
+    font-size: 16px !important;
+}
+
+.grid-header-title button {
+    text-decoration: none !important;
+    background-color: transparent !important;
+    font-size: large !important;
+    cursor: pointer;
+}
+
+table.grid-table .grid-header {
+    color: #00264e !important;
+}
+
+.table thead th {
+    background: #bec7ea;
+    text-transform: initial;
+    font-size: 15px !important;
+}
+
+.table td, .table th {
+    border: 1px solid #969595;
+}
+
+/**/
+.fixed-div {
+    position: sticky;
+    bottom: 0;
+    background-color: white;
+    padding: 10px;
+    border-top: 1px solid lightgray;
+}
+/**/
+
+/*.mud-popover {
+    z-index: 1000;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%);
+}*/
+.mud-picker-datepicker-toolbar {
+    height: 50px !important;
+}
+
+.mud-button-label {
+    font-size: 16px !important;
+}
+/**/
+@media print {
+    .print-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+        .print-table td,
+        .print-table th {
+            word-break: break-all;
+        }
+}
+
+/*hx Deopdown span max height set*/
+.dropdown-menu[b-kjzuko47a2] {
+    height: 200px !important;
+    width: 100%;
+}
+
+
+/*full screen*/
+
+
+
+/**/
+
+.custom-loader {
+    width: 240px;
+    height: 40px;
+    -webkit-mask: radial-gradient(circle closest-side,#766DF4 94%,#0000) left/20% 100%;
+    background: linear-gradient(#766DF4 0 0) left/0% 100% no-repeat #E4E4ED;
+    animation: p7 2s infinite steps(6);
+}
+
+@keyframes p7 {
+    100% {
+        background-size: 120% 100%
+    }
+}
+
+/**/
+
+/* Default styles for the card */
+.card {
+    /* Add your default card styles here */
+    background-color: #fff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    /* Add other card styles as needed */
+}
+
+
+
+
+
+
+/*Popup Screen width*/
+@media only screen and (max-width: 400px) {
+    .mediaPopup {
+        width: 350px;
+    }
+}
+
+@media only screen and (min-width: 401px) {
+    .mediaPopup {
+        width: 35%;
+    }
+}
+
+
+/**/
+.grid-table {
+    font-size: 12px !important;
+}
+
+.table.grid-table .grid-header > .grid-header-group > .grid-header-title > button {
+    font-size: 13px !important;
+}
+
+
+/**/
+.input-icon {
+    position: relative;
+}
+
+    .input-icon input {
+        padding-left: 30px;
+    }
+
+    .input-icon i {
+        position: absolute;
+        left: 20px;
+        top: calc(50% - 0.5em);
+    }
+
+.active-tab {
+    background-color: #343a40 !important; /* Example: Dark background color */
+    color: white !important; /* Example: White text color */
+}
+
+/*.row {
+    --bs-gutter-y: 0;
+    display: flex;
+    flex-wrap: nowrap !important; 
+}
+
+.grid-change-page-size label, .grid-goto-page label {
+    margin: 0px 10px !important;
+}
+.grid-change-page-size {
+    width: 68px !important;
+}*/

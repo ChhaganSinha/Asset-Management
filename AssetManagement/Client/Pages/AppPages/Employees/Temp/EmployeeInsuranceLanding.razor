@@ -1,0 +1,274 @@
+﻿@page "/emp/insurance/{key}"
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.AppPages.Employees.Component
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@using System.Text.Json;
+@using AssetManagement.Dto;
+@using Microsoft.AspNetCore.Authorization
+@inject AppClient client
+@inject HttpClient httpClient
+@inject ILogger<EmployeeDataConfig> logger
+@inject IJSRuntime JSRuntime;
+@inject NavigationManager NavigationManager
+@layout NoLayout
+@attribute [AllowAnonymous]
+
+
+<div>
+    <div class="card">
+        <div class="card-header bg-secondary text-center">
+            @Title
+        </div>
+        <div class="card-body">
+            @if (model == null && !TaskCompleted)
+            {
+                <div class="loader-container mt-4">
+                    <div class="loader"></div>
+                </div>
+
+            }
+            else if (model == null && TaskCompleted)
+            {
+                <p>No data found!</p>
+            }
+            else
+            {
+                <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <MudExpansionPanels MultiExpansion="true">
+                        <MudExpansionPanel Text="Insurance Form" MaxHeight="500" Class="custom-header" IsExpanded="true">
+                            <div class="form-group row mb-2">
+                                <label class="col-form-label col-md-2 bold-font">Name</label>
+                                <div class="col-md-10">
+                                    <span class="form-control"> @model.EmployeeName</span>
+                                </div>
+
+                                <label class="col-form-label col-md-2 bold-font">EmployeeId</label>
+                                <div class="col-md-10">
+                                    <span  class="form-control"> @model.EmployeeId</span>
+                                </div>
+
+                                <label class="col-form-label col-md-2 bold-font">Email</label>
+                                <div class="col-md-10">
+                                    <span class="form-control"> @model.EmailId</span>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered" style="margin-bottom: 0.2rem !important;">
+                                    <thead style="text-align:center">
+                                        <tr>
+                                            <th style="width: 50px;">SN</th>
+                                            <th class="name-column">Name</th>
+                                            <th style="width: 100px;">Relation</th>
+                                            <th style="width: 100px;">DOB</th>
+                                            <th style="width: 150px;">Aadhaar</th>
+                                            <th style="width: 80px;">Age</th>
+                                            <th style="width: 60px;">
+                                                <a title="Add Row" style="cursor:pointer; color:darkblue" @onclick="AddEmployeeInsurance">
+                                                    <i class="fa fa-plus-circle fa-2x" aria-hidden="true"></i>
+                                                </a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var e in employeeInsurance.Select((value, index) => new { value, index }))
+                                        {
+                                            // Ensure DOB is set to today's date if it hasn't been set
+                                            if (e.value.DOB == default(DateTime))
+                                            {
+                                                e.value.DOB = DateTime.Today;
+                                            }
+                                            <tr>
+                                                <td>@(e.index + 1)</td>
+                                                <td><input type="text" class="form-control" @bind="@e.value.Name" /></td>
+                                                <td>
+                                                    <select class="form-control" @bind="@e.value.Relation">
+                                                        @foreach (var relation in Enum.GetValues(typeof(Relation)).Cast<Relation>())
+                                                        {
+                                                            <option value="@relation">@relation</option>
+                                                        }
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <InputDate class="form-control" @bind-Value="@e.value.DOB" />
+                                                    <div style="margin-left:3px;">@e.value.DOB.ToString("dd-MMM-yyyy")</div>
+                                                </td>
+                                                <td><input type="text" class="form-control" @bind="@e.value.Aadhaar" /></td>
+                                                <td>
+                                                    <input type="text" class="form-control" value="@(CalculateAge(e.value.DOB))" readonly />
+                                                </td>
+                                                <td style="text-align:center">
+                                                    <a title="Remove Row" style="cursor:pointer;" @onclick="() => RemoveEmployeeInsurance(e.value)">
+                                                        <i class="fa fa-trash fa-2x text-danger" aria-hidden="true"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </MudExpansionPanel>
+                    </MudExpansionPanels>
+
+                    <div style="text-align:center;" class="mt-4">
+                        <button type="submit" class="btn btn-success col-md-2">Submit</button>
+                    </div>
+                </EditForm>
+                <Dailog Title="@Message" Show="@show" OnCloseDialog="ResetForm">
+                    @if (show)
+                    {
+                        @if (TaskCompleted)
+                        {
+                            <div style="text-align:center;">
+                                @MessageBody
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="text-align:center">
+                                <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                            </div>
+                        }
+                    }
+                </Dailog>
+               
+            }
+        </div>
+    </div>
+
+
+</div>
+
+@code {
+    [Parameter]
+    public string Key { get; set; } = string.Empty;
+
+    public string Title = "Employee Insurance Form";
+
+    private string BaseUri = string.Empty;
+    public bool ShowPreview = false;
+    private bool show = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+    Employee model = new Employee();
+
+    protected override async Task OnInitializedAsync()
+    {
+        BaseUri = NavigationManager.BaseUri;
+        TaskCompleted = false;
+        try
+        {
+            var responce = await client.EmployeeInsuranceByKey(Key);
+            if (responce.IsSuccess)
+            {
+                model = responce.Result;
+                employeeInsurance = model.EmployeeInsurance;
+                TaskCompleted = true;
+            }
+            else
+            {
+                show = true;
+                Message = "Error!";
+                MessageBody = responce.Message;
+                TaskCompleted = true;
+            }
+            AddEmployeeInsurance();
+
+        }
+        catch (Exception ex)
+        {
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+
+    }
+
+    protected async Task OnValidSubmit()
+    {
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        TaskCompleted = false;
+        bool FileError = false;
+    
+        show = true;
+        try
+        {
+            Message = "Please wait";
+            model.EmployeeInsurance = employeeInsurance;
+            var response = await client.EmployeeDetailSeftUpdate(model);
+
+            if (response.IsSuccess)
+            {              
+                Message = "Successfully Submitted.";
+                TaskCompleted = true;
+            }
+            else
+            {
+                Message = "Error!";
+                MessageBody = response.Message;
+                TaskCompleted = true;
+            }
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogCritical(ex, ex.Message);
+            IsError = true;
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+    }
+
+    public List<EmployeeInsurance> employeeInsurance { get; set; } = new List<EmployeeInsurance>();
+    int SN = 0;
+    private void AddEmployeeInsurance()
+    {
+        employeeInsurance.Add(new EmployeeInsurance());
+    }
+
+    private void RemoveEmployeeInsurance(EmployeeInsurance e)
+    {
+        employeeInsurance.Remove(e);
+    }
+
+    private async void ResetForm()
+    {
+        show = false;
+        await JSRuntime.InvokeVoidAsync("blazorCloseTab");
+       
+    }
+
+    public async void ClosePopUp()
+    {
+        show = false;
+        ShowPreview = false;
+        StateHasChanged();
+    }
+
+    
+
+    public async void ClosePreview()
+    {
+        show = false;
+        ShowPreview = false;
+        StateHasChanged();
+    }
+
+    private int CalculateAge(DateTime dob)
+    {
+        var today = DateTime.Today;
+        var age = today.Year - dob.Year;
+        if (dob.Date > today.AddYears(-age)) age--;
+        return age;
+    }
+}

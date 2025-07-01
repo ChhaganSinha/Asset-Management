@@ -1,0 +1,86 @@
+﻿@using AssetManagement.Client.Pages.GridButton;
+@using AssetManagement.Dto.Models;
+@using GridBlazor
+@using GridBlazor.Pages
+@using GridShared
+@using GridShared.Utility
+@using Microsoft.Extensions.Primitives
+@using AssetManagement.Dto
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
+@if (_task.IsCompleted)
+{
+    <div class="row">
+        <div class="col-sm-12">
+            <GridComponent @ref="Component" T="Allocation" Grid="@_grid"></GridComponent>
+            @*<UnAllocationButton RefreshGrid="@RefreshGrid" />*@
+        </div>
+    </div>
+}
+else
+{
+    <div class="loader-container mt-4">
+        <div class="loader"></div>
+    </div>
+}
+
+@code
+{
+    private CGrid<Allocation> _grid;
+    private Task _task;
+    private static GridComponent<Allocation> Component;
+    static bool filter = true;
+
+    Action<IGridColumnCollection<Allocation>> columns = c =>
+    {
+        c.Add(o => o.Id).SetWidth("50px").Css("table-bordered").Titled("SN.").Filterable(filter);
+        c.Add(o => o.CompanyCode).SetWidth("50px").Css("table-bordered").Titled("Company").Filterable(filter);
+        c.Add(o => o.Employee.EmployeeName).SetWidth("50px").Css("table-bordered").Titled("Employee").Filterable(filter);
+        c.Add(o => o.Employee.CompanyCode).SetWidth("50px").Css("table-bordered").Titled("EmployeeCompany").Filterable(filter);
+        c.Add(o => o.AssetType).SetWidth("50px").Css("table-bordered").Titled("Type").Filterable(filter);
+       // c.Add(o => o.Asset.Model).SetWidth("50px").Css("table-bordered").Titled("Asset").Filterable(filter);
+        c.Add(o => o.AssetModel).Css("table-bordered").Titled("Asset").Filterable(filter);
+        c.Add(o => o.AllocationType).SetWidth("50px").Css("table-bordered").Titled("Allocation").Filterable(filter);
+        c.Add(o => o.IssueDate).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered").Filterable(filter);
+        c.Add(o => o.IssueTill).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered").Filterable(filter);
+        c.Add(o => o.Responce).SetWidth("50px").Css("table-bordered").Filterable(filter);
+       // c.Add().Encoded(false).Sanitized(false).RenderComponentAs<AllocationViewButton>().SetWidth("10px").Titled("View");
+        c.Add().Encoded(false).Sanitized(false).RenderComponentAs<AllocationEditButton>().SetWidth("10px");
+        c.Add().Encoded(false).Sanitized(false).RenderComponentAs<AllocationShareButtons>(new List<Action<object>> { RefreshGrids }).SetWidth("10px");
+        c.Add().Encoded(false).Sanitized(false).RenderComponentAs<AllocationResponceReadButton>().SetWidth("10px");
+        c.Add().Encoded(false).Sanitized(false).RenderComponentAs<UnAllocationButton>(new List<Action<object>> { RefreshGrids }).SetWidth("10px");
+     
+
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        string url = $"odata/Allocation";
+        var query = new QueryDictionary<StringValues>();
+        query.Add("grid-sorting", "Id__1__1");
+
+        var client = new GridODataClient<Allocation>(HttpClient, url, query, false, "AllocationGrid", columns, 5)
+            .Sortable(true)
+            .Filterable(true)
+            .ClearFiltersButton(true)
+            .SetStriped(true)
+            .WithMultipleFilters()
+            .WithGridItemsCount()
+            .SetExcelExport(true,true, "Allocations")
+            .ChangePageSize(true)
+            .EmptyText("No data available")
+            .SetKeyboard(true)
+            .Searchable(true, false, false);
+
+        _grid = client.Grid;
+        _task = client.UpdateGrid();
+        await _task;
+    }
+
+    private static async void RefreshGrids(object item)
+    {
+        await Component.UpdateGrid();
+    }
+
+}

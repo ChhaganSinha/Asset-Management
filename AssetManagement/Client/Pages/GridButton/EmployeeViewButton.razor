@@ -1,0 +1,23 @@
+﻿@using AssetManagement.Client.Pages.AppPages.Company;
+@using AssetManagement.Dto.Models;
+@using GridShared
+@using GridShared.Columns
+@using GridShared.Utility
+@using Microsoft.Extensions.Primitives
+@implements ICustomGridComponent<Employee>
+@inject NavigationManager NavigationManager
+
+<button class='btn btn-sm btn-primary' style="border-radius:15px" @onclick="MyClickHandler" title="View"><i class="fa fa-eye"></i></button>
+
+@code {
+    [Parameter]
+    public Employee Item { get; set; }
+
+    [Parameter]
+    public CGrid<Employee> Grid { get; set; }
+
+    private void MyClickHandler(MouseEventArgs e)
+    {
+        NavigationManager.NavigateTo($"/view-employee/{Item.Id}");
+    }
+}

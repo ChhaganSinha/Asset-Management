@@ -1,0 +1,142 @@
+﻿@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@using GridShared
+@using GridShared.Columns
+@using GridShared.Utility
+@using Microsoft.AspNetCore.Components.Web
+@implements ICustomGridComponent<Allocation>
+@inject NavigationManager NavigationManager
+
+<style>
+    .m-view-table {
+        width: 100%;
+        max-width: 950px;
+        margin: 0 auto;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+        font-size: 1rem;
+    }
+
+        .m-view-table th,
+        .m-view-table td {
+            padding: 0.45rem 0.75rem;
+            vertical-align: middle;
+        }
+
+        .m-view-table th {
+            background: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            text-align: right;
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        .m-view-table td {
+            background: #fff;
+            color: #222;
+            font-weight: 500;
+            border-bottom: 1px solid #f1f3f6;
+            text-align: left;
+            max-width: 320px;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            white-space: normal;
+        }
+
+        .m-view-table tr:nth-child(even) td {
+            background: #f8f9fa;
+        }
+
+        .m-view-table tr {
+            border-radius: 8px;
+        }
+</style>
+
+<button class="btn btn-sm btn-primary" style="border-radius:15px" @onclick="MyClickHandler" title="View">
+    <i class="fa fa-eye"></i>
+</button>
+
+<PageDialog Title="@Title" Show="@show" OnCloseDialog="OnClose">
+    @if (show)
+    {
+        <div class="container-fluid" style="max-width: 980px;">
+            <table class="m-view-table">
+                <tr>
+                    <th>Company Code</th>
+                    <td>@model.CompanyCode</td>
+                    <th>Allocation Type</th>
+                    <td>@model.AllocationType</td>
+                </tr>
+                <tr>
+                    <th>Asset Type</th>
+                    <td>@model.AssetType</td>
+                    <th>Asset</th>
+                    <td>@(string.IsNullOrEmpty(model.AssetModel) ? model.AssetId.ToString() : model.AssetModel)</td>
+                </tr>
+                <tr>
+                    <th>Employee</th>
+                    <td>@model.EmployeeName</td>
+                    <th>Emp ID</th>
+                    <td>@model.EmployeeId</td>
+                </tr>
+                <tr>
+                    <th>Allocated On</th>
+                    <td>@model.IssueDate.ToShortDateString()</td>
+                    <th>Allocated Till</th>
+                    <td>
+                        @(model.IssueTill.HasValue
+                                            ? model.IssueTill.Value.ToShortDateString()
+                                            : "-")
+                                              </td>
+                                          </tr>
+                                          <tr>
+                                              <th>Return Date</th>
+                                              <td>
+                        @(model.ReturnDate.HasValue
+                                            ? model.ReturnDate.Value.ToShortDateString()
+                                            : "-")
+                </td>
+                <th>Inter-Company</th>
+                <td>@(model.Checkbox ? "Yes" : "No")</td>
+            </tr>
+            <tr>
+                <th>Response</th>
+                <td colspan="3">@model.Responce</td>
+            </tr>
+        </table>
+
+            <div class="row justify-content-center mt-4">
+                <div class="col-auto">
+                    <button type="button" class="btn btn-danger px-5" @onclick="OnClose">
+                        <i class="fa fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+</PageDialog>
+
+@code {
+    [Parameter]
+    public Allocation Item { get; set; }
+
+    [Parameter]
+    public CGrid<Allocation> Grid { get; set; }
+
+    private Allocation model = new();
+    private string Title = "Allocation Details";
+    private bool show = false;
+
+    private void MyClickHandler(MouseEventArgs e)
+    {
+        model = Item;
+        show = true;
+    }
+
+    private void OnClose()
+    {
+        show = false;
+    }
+}

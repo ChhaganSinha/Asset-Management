@@ -1,0 +1,168 @@
+﻿@using AssetManagement.Client.Pages.AppPages.Company
+@using AssetManagement.Dto.Models
+@using GridShared
+@using GridShared.Columns
+@using GridShared.Utility
+@using Microsoft.Extensions.Primitives
+@implements ICustomGridComponent<Company>
+@inject NavigationManager NavigationManager
+
+<style>
+    .m-view-table {
+        width: 100%;
+        max-width: 950px;
+        margin: 0 auto;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+        font-size: 1rem;
+    }
+
+    .m-view-table th, .m-view-table td {
+        padding: 0.45rem 0.75rem;
+        vertical-align: middle;
+        /* Remove nowrap to allow wrapping */
+        /* white-space: nowrap; */
+    }
+
+    .m-view-table th {
+        background: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+        text-align: right;
+        width: 1%;
+        white-space: nowrap;
+    }
+
+    .m-view-table td {
+        background: #fff;
+        color: #222;
+        font-weight: 500;
+        border-bottom: 1px solid #f1f3f6;
+        text-align: left;
+        max-width: 320px;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        /* Allow wrapping for long text */
+        white-space: normal;
+    }
+
+    .m-view-table tr:nth-child(even) td {
+        background: #f8f9fa;
+    }
+
+    .m-view-table tr {
+        border-radius: 8px;
+    }
+</style>
+
+<button class='btn btn-sm btn-primary' style="border-radius:15px" @onclick="MyClickHandler" title="View"><i class="fa fa-eye"></i></button>
+
+<PageDialog Title="@Title" Show="@show" OnCloseDialog="OnClose">
+    @if (show)
+    {
+        <div class="container-fluid" style="max-width: 980px;">
+            <table class="m-view-table">
+                <tr>
+                    <th>Company Code</th>
+                    <td>@model.CompanyCode</td>
+                    <th>Company Name</th>
+                    <td>@model.Name</td>
+                </tr>
+                <tr>
+                    <th>GST Number</th>
+                    <td>@model.GSTNNumber</td>
+                    <th>Registration With</th>
+                    <td>@model.RegistrationWith</td>
+                </tr>
+                <tr>
+                    <th>Startup No.</th>
+                    <td>@(model.RegistrationWith == RegistrationWith.StartUp ? model.StartupNumber : "-")</td>
+                    <th>UAM No.</th>
+                    <td>@(model.RegistrationWith == RegistrationWith.MSME ? model.UAMNumber : "-")</td>
+                </tr>
+                <tr>
+                    <th>Incorporation No</th>
+                    <td>@model.IncorporationNumber</td>
+                    <th>Incorporation Date</th>
+                    <td>@model.IncorporationDate.ToShortDateString()</td>
+                </tr>
+                <tr>
+                    <th>TAN Number</th>
+                    <td>@model.TANNumber</td>
+                    <th>PAN Number</th>
+                    <td>@model.PanNumber</td>
+                </tr>
+                <tr>
+                    <th>ESI Number</th>
+                    <td>@model.ESINumber</td>
+                    <th>PF Number</th>
+                    <td>@model.PFNumber</td>
+                </tr>
+                <tr>
+                    <th>Contact Person</th>
+                    <td>@model.ContactPerson</td>
+                    <th>Contact Number</th>
+                    <td>@model.ContactNumber</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>@model.EmailId</td>
+                    <th>Address</th>
+                    <td>@model.Address</td>
+                </tr>
+                <tr>
+                    <th>State</th>
+                    <td>@model.State</td>
+                    <th>Country</th>
+                    <td>@model.Country</td>
+                </tr>
+                <tr>
+                    <th>PIN Code</th>
+                    <td>@model.PIN</td>
+                    <th>Bank Name</th>
+                    <td>@model.BankName</td>
+                </tr>
+                <tr>
+                    <th>IFSC Code</th>
+                    <td>@model.IFSC</td>
+                    <th>Swift Code</th>
+                    <td>@model.SwiftCode</td>
+                </tr>
+                <tr>
+                    <th>Account Number</th>
+                    <td colspan="3">@model.AccNumber</td>
+                </tr>
+            </table>
+            <div class="row justify-content-center mt-4">
+                <div class="col-auto">
+                    <button type="button" class="btn btn-danger px-5" @onclick="OnClose">
+                        <i class="fa fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</PageDialog>
+
+@code {
+    [Parameter]
+    public Company Item { get; set; }
+
+    [Parameter]
+    public CGrid<Company> Grid { get; set; }
+    Company model = new();
+
+    string Title = "Company Details";
+    bool show = false;
+
+    private async Task MyClickHandler(MouseEventArgs e)
+    {
+        show = true;
+        model = Item;
+    }
+    private void OnClose()
+    {
+        show = false;
+    }
+}

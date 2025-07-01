@@ -1,0 +1,137 @@
+﻿@page "/configuration"
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.AppPages.Employees.Component
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@using System.Text.Json;
+@using AssetManagement.Dto;
+@using Microsoft.AspNetCore.Authorization
+@inject AppClient client
+@inject HttpClient httpClient
+@inject IJSRuntime JSRuntime;
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<div>
+    <div class="card">
+        <div class="card-header bg-secondary text-center">
+            @Title
+        </div>
+        <div class="card-body">
+
+            <button type="button" class="btn btn-primary" @onclick="OnEIFromSend">Send Insurance Form to All</button>
+            <button type="button" class="btn btn-primary" @onclick="ChangeReturnUrl">ChangeReturnUrl</button>
+            @if (show)
+            {
+                @if (TaskCompleted)
+                {
+                    <div style="text-align:center;">
+                        @MessageBody
+                    </div>
+                }
+                else
+                {
+                    <div style="text-align:center">
+                        @Message
+                        <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    public string Title = "Utilities";
+
+    private bool show = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+
+
+
+    protected async Task ChangeReturnUrl()
+    {
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        TaskCompleted = false;
+        show = true;
+        try
+        {
+            Message = "Please wait...";
+            var response = await client.ChangeReturnUrl();
+            if (response.IsSuccess)
+            {
+                Message = response.Message;
+                TaskCompleted = true;
+            }
+            else
+            {
+                Message = "Error!";
+                MessageBody = response.Message;
+                TaskCompleted = true;
+            }
+            StateHasChanged();
+            _timer = new Timer(TimerCallback, null, _delay, Timeout.Infinite);
+        }
+        catch (Exception ex)
+        {
+            IsError = true;
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+    }
+
+
+    protected async Task OnEIFromSend()
+    {
+        Message = string.Empty;
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        TaskCompleted = false;
+        show = true;
+        try
+        {
+            Message = "Please wait...";
+            var response = await client.EmployeeInsuranceformSender();
+            if (response.IsSuccess)
+            {
+                Message = response.Message;
+                TaskCompleted = true;
+            }
+            else
+            {
+                Message = "Error!";
+                MessageBody = response.Message;
+                TaskCompleted = true;
+            }
+            StateHasChanged();
+            _timer = new Timer(TimerCallback, null, _delay, Timeout.Infinite);
+
+        }
+        catch (Exception ex)
+        {
+            IsError = true;
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+
+    }
+
+    private Timer _timer;
+    private int _delay = 2500;
+    private void TimerCallback(Object o)
+    {
+        show = false;
+        _timer.Dispose();
+        StateHasChanged();
+    }
+}

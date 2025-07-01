@@ -1,0 +1,87 @@
+﻿@using AssetManagement.Client.Pages.GridButton;
+@using AssetManagement.Dto.Models;
+@using GridBlazor
+@using GridBlazor.Pages
+@using GridShared
+@using GridShared.Utility
+@using Microsoft.Extensions.Primitives
+@using AssetManagement.Dto
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
+@if (_task.IsCompleted)
+{
+    <div class="row">
+        <div class="col-sm-12">
+            <GridComponent @ref="Component" T="Asset" Grid="@_grid"></GridComponent>
+        </div>
+    </div>
+}
+else
+{
+    <div class="loader-container mt-4">
+        <div class="loader"></div>
+    </div>
+}
+
+@code
+{
+    private CGrid<Asset> _grid;
+    private Task _task;
+    private static GridComponent<Asset> Component;
+    static bool filter = true;
+
+    Action<IGridColumnCollection<Asset>> columns = c =>
+    {
+        c.Add(o => o.Id).SetWidth("50px").Css("table-bordered").Titled("SN.");
+        c.Add(o => o.CompanyCode).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.AssetType).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.Model).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.SerialNumber).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.Status).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.AcquireDate).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered");
+        c.Add(o => o._AssetStatus).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.DiscardDate).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.EmployeeName).SetWidth("50px").Css("table-bordered").Titled("Allocated To");
+        //c.Add(o => o.EmployeeEmail).SetWidth("50px").Css("table-bordered");
+
+        c.Add().Encoded(false).Sanitized(false).RenderComponentAs<AssetViewButton>().SetWidth("20px").Titled("View");
+        c.Add().Encoded(false).Sanitized(false).RenderComponentAs<AssetEditButton>().SetWidth("20px").Titled("Edit");
+        c.Add().Encoded(false).Sanitized(false).RenderComponentAs<AssetDeleteButton>(new List<Action<object>> { RefreshGrid }).SetWidth("10px").Titled("Delete");
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        string url = $"odata/Asset";
+        var query = new QueryDictionary<StringValues>();
+        query.Add("grid-sorting", "Id__1__1");
+
+        var client = new GridODataClient<Asset>(HttpClient, url, query, false, "AssetGrid", columns, 5)
+            .Sortable(true)
+            .Filterable(true)
+            .ClearFiltersButton(true)
+            .SetStriped(true)
+            .WithMultipleFilters()
+            .WithGridItemsCount()
+            .SetExcelExport(true,true, "Assets")
+            .ChangePageSize(true)
+            .EmptyText("No data available")
+            .SetKeyboard(true)
+            .Searchable(true, false, false);
+
+        _grid = client.Grid;
+        _task = client.UpdateGrid();
+        await _task;
+    }
+    
+    public static async void RefreshGrid(object item)
+    {
+        await Component.UpdateGrid();
+    }
+
+    public async void RefreshGrid()
+    {
+        await Component.UpdateGrid();
+    }
+
+}

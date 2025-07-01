@@ -1,0 +1,153 @@
+﻿@page "/view-employee/{Id:int}"
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.AppPages.Assets.Component
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@inject AppClient client
+@inject IJSRuntime JSRuntime;
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<div>
+    <div class="card">
+        <div class="card-header bg-secondary text-center">
+            @Title
+        </div>
+        <div class="card-body">
+            @if (model == null)
+            {
+                <div class="loader-container mt-4">
+                    <div class="loader"></div>
+                </div>
+
+            }
+            else
+            {
+                <EditForm Model="@model">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <br />
+                    <form class="row g-2">
+
+                        <div class="col-md-4">
+                            <label for="companyCode">Company Code : @model.CompanyCode</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="employeeId">Employee Id : @model.EmployeeId</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="employeeName">Employee Name : @model.EmployeeName </label>
+                        </div>
+
+
+                        <div class="col-md-4">
+                            <label for="status">Employee Status : @model.Status </label>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="email">Email : @model.EmailId</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mobile">Mobile : @model.MobileNumber </label>
+                        </div>
+                        <hr style="color:orange" />
+
+
+                        <label for="address" class="form-label" style="background-color:greenyellow">Premanent Address:  </label>
+                        <div class="col-12">
+                            <label for="mobile">Permanent Address : @model.PermanentAddress </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mobile">State : @model.PState </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mobile">Country : @model.PCountry </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mobile">PIN Code : @model.PPin </label>
+                        </div>
+
+                        <label for="address" class="form-label" style="background-color:greenyellow">Current Address:  </label>
+                        <div class="col-12">
+                            <label for="mobile">Current Address : @model.CurrentAddress </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mobile">State : @model.CState </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mobile">Country : @model.CCountry </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mobile">PIN Code : @model.CPin </label>
+                        </div>
+                        <hr style="color:orange" />
+
+
+
+                        <div class="col-md-4">
+                            <label for="aadhar">Aadhar No : @model.AadhaarNumber </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="PAN">PAN No : @model.PANNumber</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="uan">UAN No : @model.UANNo</label>
+                        </div>
+                        <hr style="color:orange" />
+
+
+
+                        <div class="col-md-4">
+                            <label for="dateOfJoin">Date Of Join : @model.DateOfJoin.ToString("dd/MM/yyyy")</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="dateOfLeaving">Date Of Leaving : @model.DateOfLeaving.ToString("dd/MM/yyyy")</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="emergency">Emergency Number : @model.EmergencyContactNumber</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="designation">Designation : @model.Designation</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="designation">designation : @model.Designation</label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="report">Reporting To : @model.ReportingTo</label>
+                        </div>
+
+                        <hr />
+                        <div style="text-align:center;" class="mt-4">
+                            <button type="button" class="btn btn-danger col-md-2" @onclick="OnClose">Close</button>
+                            @*<button type="buton" class="btn btn-info col-md-2" @onclick="Print">Print</button>*@
+                        </div>
+                        <br />
+                    </form>
+                </EditForm>
+
+            }
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    Employee model = new();
+    public string Title = "Employee Details";
+
+    protected override async Task OnInitializedAsync()
+    {
+        model = await client.GetEmployeeById(Id);
+    }
+
+    public void OnClose()
+    {
+        NavigationManager.NavigateTo("/employees");
+    }    
+    public void Print()
+    {
+
+    }
+}

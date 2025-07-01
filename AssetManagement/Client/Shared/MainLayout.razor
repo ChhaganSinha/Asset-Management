@@ -1,0 +1,84 @@
+﻿@using AssetManagement.Client.Services
+@inherits LayoutComponentBase
+@inject NavigationManager navigationManager
+@inject IdentityAuthenticationStateProvider authStateProvider
+@inject IJSRuntime JSRuntime
+
+<div class="page @(DarkMode ? "dark-mode" : "")">
+
+    <AuthorizeView>
+        <Authorized>
+            <main>
+                <Sidebar IsSidebarCollapsed="@IsSidebarCollapsed" />
+                <article class="content @(dimensions?.Width >= 768 && IsSidebarCollapsed ? "collapsed" : "")" id="content">
+                    <Header OnSidebarToggle="ToggleSidebar" OnModeToggle="ToggleMode" />
+                    <div style="margin:1px;">
+                        @Body
+                    </div>
+                </article>
+            </main>
+        </Authorized>
+        <NotAuthorized>
+            <RedirectToLogin />
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    private bool IsSidebarCollapsed = false;
+    private bool DarkMode = false;
+    public BrowserDimension dimensions;
+    private BrowserService BS;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var theme = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "theme");
+
+        if (theme == "dark")
+        {
+            DarkMode = true;
+            await JSRuntime.InvokeVoidAsync("document.body.classList.add", "dark-mode");
+        }
+        else
+        {
+            DarkMode = false;
+            await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "dark-mode");
+        }
+
+        BS = new BrowserService(JSRuntime);
+        dimensions = await BS.GetDimensions();
+        await BS.RegisterResizeListener();
+        BS.DimensionsChanged += UpdateDimensions;
+    }
+
+    private void UpdateDimensions(BrowserDimension newDimensions)
+    {
+        dimensions = newDimensions;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from the event when the component is disposed
+        BS.DimensionsChanged -= UpdateDimensions;
+    }
+    private void ToggleSidebar()
+    {
+        IsSidebarCollapsed = !IsSidebarCollapsed;
+    }
+
+    private async Task ToggleMode()
+    {
+        DarkMode = !DarkMode;
+        if (DarkMode)
+        {
+            await JSRuntime.InvokeVoidAsync("document.body.classList.add", "dark-mode");
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "theme", "dark");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "dark-mode");
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "theme", "light");
+        }
+    }
+}

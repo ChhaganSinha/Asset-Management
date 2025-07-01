@@ -1,0 +1,268 @@
+﻿@page "/allocation/{key}"
+@page "/alloc"
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@inject AppClient client
+@inject ILogger<AllocationConfig> logger
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@*@attribute [Authorize]*@
+@layout NoLayout
+@attribute [AllowAnonymous]
+
+<div>
+    <div class="card">
+        <div class="card-header bg-secondary text-center">
+            @Title
+        </div>
+        <div class="card-body">
+            @if (model == null && !TaskCompleted)
+            {
+                <div class="loader-container mt-4">
+                    <div class="loader"></div>
+                </div>
+
+            }
+            else if (model == null && TaskCompleted)
+            {
+                <p class="alert-info"> You have already submitted this information. For any further assistance, please contact your administrator.</p>
+            }
+            else
+            {
+                <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="form-group row mb-2">
+                        <label class="col-form-label col-md-2 bold-font required-field">Company Code</label>
+                        <div class="col-md-4">
+                            <InputText id="CompanyId" @bind-Value="model.CompanyCode" class="form-control" disabled />
+                        </div>
+
+                        <label class="col-form-label col-md-2 bold-font required-field">Asset Type</label>
+                        <div class="col-md-4">
+                            <InputText id="AssetType" @bind-Value="model.AssetType" class="form-control" disabled />
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-2">
+                        <label class="col-form-label col-md-2 bold-font required-field">Asset</label>
+                        <div class="col-md-4">
+                            <InputText id="AssetId" @bind-Value="model.AssetModel" class="form-control" disabled />
+                        </div>
+
+                        <label class="col-form-label col-md-2 bold-font required-field">Employee</label>
+                        <div class="col-md-4">
+                            <InputText id="EmployeeId" @bind-Value="model.EmployeeName" class="form-control" disabled />
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-2">
+                        <label class="col-form-label col-md-2 bold-font required-field">Allocation Type</label>
+                        <div class="col-md-4">
+                            <InputSelect id="AllocationType" @bind-Value="model.AllocationType" class="form-control" disabled>
+                                @foreach (var al in Enum.GetValues<AllocationType>())
+                                {
+                                    <option value="@al">@al</option>
+                                }
+                            </InputSelect>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-2">
+                        <label class="col-form-label col-md-2 bold-font required-field">Allocated On</label>
+                        <div class="col-md-4">
+                            @*<InputDate id="IssueDate" @bind-Value="model.IssueDate" class="form-control" />*@
+                            <input type="date" id="allocationdate" name="allocationdate" @bind="model.IssueDate" max="@maxDateAttribute" class="form-control">
+                            <ValidationMessage For="() => model.IssueDate" />
+                        </div>
+                        @if (model.AllocationType == AllocationType.Temporary)
+                        {
+                            <label class="col-form-label col-md-2 bold-font required-field">Allocated Till</label>
+                            <div class="col-md-4">
+                                @*<InputDate id="IssueTill" @bind-Value="model.IssueTill" class="form-control" />*@
+                                <input type="date" id="allocationdate" name="allocationdate" @bind="model.IssueTill" min=@model.IssueDate.Date.ToString("yyyy-MM-dd") class="form-control">
+                                <ValidationMessage For="() => model.IssueTill" />
+                            </div>
+                        }
+                    </div>
+
+                    <div style="text-align:center;" class="mt-5">
+                        <a @onclick="Correct" class="btn @(model.Responce == Responce.Approved ? "btn-success" : "btn-secondary")">Correct</a>
+                        <a @onclick="InCorrect" class="btn @(model.Responce == Responce.Reject ? "btn-danger" : "btn-secondary")">Incorrect</a>
+                    </div>
+                    <br />
+                </EditForm>
+
+
+                <SimpleDailog Title="@Message" Show="@show" OnCloseDialog="ResetForm">
+                    @if (show)
+                    {
+                        @if (!TaskCompleted && !process)
+                        {
+                            <div class="form-group mb-2">
+                                @if (model.Responce == Responce.Reject)
+                                {
+                                    <div class="form-group row mb-2">
+                                        <label class="col-form-label col-md-6 bold-font required-field">Comment</label>
+                                        <div class="col-md-12">
+                                            <InputTextArea class="form-control" @bind-Value="model.Comment"></InputTextArea>
+                                            <span style="color:red">@CommentValidation</span>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span>Are you sure you want to submit?</span>
+                                }
+                            </div>
+ 
+                            <div style="text-align:center;" class="mt-4">
+                                <button type="button" @onclick="OnValidSubmit" class="btn btn-primary col-md-6">Submit</button>
+                            </div>
+                        }
+                        else if (TaskCompleted && process)
+                        {
+                            <div style="text-align:center;">
+                                @MessageBody
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="text-align:center">
+                                <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                            </div>
+                        }
+                    }
+                </SimpleDailog>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Key { get; set; } = string.Empty;
+
+    public string Title = "Verify your details";
+
+    private bool show = false;
+    private bool process = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    string CommentValidation = string.Empty;
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+    Allocation model = new();
+    List<Company> company = new();
+    List<AssetType> assetType = new();
+    List<Asset> asset = new();
+    List<Employee> employee = new();
+    private bool IsSubmitted = false;
+    private string maxDateAttribute { get; set; } = DateTime.Now.Date.ToString("yyyy-MM-dd");
+
+    public void Correct()
+    {
+        CommentValidation = string.Empty;
+        Message = "Process";
+        model.Responce = Responce.Approved;
+        show = true;
+    }
+    public void InCorrect()
+    {
+        Message = "Process";
+        model.Responce = Responce.Reject;
+        show = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var data = await client.EmployeeAllocationDetails(Key);
+            if (!data.IsSuccess)
+            {
+                model = null;
+                TaskCompleted = true;
+            }
+
+            else
+                model = data.Result;
+
+        }
+        catch (Exception ex)
+        {
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+    }
+
+    protected async Task OnValidSubmit()
+    {
+        CommentValidation = string.Empty;
+        if (model.Comment == "" && model.Responce == Responce.Reject)
+        {
+            CommentValidation = "This field is required!";
+            return;
+        }
+        process = false;
+        Message = "Process";
+        MessageBody = "Thank you!";
+        IsError = false;
+        IsSuccess = false;
+        show = true;
+        TaskCompleted = false;
+        process = true;
+        try
+        {
+            process = true;
+            Message = "Please wait";
+            if (model.Comment == string.Empty && model.Responce == Responce.Reject)
+            {
+                Message = "Error";
+                MessageBody = "Please comment the reason if the information is incorrect!";
+                TaskCompleted = true;
+                return;
+            }
+            if (model.Responce == Responce.Pending)
+            {
+                Message = "Error";
+                MessageBody = "Please verify whether the above details are correct or not!";
+                TaskCompleted = true;
+                return;
+            }
+            var response = await client.EmployeeAllocationResponce(model);
+            if (response.IsSuccess)
+            {
+                Message = "Successfully Updated";
+                TaskCompleted = true;
+            }
+            else
+            {
+                Message = "Error!";
+                MessageBody = response.Message;
+                TaskCompleted = true;
+            }
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogCritical(ex, ex.Message);
+            IsError = true;
+            Message = "Error!";
+            MessageBody = ex.Message;
+            TaskCompleted = true;
+        }
+    }
+
+    private async void ResetForm()
+    {
+        show = false;
+        if (Message.Contains("Successfully Updated"))
+        {
+            //Init();
+            await JSRuntime.InvokeVoidAsync("blazorCloseTab");
+        }
+    }
+
+}

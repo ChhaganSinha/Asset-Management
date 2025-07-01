@@ -1,0 +1,54 @@
+﻿@using AssetManagement.Dto.Models;
+<div style="margin-bottom:50px">
+    <div class="table-container table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <td>Company Code</td>
+                    <td>Asset Categoty</td>
+                    <td>SubCategory</td>
+                    <td>Brand</td>
+                    <td>Model</td>
+                    <td>SerialNumber</td>
+                    <td>Mac Address</td>
+                    <td>Description</td>
+                    <td>Acquire Date</td>
+                    <td>Vendor Name</td>                
+
+                </tr>
+            </thead>
+            <tbody>
+
+                @if (DataList?.Count == 0)
+                {
+                    <tr><td colspan="3">No data found</td></tr>
+                }
+                else
+                {
+                    foreach (var r in DataList)
+                    {
+                        <tr>
+                            <td>@r.CompanyCode</td>
+                            <td>@r.AssetType</td>
+                            <td>@r.SubAssetType</td>
+                            <td>@r.Brand</td>
+                            <td>@r.Model</td>
+                            <td>@r.SerialNumber</td>
+                            <td>@r.MacAddress</td>
+                            <td>@r.Description</td>
+                            <td>@r.AcquireDate.ToString("dd/MM/yyyy")</td>
+                            <td>@r.VendorName</td>
+                          
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<AssetImport> DataList { get; set; }
+
+}

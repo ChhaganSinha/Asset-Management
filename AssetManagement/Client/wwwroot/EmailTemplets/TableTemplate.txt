@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <tr style="background-color: cornflowerblue;">
+            <th colspan="2" style="text-align:center;">
+                <h4 style="margin: 0;">Your Details</h4>
+            </th>
+        </tr>
+        <tr>
+            <td>Company Code</td>
+            <td><ccode></td>
+        </tr>
+        <tr>
+            <td>Employee Id</td>
+            <td><eid></td>
+        </tr>
+        <tr>
+            <td>Employee Name</td>
+            <td><ename></td>
+        </tr>
+        <tr>
+            <td>Father's Name</td>
+            <td><fname></td>
+        </tr>
+        <tr>
+            <td>Email</td>
+            <td><email></td>
+        </tr>
+        <tr>
+            <td>Mobile</td>
+            <td><mobile></td>
+        </tr>
+        <tr>
+            <td>Emergency Number</td>
+            <td><emergency></td>
+        </tr>
+        <tr>
+            <td>Date Of Birth</td>
+            <td><dob></td>
+        </tr>
+        <tr>
+            <td>Aadhar Number</td>
+            <td><adhar></td>
+        </tr>
+        <tr>
+            <td>PAN Number</td>
+            <td><pan></td>
+        </tr>
+        <tr>
+            <td>UAN Number</td>
+            <td><uan></td>
+        </tr>
+        <tr>
+            <td>Date Of Join</td>
+            <td><doj></td>
+        </tr>
+        <tr>
+            <td>Designation</td>
+            <td><designation></td>
+        </tr>
+        <tr>
+            <td>Reporting To</td>
+            <td><report></td>
+        </tr>
+
+        <tr style="background-color: cornflowerblue;">
+            <th colspan="2" style="text-align:center">
+                <h4 style="margin: 0;">Permanent Address Details</h4>
+            </th>
+        </tr>
+        <tr>
+            <td>Address</td>
+            <td><paddress></td>
+        </tr>
+        <tr>
+            <td>State</td>
+            <td><pstate></td>
+        </tr>
+        <tr>
+            <td>Country</td>
+            <td><pcountry></td>
+        </tr>
+        <tr>
+            <td>PIN Code</td>
+            <td><ppin></td>
+        </tr>
+
+        <tr style="background-color: cornflowerblue;">
+            <th colspan="2" style="text-align:center">
+                <h4 style="margin: 0;">Current Address Details</h4>
+            </th>
+        </tr>
+        <tr>
+            <td>Address</td>
+            <td><caddress></td>
+        </tr>
+        <tr>
+            <td>State</td>
+            <td><cstate></td>
+        </tr>
+        <tr>
+            <td>Country</td>
+            <td><ccountry></td>
+        </tr>
+        <tr>
+            <td>PIN Code</td>
+            <td><cpin></td>
+        </tr>
+
+        <tr style="background-color: cornflowerblue;">
+            <th colspan="2" style="text-align:center">
+                <h4 style="margin: 0;">Bank Details</h4>
+            </th>
+        </tr>
+        <tr>
+            <td>Bank Name</td>
+            <td><bank></td>
+        </tr>
+        <tr>
+            <td>Account Name</td>
+            <td><accountname></td>
+        </tr>
+        <tr>
+            <td>Account Number</td>
+            <td><account></td>
+        </tr>
+        <tr>
+            <td>IFSC Code</td>
+            <td><ifsc></td>
+        </tr>
+    </table>
+    <h3 style="color:red">Note : Please check your Details, if there is any correction, then click  <a href="<###RETURN_URL###>">Here</a>  to update.</h3><br><br>
+</body>
+
+</html>

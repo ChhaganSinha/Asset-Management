@@ -1,0 +1,92 @@
+﻿@using AssetManagement.Client.Client;
+@using AssetManagement.Dto
+@using AssetManagement.Dto.Dashboard;
+@inject IJSRuntime JSRuntime
+@inject AppClient client
+@inject NavigationManager NavManager
+@inject IJSRuntime JSRuntime
+
+<canvas id="@Id" style="width:100%; height:200px;"></canvas>
+
+
+@code {
+
+
+    [Parameter]
+    public string Id { get; set; }
+
+    [Parameter]
+    public Dto.Dashboard.ChartType Type { get; set; }
+
+    [Parameter]
+    public string[] Data { get; set; }
+
+    [Parameter]
+    public string[] BackgroundColor { get; set; }
+
+    [Parameter]
+    public string[] Labels { get; set; }
+    
+    [Parameter]
+    public string[] Ids { get; set; }
+
+    [Parameter]
+    public bool Responsive { get; set; } = true;
+
+    [Parameter]
+    public bool IsStacked { get; set; }
+
+    [Parameter]
+    public List<ChartJsDataset> Datasets { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnChartClick { get; set; }
+
+    [Parameter]
+    public bool IsClickable { get; set; } = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Here we create an anonymous type with all the options
+        // that need to be sent to Chart.js
+
+        if (Data == null || Data.Count() == 0)
+            return;
+
+        var config = new
+        {
+
+            Type = Type.ToString(),
+            Options = new
+            {
+                Responsive = Responsive
+            },
+
+            Data = new
+            {
+                Datasets = new[]
+                                    {
+                    new { Data = Data, BackgroundColor = BackgroundColor}
+
+    },
+                Labels = Labels,
+                Ids = Ids,
+            }
+        };
+        var ObjRef = DotNetObjectReference.Create(this);
+        await JSRuntime.InvokeVoidAsync("setup", Id, config, ObjRef);
+    }
+
+
+    [JSInvokable]
+    public async Task PieChartClick(string label, string id)
+    {
+
+        if (!IsClickable)
+            return;
+        
+
+    }
+
+
+}

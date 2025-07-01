@@ -1,0 +1,192 @@
+﻿@page "/role-management"
+@using AssetManagement.Dto.RBAC
+@inject IRoleService RoleService
+@attribute [Authorize(Roles = "SuperAdmin,Admin")]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject PermissionService PermissionService
+
+<!-- Breadcrumb Section -->
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item">Settings</li>
+        <li class="breadcrumb-item active" aria-current="page">Role Management</li>
+    </ol>
+</nav>
+
+<div class="container mt-4">
+    @if (roles != null)
+    {
+        <div class="card borderd mt-4">
+            <div class="card-header">
+                <div class="form-group row mb-1">
+                    <label class="col-form-label text-primary col-md-4 bold-font">Select Role to Assign Permission</label>
+                    <div class="col-md-4">
+                        <select class="form-control" @bind-value="@SelectedRoleName" @onchange="OnRoleChange" @bind-value:event="oninput">
+                            <option value="">-- Select Role --</option>
+                            @foreach (var r in roles)
+                            {
+                                <option value="@r.Name">@r.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-success" @onclick="AssignPermission">Assign</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" style="max-height:66vh; overflow:auto;">
+                <UiAlert Model="alert"></UiAlert>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>SN</th>
+                                <th>Page Name</th>
+                                <th>View</th>
+                                <th>Edit</th>
+                                <th>Full Access</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (SelectedRole != null)
+                            {
+                                @for (int i = 0; i < SelectedRole.PagePermissions.Count; i++)
+                                {
+                                    var permission = SelectedRole.PagePermissions[i];
+
+                                    <tr>
+                                        <td>@(i + 1)</td>
+                                        <td>@permission.PageName</td> <!-- ✅ Page Name Now Displays Correctly -->
+
+
+                                        <td>
+                                            <input class="form-check-input" type="checkbox" @bind="@permission.CanView" @bind:event="onchange" />
+                                        </td>
+                                        <td>
+                                            <input class="form-check-input" type="checkbox" @bind="@permission.CanEdit" @bind:event="onchange" @bind:after="@(() => UpdateEditPermission(permission))" />
+                                        </td>
+                                        <td>
+                                            <input class="form-check-input" type="checkbox" @bind="@permission.HasFullAccess" @bind:event="onchange" @bind:after="@(() => UpdateFullAccess(permission))" />
+                                        </td>
+
+
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Select a role to manage permissions.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string SelectedRoleName;
+    private RoleViewModel SelectedRole;
+    private List<RoleViewModel> roles = new();
+
+    private List<string> allPages = new() { 
+        "Dashboard",
+        "All Company",
+        "Add Company",
+        "All Employees",
+        "Add Employee",
+        "Employee Onboardings",
+        "Employee Transfer",
+        "All Assets",
+        "Add Asset",
+        "Asset Transfer",
+        "All Allocations",
+        "New Allocation",
+        "Reports",
+        "User Registrations",
+        "User Management",
+        "Page Permissions", 
+        "App Settings",
+    };
+
+    [CascadingParameter]
+    protected AlertModel? alert { get; set; }
+    private Timer _timer;
+    private int _delay = 2500;
+
+    protected override async Task OnInitializedAsync()
+    {
+        alert ??= new();
+        alert?.Clear();
+        roles = await RoleService.GetRoles();
+        roles = await RoleService.GetRolesWithPermissions();
+
+    }
+
+    private void OnRoleChange(ChangeEventArgs e)
+    {
+        SelectedRoleName = e.Value.ToString();
+        SelectedRole = roles.FirstOrDefault(r => r.Name == SelectedRoleName) ?? new RoleViewModel { Name = SelectedRoleName, PagePermissions = new List<PagePermissionViewModel>() };
+
+        // Ensure permissions for all pages exist
+        foreach (var page in allPages)
+        {
+            if (!SelectedRole.PagePermissions.Any(p => p.PageName == page))
+            {
+                SelectedRole.PagePermissions.Add(new PagePermissionViewModel { PageName = page, CanView = false, CanEdit = false, HasFullAccess = false });
+            }
+        }
+    }
+
+
+    private async Task AssignPermission()
+    {
+        if (SelectedRole == null)
+        {
+            alert?.SetError("Please select a role before assigning permissions.");
+            return;
+        }
+
+        try
+        {
+            alert?.Clear();
+            await RoleService.AssignPermission(SelectedRole.Name, SelectedRole.SelectedPermission, SelectedRole.PagePermissions);
+            alert?.SetSuccess("Permissions assigned successfully.");
+            _timer = new Timer(TimerCallback, null, _delay, Timeout.Infinite);
+        }
+        catch (Exception ex)
+        {
+            alert?.SetError($"Error assigning permissions: {ex.Message}");
+        }
+    }
+
+    private void TimerCallback(object o)
+    {
+        alert?.Clear();
+        _timer.Dispose();
+        StateHasChanged();
+    }
+
+    private void UpdateEditPermission(PagePermissionViewModel permission)
+    {
+        if (permission.CanEdit)
+        {
+            permission.CanView = true;
+        }
+        StateHasChanged(); // Manually update UI
+    }
+
+    private void UpdateFullAccess(PagePermissionViewModel permission)
+    {
+        permission.CanView = permission.HasFullAccess;
+        permission.CanEdit = permission.HasFullAccess;
+
+        StateHasChanged(); // Force UI to refresh
+    }
+
+
+}

@@ -1,0 +1,156 @@
+﻿@using AssetManagement.Client.Client;
+@using AssetManagement.Dto
+@using AssetManagement.Dto.Dashboard;
+@inject IJSRuntime JSRuntime
+@inject AppClient client
+@inject NavigationManager NavManager
+<canvas id="@Id" style="width:100%; height:200px;"></canvas>
+
+
+@code {
+
+    [Parameter]
+    public string Id { get; set; }
+
+    [Parameter]
+    public string IndexAxis { get; set; }
+
+    [Parameter]
+    public Dto.Dashboard.ChartType Type { get; set; }
+
+    [Parameter]
+    public string[] Data { get; set; }
+
+    [Parameter]
+    public string[] BackgroundColor { get; set; }
+
+    [Parameter]
+    public string[] Labels { get; set; }
+
+    [Parameter]
+    public int[] Ids { get; set; }
+
+    [Parameter]
+    public bool Responsive { get; set; } = true;
+
+    [Parameter]
+    public bool AspectRatio { get; set; } = true;
+
+    [Parameter]
+    public bool IsStacked { get; set; }
+
+    [Parameter]
+    public List<ChartJsDataset> Datasets { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnChartClick { get; set; }
+
+    [Parameter]
+    public bool IsClickable { get; set; } = true;
+
+    [Parameter]
+    public int borderRadius { get; set; } = 0;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Datasets == null || Datasets.Count() == 0)
+            return;
+
+        if (!IsStacked)
+        {
+            var config = new
+            {
+               
+                Type = Type.ToString().ToLower(),
+                Options = new
+                {
+                    Responsive = Responsive,
+                    maintainAspectRatio = AspectRatio,
+                    indexAxis = IndexAxis,
+                    Scales = new
+                    {
+
+                        YAxes = new[]
+                        {
+                                new
+                                {
+                                    Ticks = new { BeginAtZero = true },
+                                    Stacked = IsStacked,
+                                    //min = 0,
+                                    //max = 100,
+                                }
+            }
+                    },
+
+
+
+                },
+
+                Data = new
+                {
+                    Labels = Labels,
+                    Ids = Ids,
+                    Datasets = Datasets.Select(o => new
+                    {
+                        Label = o.Label,
+                        Data = o.Data,
+                        Tension = 0.4,
+                        borderWidth = 2,
+                        borderRadius = borderRadius,
+                        BackgroundColor = o.BackgroundColor,
+                        Labels = o.Labels
+                        //Fill : true
+                        //Urls = o.Data.Select(o=>string.Concat("https://phishsims.com/report/",o))
+                    })
+
+                },
+
+
+
+
+
+            };
+            var ObjRef = DotNetObjectReference.Create(this);
+
+            await JSRuntime.InvokeVoidAsync("setup", Id, config, ObjRef);
+
+        }
+
+    }
+
+    [JSInvokable]
+    public async Task ChartClick(string cmp, string label, string ChartId)
+    {
+        if (ChartId == "companybar")
+        {
+            if (label == "TotalEmployees")
+                NavManager.NavigateTo($"/employees/{cmp}/{label}");
+            else if (label == "TotalAssets")
+                NavManager.NavigateTo($"/assets/{cmp}/{label}");
+            else if (label == "TotalAllocations")
+                NavManager.NavigateTo($"/allocations/{cmp}/{label}");
+        }
+
+        if (ChartId == "assetbar")
+        {
+            if (label == "Total Assets")
+                NavManager.NavigateTo($"/assets/{cmp}/{label}");
+            else if (label == "Free Assets")
+                NavManager.NavigateTo($"/assets/{cmp}/{label}");
+            else if (label == "Allocated Assets")
+                NavManager.NavigateTo($"/assets/{cmp}/{label}");
+            else if (label == "Active Assets")
+                NavManager.NavigateTo($"/assets/{cmp}/{label}");
+            else if (label == "Discarded Assets")
+                NavManager.NavigateTo($"/assets/{cmp}/{label}");
+        }
+    }
+
+    [JSInvokable]
+    public static async Task ChartHover()
+    {
+        //Console.WriteLine("MouseHovered");
+    }
+
+}

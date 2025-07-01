@@ -1,0 +1,76 @@
+﻿@using AssetManagement.Client.Pages.GridButton;
+@using AssetManagement.Dto.Models;
+@using GridBlazor
+@using GridBlazor.Pages
+@using GridShared
+@using GridShared.Utility
+@using Microsoft.Extensions.Primitives
+@using AssetManagement.Dto
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
+@if (_task.IsCompleted)
+{
+    <div class="row">
+        <div class="col-sm-12">
+            <GridComponent @ref="Component" T="Company" Grid="@_grid"></GridComponent>
+        </div>
+    </div>
+}
+else
+{
+    <div class="loader-container mt-4">
+        <div class="loader"></div>
+    </div>
+
+}
+
+@code
+{
+    private CGrid<Company> _grid;
+    private Task _task;
+    private static GridComponent<Company> Component;
+    static bool filter = true;
+
+    Action<IGridColumnCollection<Company>> columns = c =>
+    {
+        c.Add(o => o.Id).SetWidth("50px").Css("table-bordered").Titled("SN.").Filterable(filter);
+        c.Add(o => o.CompanyCode).SetWidth("50px").Css("table-bordered").Filterable(filter);
+        c.Add(o => o.Name).Css("table-bordered").Filterable(filter);
+        c.Add(o => o.GSTNNumber).Css("table-bordered").Filterable(filter);
+        c.Add(o => o.ContactPerson).Css("table-bordered").Filterable(filter);
+        c.Add(o => o.ContactNumber).Css("table-bordered").Filterable(filter);
+        c.Add().Encoded(false).Sanitized(false).RenderComponentAs<CompanyViewButton>().SetWidth("50px").Titled("View");
+        c.Add().Encoded(false).Sanitized(false).RenderComponentAs<CompanyEditButton>().SetWidth("50px").Titled("Edit");
+        c.Add().Encoded(false).Sanitized(false).RenderComponentAs<CompanyDeleteButton>(new List<Action<object>> { RefreshGrid }).SetWidth("10px").Titled("Delete");
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        string url = $"odata/Company";
+        var query = new QueryDictionary<StringValues>();
+        query.Add("grid-sorting", "Id__1__1");
+
+        var client = new GridODataClient<Company>(HttpClient, url, query, false, "ordersGrid", columns, 5)
+            .Sortable(true)
+            .Filterable(true)
+            .ClearFiltersButton(true)
+            .SetStriped(true)
+            .WithMultipleFilters()
+            .WithGridItemsCount()
+            .SetExcelExport(true, true, "Companies")
+            .ChangePageSize(true)
+            .EmptyText("No data available")
+            .SetKeyboard(true)
+            .Searchable(true, false, false);
+
+        _grid = client.Grid;
+        _task = client.UpdateGrid();
+        await _task;
+    }
+
+    public static async void RefreshGrid(object item)
+    {
+        await Component.UpdateGrid();
+    }
+}

@@ -1,0 +1,420 @@
+﻿@page "/EmployeeTransfer"
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.AppPages.Employees.Component
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models
+@using AssetManagement.Dto;
+@using System.Text.Json
+@using System.Text.RegularExpressions;
+@using MudBlazor
+@inject AppClient client
+@inject HttpClient _httpClient
+@inject ILogger<EmployeeDataConfig> logger
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<div>
+    <div class="card">
+        <div class="card-header bg-secondary text-center">
+            @Title
+        </div>
+        <div class="form-group row mb-2 p-2">
+
+            <EditForm Model="model">
+                <div class="form-group row" style="padding:4px">
+                    <div class="col-md-4">
+                        <MudGrid>
+                            <MudItem xs="12" sm="12" md="12">
+                                <MudAutocomplete T="Company" Label="Source Company" @bind-Value="selectedSourceCompany" SearchFunc="@SourceCompanySearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                 ToStringFunc="@(e => e == null ? null : $"{e.Name} ({e.CompanyCode})")"
+                                                 Required="false"
+                                                 ResetValueOnEmptyText="true"
+                                                 CoerceText="true"
+                                                 CoerceValue="true"
+                                                 MaxItems="null">
+                                </MudAutocomplete>
+                            </MudItem>
+                        </MudGrid>
+                        <span style="color:red; padding-left: 1px">@ErrorSourceCompany</span>
+                        @if (selectedSourceCompany == null)
+                        {
+                            selectedEmployee = null; selectedTargetCompany = null; model = new();
+                            ErrorSourceCompany = string.Empty;
+                            ErrorSourceEmployee = string.Empty;
+                            ErrorTargetCompany = string.Empty;
+                        }
+                    </div>
+                    <div class="col-md-4">
+                        <MudGrid>
+                            <MudItem xs="12" sm="12" md="12">
+                                <MudAutocomplete T="Employee" Label="Select Employee" @bind-Value="selectedEmployee" SearchFunc="@EmployeeSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                 ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} - {e.CompanyCode} (EmpID - {e.EmployeeId})")"
+                                                 Required="false"
+                                                 ResetValueOnEmptyText="true"
+                                                 CoerceText="true"
+                                                 CoerceValue="true"
+                                                 MaxItems="null">
+                                </MudAutocomplete>
+                            </MudItem>
+                        </MudGrid>
+                        <span style="color:red; padding-left: 1px">@ErrorSourceEmployee</span>
+                        @if (selectedEmployee != null) { OnEmployeeChange(selectedEmployee); } else { model = new(); }
+                    </div>
+                    <div class="col-md-4">
+                        <MudGrid>
+                            <MudItem xs="12" sm="12" md="12">
+                                <MudAutocomplete T="Company" Label="Target Company" @bind-Value="selectedTargetCompany" SearchFunc="@TargetCompanySearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                 ToStringFunc="@(e => e == null ? null : $"{e.Name} ({e.CompanyCode})")"
+                                                 Required="true"
+                                                 ResetValueOnEmptyText="true"
+                                                 CoerceText="true"
+                                                 CoerceValue="true"
+                                                 MaxItems="null">
+                                </MudAutocomplete>
+                            </MudItem>
+                        </MudGrid>
+                        <span style="color:red; padding-left: 1px">@ErrorTargetCompany</span>
+                    </div>
+                </div>
+
+                <div class="card form-group row mb-2 m-1 mt-2" style="">
+                    <div class="form-group row mb-2">
+                        <label class="col-form-label col-md-2 bold-font">Company Code : </label>
+                        <div class="col-md-4 mt-1">
+                            <span class="text-info">@model.CompanyCode</span>
+                        </div>
+
+                        <label class="col-form-label col-md-2 bold-font">Employee Id : </label>
+                        <div class="col-md-4 mt-1">
+                            <span class="text-info">@model.EmployeeId</span>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-2">
+
+                        <label class="col-form-label col-md-2 bold-font">Name : </label>
+                        <div class="col-md-4 mt-1">
+                            <span class="text-info">@model.EmployeeName</span>
+                        </div>
+
+                        <label class="col-form-label col-md-2 bold-font">Status : </label>
+                        <div class="col-md-4 mt-1">
+                            @if (model.Id > 0)
+                            {
+                                <span class="text-info">@model.Status</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group row mb-2">
+                        <label class="col-form-label col-md-2 bold-font">Email Id : </label>
+                        <div class="col-md-4 mt-1">
+                            <span class="text-info">@model.EmailId</span>
+                        </div>
+
+                        <label class="col-form-label col-md-2 bold-font">MobileNumber : </label>
+                        <div class="col-md-4 mt-1">
+                            <span class="text-info">@model.MobileNumber</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-2">
+                        <label class="col-form-label col-md-2 bold-font">ReportingTo : </label>
+                        <div class="col-md-4 mt-1">
+                            <span class="text-info">@model.ReportingTo</span>
+                        </div>
+
+                        <label class="col-form-label col-md-2 bold-font">Designation : </label>
+                        <div class="col-md-4 mt-1">
+                            <span class="text-info">@model.Designation</span>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-2">
+                        <label class="col-form-label col-md-2 bold-font">EmployeeCategory : </label>
+                        <div class="col-md-4 mt-1">
+                            <span class="text-info">@model.EmployeeCategory</span>
+                        </div>
+                    </div>
+                    <div style="text-align:center;" class="mt-4 fixed-div">
+                        <button type="button" @onclick="Back" class="btn btn-secondary col-md-2 mr-1"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back</button>
+                        <button type="button" @onclick="Validate" class="btn btn-primary col-md-2 mr-1">Transfer <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+            </EditForm>
+
+
+            <SimpleDailog Title="@Message" Show="@show" OnCloseDialog="ResetForm">
+                @if (show)
+                {
+                    @if (!TaskCompleted && !process)
+                    {
+                        <div class="form-group mb-2">
+                            <label for="email" class="bold-font required-field">New EmployeeID:</label>
+                            <input type="text" class="form-control" @bind-value="NewEmployeeID">
+                            <span style="color:red">@NewEmployeeIDErrorMessage</span>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="email" class="bold-font required-field">New Email of Employee:</label>
+                            <input type="email" class="form-control" id="email" @bind-value="NewEmailOfEmployee">
+                            <span style="color:red">@ErrorMessage</span>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="TransferDate" class="bold-font required-field">Transfer Date:</label>
+                            <input type="date" class="form-control" id="TransferDate" @bind-value="TransferDate">
+                            <span style="color:red">@TransferDateValidation</span>
+                        </div>
+                        <div style="text-align:center;" class="mt-4">
+                         @*   <button type="button" @onclick="Back" class="btn btn-secondary col-md-2 mr-1"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back</button>*@
+                            <button type="button" @onclick="OnValidSubmit" class="btn btn-primary col-md-6">Go <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+                        </div>
+                    }                   
+                    else if (TaskCompleted && process)
+                    {
+                        <div style="text-align:center;">
+                            @MessageBody
+                        </div>
+                        <br />
+                        <div style="text-align:center;" class="mt-4">
+                            <button type="button" @onclick="ResetForm" class="btn btn-outline-secondary col-md-6">Close</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="text-align:center">
+                            <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+                        </div>
+                    }
+                }
+            </SimpleDailog>
+
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private bool show = false;
+    private bool unallocate = false;
+    bool process = false;
+    bool TaskCompleted = false;
+
+    string Message = "Process";
+    string MessageBody = "Thank you!";
+    string ErrorMessage = string.Empty;
+    string ReturnDateValidation = string.Empty;
+    string TransferDateValidation = string.Empty;
+
+    string NewEmployeeID = string.Empty;
+    string NewEmailOfEmployee = string.Empty;
+    DateTime TransferDate = DateTime.Now;
+    string ErrorSourceCompany = string.Empty;
+    string ErrorSourceEmployee = string.Empty;
+    string ErrorTargetCompany = string.Empty;
+    string NewEmployeeIDErrorMessage = string.Empty;
+
+    List<Company> company = new();
+    List<Employee> employee = new();
+    Employee model = new();
+    EmployeeTransferModel employeeTransfer = new();
+    string Title = "Employee Transfer";
+    protected override async Task OnInitializedAsync()
+    {
+        var BaseUri = NavigationManager.BaseUri;
+        employee = new List<Employee>(await client.GetAllEmployee());
+        company = new List<Company>(await client.GetAllCompany());
+    }
+
+    public void Validate()
+    {
+        ErrorSourceCompany = string.Empty;
+        ErrorSourceEmployee = string.Empty;
+        ErrorTargetCompany = string.Empty;
+        if (selectedSourceCompany == null)
+        {
+            ErrorSourceCompany = "This Field is required";
+            return;
+        }
+        if (selectedEmployee == null)
+        {
+            ErrorSourceEmployee = "This Field is required";
+            return;
+        }
+        if (selectedTargetCompany == null)
+        {
+            ErrorTargetCompany = "This Field is required";
+            return;
+        }
+
+        var targetCompanyEmpIDs = employee.Where(o => o.CompanyCode == selectedTargetCompany?.CompanyCode).Select(o => o.EmployeeId).ToList();
+        string lastEmployeeId = targetCompanyEmpIDs
+        .OrderByDescending(id => id, StringComparer.OrdinalIgnoreCase)
+        .FirstOrDefault();
+        if (lastEmployeeId != null)
+        {
+            string pattern = @"\d+";
+            Match match = Regex.Match(lastEmployeeId, pattern);
+
+            if (match.Success)
+            {
+                string numericPart = match.Value;
+                if (int.TryParse(numericPart, out int lastNumericId))
+                {
+                    lastNumericId++;
+                    string updatedEmployeeId = string.Empty;
+                    if (lastNumericId < 1000)
+                        updatedEmployeeId = lastEmployeeId.Replace(numericPart, lastNumericId.ToString("d3"));
+                    else
+                        updatedEmployeeId = lastEmployeeId.Replace(numericPart, lastNumericId.ToString());
+
+                    NewEmployeeID = updatedEmployeeId;
+                }
+
+            }
+
+        }
+        else
+        {
+            NewEmployeeID = selectedTargetCompany.CompanyCode + 1.ToString("d3");
+        }
+        NewEmailOfEmployee = model.EmailId;
+        show = true;
+    }
+
+    protected async Task OnValidSubmit()
+    {
+        process = false;
+        Message = "Process";
+        MessageBody = "Thank you!";
+        TransferDateValidation = string.Empty;
+        NewEmployeeIDErrorMessage = string.Empty;
+        ErrorMessage = string.Empty;
+        show = true;
+        TaskCompleted = false;
+
+        try
+        {
+           
+            if (NewEmailOfEmployee == "")
+            {
+                ErrorMessage = "New Email is required!";
+                return;
+            }           
+            else
+            {
+                var targetCompanyEmails = employee.Where(o => o.CompanyCode == selectedTargetCompany?.CompanyCode).Select(o => o.EmailId).ToList();
+                if (targetCompanyEmails.Contains(NewEmailOfEmployee))
+                {
+                    ErrorMessage = "This Email already Exist!";
+                    return;         
+                }
+            }
+            if (NewEmployeeID == "")
+            {
+                NewEmployeeIDErrorMessage = "New EmployeeID is required!";
+                return;
+            }
+            if (!Regex.IsMatch(NewEmailOfEmployee, ImportEmployeeConfig.EmailRegex))
+            {
+                ErrorMessage = "Invalid EmailID!";
+                return;
+            }
+            if (TransferDate == DateTime.MinValue)
+            {
+                TransferDateValidation = "Invalid Transfer Date!";
+                return;
+            }
+            if (TransferDate < model.DateOfJoin)
+            {
+                TransferDateValidation = "Transfer Date greate then Joininig Date!";
+                return;
+            }
+
+            process = true;
+            employeeTransfer.Id = selectedEmployee.Id;
+            employeeTransfer.NewEmail = NewEmailOfEmployee;
+            employeeTransfer.NewEmployeeId = NewEmployeeID;
+            employeeTransfer.SourceCompanyCode = selectedSourceCompany.CompanyCode;
+            employeeTransfer.TargetCompanyCode = selectedTargetCompany.CompanyCode;
+            employeeTransfer.TargetCompanyId = selectedTargetCompany.Id;
+            employeeTransfer.TransferDate = TransferDate;
+
+            var responce = await client.EmployeeTransfer(employeeTransfer);
+            MessageBody = responce.Message;
+            Message = "Completed";
+            TaskCompleted = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+
+        } 
+    }
+
+    private async void ResetForm()
+    {
+        show = false;
+        TaskCompleted = false;
+        process = false;
+        if (Message.Contains("Completed"))
+        {
+            model = new();
+        }
+        selectedEmployee = null;
+        selectedSourceCompany = null;
+        selectedTargetCompany = null;
+    }
+
+    private Employee? selectedEmployee { get; set; }
+    private async Task<IEnumerable<Employee>> EmployeeSearch(string value)
+    {
+        await Task.Delay(5);
+
+        if (string.IsNullOrEmpty(value) && selectedSourceCompany != null)
+        {
+            return employee.Where(o => o.CompanyCode == selectedSourceCompany.CompanyCode && o.Status != EmployeeStatus.Resigned);
+        }
+        if (!string.IsNullOrEmpty(value) && selectedSourceCompany != null)
+        {
+            return employee.Where(o => o.CompanyCode == selectedSourceCompany.CompanyCode && o.Status != EmployeeStatus.Resigned)
+                .Where(x => x.EmployeeId.Contains(value, StringComparison.InvariantCultureIgnoreCase) || x.EmployeeName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        }
+        else
+            return null;
+    }
+
+    private void OnEmployeeChange(Employee employee)
+    {
+        model = employee;
+    }
+
+    private Company? selectedSourceCompany { get; set; }
+    private async Task<IEnumerable<Company>> SourceCompanySearch(string value)
+    {
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return company;
+        return company
+        .Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase) ||
+        x.CompanyCode.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private Company? selectedTargetCompany { get; set; }
+    private async Task<IEnumerable<Company>> TargetCompanySearch(string value)
+    {
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value) && selectedSourceCompany != null)
+            return company.Where(o=>o.CompanyCode != selectedSourceCompany.CompanyCode);
+        if (string.IsNullOrEmpty(value) && selectedSourceCompany != null)
+        {
+            return company
+            .Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase) ||
+            x.CompanyCode.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        }
+        else
+            return null;
+    }
+
+    public void Back()
+    {
+        NavigationManager.NavigateTo("/employees");
+    }
+}

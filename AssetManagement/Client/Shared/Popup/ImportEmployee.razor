@@ -1,0 +1,89 @@
+﻿@using AssetManagement.Dto.Models;
+<div style="margin-bottom:50px">
+    <div class="table-container table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <td>EmployeeCode</td>
+                    <td>EmployeeId</td>
+                    <td>EmployeeName</td>
+                    <td>fatherName</td>
+                    <td>Status</td>
+                    <td>EmailId</td>
+                    <td>MobileNumber</td>
+                    <td>PermanentAddress</td>
+                    <td>PState</td>
+                    <td>PCountry</td>
+                    <td>PPin</td>
+                    <td>CAddress</td>
+                    <td>CState</td>
+                    <td>CCountry</td>
+                    <td>CPin</td>
+                    <td>DateOfBirth</td>
+                    <td>AadhaarNumber</td>
+                    <td>PANNumber</td>
+                    <td>UAM</td>
+                    <td>EmpBankName</td>
+                    <td>EmpAccountName</td>
+                    <td>EmpBankAccNumber</td>
+                    <td>EmpBankIfsc</td>
+                    <td>EmergencyContactNumber</td>
+                    <td>DateOfJoin</td>
+                    <td>DateOfLeaving</td>
+                    <td>Designation</td>
+                    <td>ReportingTo</td>
+                    
+                </tr>
+            </thead>
+            <tbody>
+
+                @if (DataList?.Count == 0)
+                {
+                    <tr><td colspan="3">No data found</td></tr>
+                }
+                else
+                {
+                    foreach (var r in DataList)
+                    {
+                        <tr>
+                            <td>@r.CompanyCode</td>
+                            <td>@r.EmployeeId</td>
+                            <td>@r.EmployeeName</td>
+                            <td>@r.fatherName</td>
+                            <td>@r.Status</td>
+                            <td>@r.EmailId</td>
+                            <td>@r.MobileNumber</td>
+                            <td>@r.PermanentAddress</td>
+                            <td>@r.PState</td>
+                            <td>@r.PCountry</td>
+                            <td>@r.PPin</td>
+                            <td>@r.CurrentAddress</td>
+                            <td>@r.CState</td>
+                            <td>@r.CCountry</td>
+                            <td>@r.CPin</td>
+                            <td>@r.DateOfBirth.ToString("dd/MM/yyyy")</td>
+                            <td>@r.AadhaarNumber</td>
+                            <td>@r.PANNumber</td>
+                            <td>@r.UANNo</td>
+                            <td>@r.EmpBankName</td>
+                            <td>@r.EmpAccountName</td>
+                            <td>@r.EmpBankAccNumber</td>
+                            <td>@r.EmpBankIfsc</td>
+                            <td>@r.EmergencyContactNumber</td>
+                            <td>@r.DateOfJoin.ToString("dd/MM/yyyy")</td>
+                            <td>@r.DateOfLeaving.ToString("dd/MM/yyyy")</td>
+                            <td>@r.Designation</td>
+                            <td>@r.ReportingTo</td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<EmployeeImport> DataList { get; set; }
+
+}

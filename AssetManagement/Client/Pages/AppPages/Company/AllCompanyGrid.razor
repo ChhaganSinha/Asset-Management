@@ -1,0 +1,67 @@
+﻿@page "/companies"
+@using AssetManagement.Client.Pages.GridComponent
+@using AssetManagement.Client.Shared.Popup
+@inject PermissionService PermissionService
+@attribute [Authorize]
+
+<!-- Breadcrumb Section -->
+<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Companies</li>
+    </ol>
+</nav>
+
+@if (canEdit || hasFullAccess)
+{
+    <a href="company-config" style="cursor:pointer" class="btn btn-primary p-1 mb-1">
+        <i class="fa fa-plus fa-lg" aria-hidden="true"></i> Company
+    </a>
+}
+
+@if (canView)
+{
+    <div class="card borderd" style="padding: 0 10px;">
+        <AllCompaniesGrid />
+    </div>
+}
+else
+{
+    <div class="col-sm-12" style="margin-top:40vh">
+        <div class="loader-progress"></div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private static bool canView = true;
+    private static bool canEdit = true;
+    private static bool hasFullAccess = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var permissions = await PermissionService.HasPermission("All Company");
+            if (permissions != null)
+            {
+                canView = permissions.CanView;
+                canEdit = permissions.CanEdit;
+                hasFullAccess = permissions.HasFullAccess;
+            }
+
+            if (!canView)
+            {
+                // Redirect or handle unauthorized access
+                NavigationManager.NavigateTo("/unauthorized");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+    }
+}

@@ -1,0 +1,573 @@
+﻿@page "/employees"
+@page "/employees/{cmp}/{label?}"
+@using System;
+@using System.Linq;
+@using DocumentFormat.OpenXml;
+@using DocumentFormat.OpenXml.Packaging;
+@using DocumentFormat.OpenXml.Spreadsheet;
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.GridComponent
+@using System.Text.RegularExpressions;
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models;
+@using AssetManagement.Dto;
+@using System.Globalization;
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.Extensions.Primitives;
+@using MudBlazor
+@inject ILogger<AllEmployeeGrid> logger
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@inject AppClient _appClient
+@inject IJSRuntime JSRuntime
+
+
+<div class="card">
+    <div class="card-header" style="padding: 8px !important; display: flex; align-items: center;">
+        <MudButton Href="employee-config"
+                   Variant="Variant.Outlined"
+                   Color="MudBlazor.Color.Tertiary"
+                   Size="Size.Small"
+                   Disabled=false>
+            Add Employee
+        </MudButton>
+        <div style="margin-left: auto;">
+            <ol class="breadcrumb" style="display: flex; justify-content: flex-end; align-items: center; list-style: none; padding: 0; margin: 0;">
+                <li class="breadcrumb-item"><a href="/"><i class="fa fa-home" aria-hidden="true"></i></a></li>
+                <li class="breadcrumb-item active">Employees</li>
+            </ol>
+        </div>
+
+    </div>
+   
+    <div class="card-body">
+        <div class="card-header" style="padding: 8px !important;">
+            <div class="row">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="d-flex flex-md-row">
+                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles" Accept=".xlsx">
+                            <ButtonTemplate>
+                                <MudButton HtmlTag="label"
+                                           Variant="Variant.Outlined"
+                                           Color="MudBlazor.Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.Download"
+                                           Size="Size.Small"
+                                           Class="mr-2"
+                                           Style="margin-top: -8px;"
+                                           for="@context">
+                                    Import Employees
+                                </MudButton>
+                            </ButtonTemplate>
+                        </MudFileUpload>
+                        <a href="sample-data/Employee_Template.xlsx" title="Employee Template" class="ml-5" style="margin-top: 3px;">
+                            <i class="fa fa-cloud-download fa-2x text-info" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex flex-column flex-md-row justify-content-md-end">
+                        <MudButton Href="EmployeeTransfer"
+                                   Variant="Variant.Outlined"
+                                   Color="MudBlazor.Color.Warning"
+                                   Size="Size.Small"
+                                   Class="mb-2 mb-md-0 mr-md-2">
+                            Employee Transfer
+                        </MudButton>
+                        <MudButton Href="newOnboarding"
+                                   Variant="Variant.Outlined"
+                                   Color="MudBlazor.Color.Secondary"
+                                   Size="Size.Small"
+                                   Class="mb-2 mb-md-0">
+                            New Onboard
+                        </MudButton>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if(cmp != null)
+        {
+            @if (_task.IsCompleted)
+            {
+                <div class="row">
+                    <div class="col-sm-12">
+                        <GridComponent T="Employee" Grid="@_grid"></GridComponent>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="loader-container mt-4">
+                    <div class="loader"></div>
+                </div>
+
+            }
+        }
+        else
+        {
+            <EmployeesGrid @ref="employeesGridRef" />          
+        }
+    </div>
+
+    <ImportViewDailog Title="Import Employees" Show="show" OnCloseDialog="CloseDailogBox">
+        @if (employees?.Count() > 0)
+        {
+            <div style="padding-top: -45%">
+                @if (!Imported)
+                {
+                    <ImportEmployee DataList="employees"></ImportEmployee>
+                    <div style="text-align:center;" class="mt-4">
+                        <button @onclick="ImportEmployess" class="btn btn-outline-primary">Import</button>
+                        <button @onclick="CloseDailogBox" class="btn btn-outline-danger"> Close </button>
+                    </div>
+                }
+                else
+                {
+                    @Message
+                    <div style="text-align:center;" class="mt-4">
+                        <button @onclick="CloseDailogBox" class="btn btn-outline-danger"> Close.</button>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            @if (string.IsNullOrEmpty(Message))
+            {
+                <div>No data found</div>
+            }
+            else
+            { 
+                @Message
+            }
+            <br />
+            <div style="text-align:center;" class="mt-4">
+                <button @onclick="CloseDailogBox" class="btn btn-outline-danger"> Close </button>
+            </div>
+        }
+    </ImportViewDailog>
+</div>
+
+@code {
+    [Parameter]
+    public string cmp { get; set; }
+    [Parameter]
+    public string label { get; set; }
+
+    private EmployeesGrid employeesGridRef;
+    private bool show = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+    bool Imported = false;
+    List<EmployeeImport> employees = new List<EmployeeImport>();
+    int MaxAllowedFileSize = 512000;
+    int NumberOfColumnInSheet = 30;
+
+    IBrowserFile files;
+    private async void UploadFiles(IBrowserFile files)
+    {
+        IsError = false;
+        Message = string.Empty;
+        string ErrorMessage = string.Empty;
+        TaskCompleted = false;
+        show = false;
+        employees.Clear();
+        var file = files;
+        int count = 0;
+        int ErrorCount = 0;
+        try
+        {
+            show = true;
+            Message = "Please wait...";
+            if (files.Size > MaxAllowedFileSize)
+            {
+                TaskCompleted = true;
+                Message = $"File size is greater then {MaxAllowedFileSize / 1024} Kb";
+                StateHasChanged();
+                return;
+            }
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                // copy data from file to memory stream
+                await file.OpenReadStream().CopyToAsync(ms);
+                // positions the cursor at the beginning of the memory stream
+                ms.Position = 0;
+
+                // open the Excel document using OpenXML
+                using (SpreadsheetDocument spreadsheetDocument = SpreadsheetDocument.Open(ms, false))
+                {
+                    // get the first sheet of the workbook
+                    WorksheetPart worksheetPart = spreadsheetDocument.WorkbookPart.WorksheetParts.First();
+                    Worksheet worksheet = worksheetPart.Worksheet;
+
+                    // Find the dimensions of the worksheet
+                    SheetData sheetData = worksheet.GetFirstChild<SheetData>();
+                    if (worksheet.SheetDimension == null)
+                    {
+                        Message = "There is some preblem in sheet, Please check.";
+                        TaskCompleted = true;
+                        StateHasChanged();
+                        return;
+                    }
+                    string dimensions = worksheet.SheetDimension.Reference.Value;
+
+                    // Extract the number of columns from the dimensions
+                    int lastColumnIndex = 0;
+                    try
+                    {
+                        lastColumnIndex = GetLastColumnIndex(dimensions);                        
+                    }
+                    catch(Exception ex)
+                    {
+                        TaskCompleted = true;
+                        Message = ex.Message;
+                        StateHasChanged();
+                        return;
+                    }
+                    if (lastColumnIndex != NumberOfColumnInSheet)
+                    {
+                        TaskCompleted = true;
+                        Message = $"Sheet column mismatch or invalid sheet!";
+                        StateHasChanged();
+                        return;
+                    }
+
+                    // iterate over the rows in the sheet
+                    foreach (DocumentFormat.OpenXml.Spreadsheet.Row row in worksheet.Descendants<DocumentFormat.OpenXml.Spreadsheet.Row>())
+                    {
+                        count++;
+
+                        // skip the header row
+                        if (row.RowIndex.Value == 1) continue;
+
+                        // create a new EmployeeImport object
+                        EmployeeImport employee = new EmployeeImport();
+
+                        // iterate over the cells in the row
+                        foreach (Cell cell in row.Descendants<Cell>())
+                        {
+                            // get the value of the cell
+                            string value = cell.InnerText;
+                            if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+                            {
+                                SharedStringItem ssi = spreadsheetDocument.WorkbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAt(int.Parse(value));
+                                value = ssi.Text.Text;
+                            }
+
+                            // map the value of the cell to the corresponding property of the EmployeeImport object
+                            string column = Regex.Match(cell.CellReference.Value, "[A-Z]+").Value;
+                            try
+                            {
+                                switch (column)
+                                {
+                                    case "A":
+                                        employee.CompanyCode = value.ToUpper().Trim();
+                                        break;
+                                    case "B":
+                                        employee.EmployeeId = value.Trim();
+                                        break;
+                                    case "C":
+                                        employee.EmployeeName = value.Trim();
+                                        break;
+                                    case "D":
+                                        employee.fatherName = value.Trim();
+                                        break;
+                                    case "E":
+                                        employee.Status = (EmployeeStatus)Enum.Parse(typeof(EmployeeStatus), value.Trim());
+                                        break;
+                                    case "F":
+                                        employee.EmailId = value.Trim();
+                                        break;
+                                    case "G":
+                                        employee.MobileNumber = value.Trim();
+                                        break;
+                                    case "H":
+                                        employee.PermanentAddress = value.Trim();
+                                        break;
+                                    case "I":
+                                        employee.PState = value.Trim();
+                                        break;
+                                    case "J":
+                                        employee.PCountry = value.Trim();
+                                        break;
+                                    case "K":
+                                        employee.PPin = value.Trim();
+                                        break;
+                                    case "L":
+                                        employee.CurrentAddress = value.Trim();
+                                        break;
+                                    case "M":
+                                        employee.CState = value.Trim();
+                                        break;
+                                    case "N":
+                                        employee.CCountry = value.Trim();
+                                        break;
+                                    case "O":
+                                        employee.CPin = value.Trim();
+                                        break;
+                                    case "P":
+                                        DateTime dateOfBirth = DateTime.FromOADate(double.Parse(value));
+                                        string formattedDateOfBirth = dateOfBirth.ToString("dd/MM/yyyy");
+                                        employee.DateOfBirth = DateTime.ParseExact(formattedDateOfBirth, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                                        break;
+                                    case "Q":
+                                        employee.AadhaarNumber = value.Trim();
+                                        break;
+                                    case "R":
+                                        employee.PANNumber = value.Trim();
+                                        break;
+                                    case "S":
+                                        employee.UANNo = value.Trim();
+                                        break;
+                                    case "T":
+                                        employee.EmpBankName = value.Trim();
+                                        break;
+                                    case "U":
+                                        employee.EmpAccountName = value.Trim();
+                                        break;
+                                    case "V":
+                                        employee.EmpBankAccNumber = value.Trim();
+                                        break;
+                                    case "W":
+                                        employee.EmpBankIfsc = value.Trim();
+                                        break;
+                                    case "X":
+                                        employee.EmergencyContactNumber = value.Trim();
+                                        break;
+                                    case "Y":
+                                        double excelDateOfJoin = double.Parse(value);
+                                        employee.DateOfJoin = DateTime.FromOADate(excelDateOfJoin);
+                                        break;
+                                    case "Z":
+                                        if (value == "")
+                                        {
+                                            value = "01-01-0001";
+                                            DateTime dateOfLeaving = DateTime.ParseExact(value, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                                            employee.DateOfLeaving = dateOfLeaving;
+                                        }
+                                        else
+                                        {                                        
+                                            employee.DateOfLeaving = DateTime.FromOADate(double.Parse(value));
+                                        }
+                                        break;          
+                                    case "AA":
+                                        employee.Designation = value.Trim();
+                                        break;
+                                    case "AB":
+                                        employee.ReportingTo = value.Trim();
+                                        break;
+                                    case "AC":
+                                        employee.EmployeeCategory = value.Trim();
+                                        break;
+                                    case "AD":
+                                        employee.Department = (Departments)Enum.Parse(typeof(Departments), value.Trim());
+                                        break;
+                                }
+                            }
+                            catch(Exception ex)
+                            {
+                                IsError = true;
+                                ErrorMessage += $"\n{++ErrorCount} : " + ex.Message + $" Check Row {row.RowIndex.Value} and Column {column}\n";
+                                if (count >= worksheet.Descendants<DocumentFormat.OpenXml.Spreadsheet.Row>().Count())
+                                {
+                                    employees.Clear();
+                                    show = true;
+                                    TaskCompleted = true;
+                                    Message = ErrorMessage;                                 
+                                    StateHasChanged();
+                                    return;
+                                }
+
+                            }
+                        }
+
+                        employee.Validate();
+                        if (employee.ValidationErrMsg is not null)
+                        {
+                            IsError = true;
+                            ErrorMessage += $"\n{++ErrorCount} : " + employee.ValidationErrMsg + $" Check {employee.EmployeeName} Data \n";
+                            if (count >= worksheet.Descendants<DocumentFormat.OpenXml.Spreadsheet.Row>().Count())
+                            {
+                                employees.Clear();
+                                show = true;
+                                TaskCompleted = true;                               
+                                Message = ErrorMessage;
+                                StateHasChanged();
+                                return;
+                            }
+                        }
+                        if (!employees.Any(i => i.EmailId == employee.EmailId))
+                            employees.Add(employee);
+                    }
+
+                    show = true;
+                    TaskCompleted = true;
+                    StateHasChanged();
+                }
+
+
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            //logger.LogError("Error occurred while importing employees : {0}", ex.Message);
+            Message = ex.Message;
+            show = true;
+            TaskCompleted = true;
+            StateHasChanged();
+        }
+    }
+
+    public async Task ImportEmployess()
+    {
+        var response = await _appClient.UpsertImportEmployeeAsync(employees);
+        if (response.IsSuccess)
+        {
+            employees = response.Result;
+            Message = "Successfully Imported/Updated";
+            Imported = true;
+        }
+        else
+        {
+            Message = response.Message;
+            Imported = true;
+        }
+    }
+
+    private void CloseDailogBox()
+    {
+        show = false;
+        IsError = false;
+        Message = string.Empty;
+        employees.Clear();
+        TaskCompleted = false;
+        Imported = false;
+        employeesGridRef.RefreshGrid();
+    }
+
+    private int GetLastColumnIndex(string dimensions)
+    {
+        string[] dimensionsSplit = dimensions.Split(':');
+        string lastCellReference = dimensionsSplit[1];
+        string columnName = Regex.Replace(lastCellReference, @"\d", "");
+        int columnIndex = 0;
+        int power = 1;
+        for (int i = columnName.Length - 1; i >= 0; i--)
+        {
+            char character = columnName[i];
+            columnIndex += (character - 'A' + 1) * power;
+            power *= 26;
+        }
+        return columnIndex;
+    }
+
+    /////////////////////////////////////////////////////
+
+    private CGrid<Employee> _grid;
+    private Task _task;
+    static List<EmployeeFilesMapping> employeeFiles = new();
+
+    static bool filter = true;
+    static string BaseUri = string.Empty;
+    Action<IGridColumnCollection<Employee>> columns = c =>
+    {
+        c.Add(o => o.Id).SetWidth("50px").Css("table-bordered").Titled("SN.");
+        c.Add().Encoded(false).Sanitized(false).RenderValueAs(employee =>
+       {
+           var imageUrl = "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar.png";
+           var employeeFile = employeeFiles.FirstOrDefault(o => o.EmployeeId == employee.Id);
+           if (employeeFile != null)
+           {
+               imageUrl = $"{BaseUri}EmployeesZone/{employeeFile.ProfilePhotoFile}";
+           }
+           return $"<img src='{imageUrl}' alt='{employee.EmployeeName}' width='50' height='50' />";
+       }).SetWidth("50px").Css("table-bordered").Titled("Image");
+        c.Add(o => o.CompanyCode).SetWidth("50px").Css("table-bordered").Titled("Company");
+        c.Add(o => o.EmployeeId).SetWidth("50px").Css("table-bordered").Titled("ID");
+        c.Add(o => o.EmployeeName).SetWidth("50px").Css("table-bordered").Titled("Name");
+        c.Add(o => o.fatherName).SetWidth("50px").Css("table-bordered").Titled("Father's Name");
+        c.Add(o => o.Status).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.Department).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.MobileNumber).SetWidth("50px").Css("table-bordered").Titled("Mobile");
+        c.Add(o => o.EmailId).SetWidth("50px").Css("table-bordered").Titled("Email");
+        c.Add(o => o.AadhaarNumber).SetWidth("50px").Css("table-bordered").Titled("Aadhaar");
+        c.Add(o => o.PANNumber).SetWidth("50px").Css("table-bordered").Titled("Aadhaar");
+        c.Add(o => o.DateOfBirth).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered").Titled("Aadhaar");
+        
+        c.Add(o => o.EmergencyContactNumber).SetWidth("50px").Css("table-bordered").Titled("EmergencyNumber");
+        c.Add(o => o.EmployeeEducation).SetWidth("50px").Css("table-bordered").Titled("Education");
+        c.Add(o => o.EmployeeCategory).SetWidth("50px").Css("table-bordered").Titled("Category");
+        c.Add(o => o.ReportingTo).SetWidth("50px").Css("table-bordered");
+        c.Add(o => o.DateOfJoin).Format("{0:dd/MM/yyyy}").SetWidth("50px").Css("table-bordered");
+        
+        c.Add(o => o.EmpBankName).SetWidth("50px").Css("table-bordered").Titled("Bank");
+        c.Add(o => o.EmpAccountName).SetWidth("50px").Css("table-bordered").Titled("AccountName");
+        c.Add(o => o.EmpBankAccNumber).SetWidth("50px").Css("table-bordered").Titled("AccountNumber");
+        c.Add(o => o.EmpBankIfsc).SetWidth("50px").Css("table-bordered").Titled("IFSC");
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        BaseUri = NavigationManager.BaseUri;
+        string url = $"odata/Employee";
+        var query = new QueryDictionary<StringValues>();
+        //query.Add("grid-sorting", "Id__1__1");
+        
+        if (cmp != null)
+        {
+            if (label == "Total Employee" || label == "TotalEmployees")
+            {
+                var values = new string[] { $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new StringValues(values));
+            }
+
+            else if (label == "Probation")
+            {
+                var values = new string[] { $"Status__1__{label}", $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new StringValues(values));
+            } 
+            else if (label == "Permanent")
+            {
+                var values = new string[] { $"Status__1__{label}", $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new StringValues(values));
+            } 
+            else if (label == "Temporary")
+            {
+                var values = new string[] { $"Status__1__{label}", $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new StringValues(values));
+            } 
+            else if (label == "Resigned")
+            {
+                var values = new string[] { $"Status__1__{label}", $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new StringValues(values));
+            }
+            else   //comment this to active search option, this is bug
+            {
+                var values = new string[] { $"Department__1__{label}", $"CompanyCode__1__{cmp}" };
+                query.Add("grid-filter", new StringValues(values));
+            }
+        }
+        var client = new GridODataClient<Employee>(HttpClient, url, query, false, "EmployeeGrid", columns, 10)
+            .Sortable(false)
+            .Filterable(false)
+            .ClearFiltersButton(true)
+            .SetStriped(true)
+            .WithGridItemsCount()
+            .SetExcelExport(true,true, "Employees.xlsx")
+            .ChangePageSize(true)
+            .EmptyText("No data available")
+            .SetKeyboard(true)
+            .Searchable(true, false, false);
+
+        _grid = client.Grid;
+        _task = client.UpdateGrid();
+        await _task;
+        employeeFiles = new List<EmployeeFilesMapping>(await _appClient.GetAllEmployeeFileMap());
+    }
+}

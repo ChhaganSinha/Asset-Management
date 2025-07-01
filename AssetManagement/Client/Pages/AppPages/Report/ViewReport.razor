@@ -1,0 +1,813 @@
+﻿@page "/reports"
+@page "/report/{Id:int}"
+
+@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.GridComponent
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models;
+@using System.Globalization;
+@using AssetManagement.Dto;
+@using MudBlazor
+@inject AppClient client
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+@inject IDialogService DialogService
+
+<div class="card">
+    <div class="card-header" style="padding: 8px !important; display: flex; align-items: center;">
+        <h5>Reports</h5>
+        <div style="margin-left: auto;">
+            <ol class="breadcrumb" style="display: flex; justify-content: flex-end; align-items: center; list-style: none; padding: 0; margin: 0;">
+                <li class="breadcrumb-item"><a href="/"><i class="fa fa-home" aria-hidden="true"></i></a></li>
+                <li class="breadcrumb-item active">Reports</li>
+            </ol>
+        </div>
+    </div>
+
+
+    <div class="card-body">
+
+        <MudForm>
+            <div class="form-group row m-0">
+                <label class="col-form-label col-md-2 bold-font" style="line-height: 34px;">Report Type</label>
+                <div class="col-md-10">
+                    <MudRadioGroup @bind-SelectedOption="@SelectedOption" Orientation="Orientation.Horizontal" @oninput = "OnRadioChange">
+                        <MudRadio Option=@("Employee") Color="Color.Primary" Style="margin-right:65px">Employee</MudRadio>
+                        <MudRadio Option=@("Asset") Color="Color.Secondary">Asset</MudRadio>
+                    </MudRadioGroup>
+                </div>
+            </div>
+        </MudForm>
+
+        <div style="background: whitesmoke;border-radius: 5px;">
+            @if (SelectedOption == "Employee")
+            {              
+                <div class="form-group row mb-2 p-2 mt-1" style="margin:0">
+
+                    <EditForm Model="employeeModel">
+                        <div class="form-group row" style="padding:4px">
+                            <div class="col-md-3">
+                                <MudGrid>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudAutocomplete T="Company" Label="Company" @bind-Value="selectedSourceCompany" SearchFunc="@SourceCompanySearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                         ToStringFunc="@(e => e == null ? null : $"{e.Name} ({e.CompanyCode})")"
+                                                         Required="false"
+                                                         ResetValueOnEmptyText="true"
+                                                         CoerceText="true"
+                                                         CoerceValue="true"
+                                                         MaxItems="null">
+                                        </MudAutocomplete>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+
+                            <div class="col-md-3">
+                                <MudGrid>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudAutocomplete T="string" Label="Job Profile" @bind-Value="selectedJobProfile" SearchFunc="@JobProfileSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
+                                                         Required="false"
+                                                         ResetValueOnEmptyText="true"
+                                                         CoerceText="true"
+                                                         CoerceValue="true"
+                                                         MaxItems="null">
+                                        </MudAutocomplete>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+
+                            <div class="col-md-3">
+                                <MudGrid>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudAutocomplete T="string" Label="Manager" @bind-Value="selectedManager" SearchFunc="@ManagerSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
+                                                         Required="false"
+                                                         ResetValueOnEmptyText="true"
+                                                         CoerceText="true"
+                                                         CoerceValue="true"
+                                                         MaxItems="null">
+                                        </MudAutocomplete>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+                            <div class="col-md-3">
+                                <MudGrid>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudAutocomplete T="string" Label="Office Branch" @bind-Value="selectedBranch" SearchFunc="@BranchSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
+                                                         Required="false"
+                                                         ResetValueOnEmptyText="true"
+                                                         CoerceText="true"
+                                                         CoerceValue="true"
+                                                         MaxItems="null">
+                                        </MudAutocomplete>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+                        </div>
+                        <div class="form-group row" style="padding:4px">
+                            <div class="col-md-10">
+                                <MudRadioGroup @bind-SelectedOption="selectedEmployeeStatus">
+                                    <MudRadioGroup @bind-SelectedOption="@selectedEmployeeStatus" Orientation="Orientation.Horizontal" @oninput="OnStatusChange">
+                                        <MudRadio Option=@("All") Color="Color.Dark" Style="margin-right:65px">All Employee</MudRadio>
+                                        <MudRadio Option=@("Active") Color="Color.Info" Style="margin-right:65px">Active Employee</MudRadio>
+                                        <MudRadio Option=@("Resigned") Color="Color.Tertiary">Resigned Employee</MudRadio>
+                                    </MudRadioGroup>
+                                </MudRadioGroup>
+                            </div>
+                        </div>
+                        <div class="form-group row" style="padding:4px">
+                            <div class="col-md-4">
+                                <MudSelect MultiSelectionTextFunc="@(new Func<List<string>, string>(GetMultiSelectionText))" MultiSelection="true" @bind-Value="value" @bind-SelectedValues="selectedSkills" T="string" Label="Skills" AdornmentIcon="@Icons.Material.Filled.Search" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                    @foreach (var skill in SkillOptions)
+                                    {
+                                        <MudSelectItem T="string" Value="@skill">@skill</MudSelectItem>
+                                    }
+                                </MudSelect>
+
+                                <MudSwitch @bind-Checked="multiselectionTextChoice" Class="mud-width-full" Color="Color.Primary">MultiSelection Text choice</MudSwitch>
+                            </div>
+
+                            <div class="col-md-4">
+                                <MudDateRangePicker Label="Join Date" @ref="_dateOfJoinPicker" @bind-DateRange="_joinDate" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                    @*  <PickerActions Context="pickerActionsContext">
+                                <MudButton Class="mr-auto align-self-start" OnClick="@(() => _dateOfJoinPicker.Clear())">Clear</MudButton>
+                                <MudButton OnClick="@(() => _dateOfJoinPicker.Close(false))">Cancel</MudButton>
+                                <MudButton Color="Color.Primary" OnClick="@(() => _dateOfJoinPicker.Close())">Ok</MudButton>
+                                </PickerActions> *@
+                                </MudDateRangePicker>
+                            </div>
+                            @if(selectedEmployeeStatus == "Resigned")
+                            {
+                                <div class="col-md-4">
+                                    <MudDateRangePicker Label="Resign Date" @ref="_resignDatePicker" @bind-DateRange="_resignDate" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                        @*  <PickerActions Context="pickerActionsContext">
+                                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _resignDatePicker.Clear())">Clear</MudButton>
+                                    <MudButton OnClick="@(() => _resignDatePicker.Close(false))">Cancel</MudButton>
+                                    <MudButton Color="Color.Primary" OnClick="@(() => _resignDatePicker.Close())">Ok</MudButton>
+                                    </PickerActions> *@
+                                    </MudDateRangePicker>
+                                </div>
+                            }
+
+                            @* <div class="col-md-4">
+                        <MudGrid>
+                        <MudItem xs="12" sm="12" md="12">
+                        <MudAutocomplete T="string" Label="Location" @bind-Value="selectedLocation" SearchFunc="@LocationSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                        ToStringFunc="@(e => e == null ? null : $"{e}")"
+                        Required="false"
+                        ResetValueOnEmptyText="true"
+                        CoerceText="true"
+                        CoerceValue="true"
+                        MaxItems="null">
+                        </MudAutocomplete>
+                        </MudItem>
+                        </MudGrid>
+                        </div> *@
+                          
+                        </div>
+
+                        <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="ViewReportData" EndIcon="@Icons.Material.Filled.BarChart" Color="Color.Primary">View</MudButton>
+                        <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="ClearFilter" EndIcon="@Icons.Material.Filled.Close" Color="Color.Error">Clear</MudButton>
+                    </EditForm>
+                </div>
+            }
+            else
+            {
+             
+                <div class="form-group row mb-2 p-2 mt-1" style="margin:0">
+
+                    <EditForm Model="employeeModel">
+                        <div class="form-group row" style="padding:4px">
+                            <div class="col-md-3">
+                                <MudGrid>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudAutocomplete T="Company" Label="Company" @bind-Value="selectedSourceCompanyForAsset" SearchFunc="@AssetSourceCompanySearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                         ToStringFunc="@(e => e == null ? null : $"{e.Name} ({e.CompanyCode})")"
+                                                         Required="false"
+                                                         ResetValueOnEmptyText="true"
+                                                         CoerceText="true"
+                                                         CoerceValue="true"
+                                                         MaxItems="null">
+                                        </MudAutocomplete>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+
+                            <div class="col-md-3">
+                                <MudGrid>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudAutocomplete T="string" Label="Asset Type" @bind-Value="selectedAssetType" SearchFunc="@AssetTypeSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
+                                                         Required="false"
+                                                         ResetValueOnEmptyText="true"
+                                                         CoerceText="true"
+                                                         CoerceValue="true"
+                                                         MaxItems="null">
+                                        </MudAutocomplete>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+
+                            <div class="col-md-3">
+                                <MudGrid>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudAutocomplete T="string" Label="Brand" @bind-Value="selectedAssetBrand" SearchFunc="@AssetBrandSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
+                                                         Required="false"
+                                                         ResetValueOnEmptyText="true"
+                                                         CoerceText="true"
+                                                         CoerceValue="true"
+                                                         MaxItems="null">
+                                        </MudAutocomplete>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+                            <div class="col-md-3">
+                                <MudGrid>
+                                    <MudItem xs="12" sm="12" md="12">
+                                        <MudAutocomplete T="string" Label="Model" @bind-Value="selectedAssetModel" SearchFunc="@AssetModelSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
+                                                         Required="false"
+                                                         ResetValueOnEmptyText="true"
+                                                         CoerceText="true"
+                                                         CoerceValue="true"
+                                                         MaxItems="null">
+                                        </MudAutocomplete>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+                        </div>
+
+                        <div class="form-group row" style="padding:4px">
+                            <div class="col-md-4">
+                                <MudSelect Margin="Margin.Dense" T="string" @bind-Value="allocationStatus" Label="Allocation Status" Variant="Variant.Outlined">
+                                    <MudSelectItem Value="@("All")" />
+                                    <MudSelectItem Value="@("Free")" />
+                                    <MudSelectItem Value="@("Allocated")" />
+                             
+                                </MudSelect>
+                            </div>
+
+                            <div class="col-md-4">
+                                <MudDateRangePicker Label="Aquire Date" @ref="_aquireDatePicker" @bind-DateRange="_aquireDate" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
+
+                                </MudDateRangePicker>
+                            </div>
+
+                            <div class="col-md-4">
+                                <MudDateRangePicker Label="Discard Date" @ref="_discardDatePicker" @bind-DateRange="_discardDate" HelperText="" DateFormat="dd/MM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
+  
+                                </MudDateRangePicker>
+                            </div>
+
+                           
+
+
+                        </div>
+
+                        <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="ViewReportData" EndIcon="@Icons.Material.Filled.BarChart" Color="Color.Primary">View</MudButton>
+                        <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="ClearAssetFilter" EndIcon="@Icons.Material.Filled.Close" Color="Color.Error">Clear</MudButton>
+                    </EditForm>
+                </div>
+            }
+        </div>
+
+        @if (showReport && SelectedOption == "Employee")
+        {
+            <div style="background: whitesmoke;border-radius: 5px;">
+                <div class="table-container table-responsive" style="overflow: auto; max-height:300px">
+                    <table id="printContent" class="table table-striped table-hover print-table">
+                        <thead class="bg-secondary text-light fixed-div">
+                            <tr style="text-align:center">
+                                <td>SN.</td>
+                                <td>Company</td>
+                                <td>EmployeeID</td>
+                                <td>Status</td>
+                                <td>Name</td>
+                                <td>Father</td>
+                                <td>Email</td>
+                                <td>Mobile</td>
+                                <td>Aadhaar</td>
+                                <td>PAN</td>
+                                <td>UAN</td>
+                                <td>Education</td>
+                                <td>Skills</td>
+                                <td>Designation</td>
+                                <td>DOB</td>
+                                <td>Manager</td>
+                                <td>JoinDate</td>
+                                <td>ResignDate</td>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (responceDataOfEmployee?.Count == 0)
+                            {
+                                <tr><td colspan="3">No data found</td></tr>
+                            }
+                            else
+                            {
+                                int counter = 0;
+                                foreach (var r in responceDataOfEmployee)
+                                {
+                                    counter++;
+                                    <tr>
+                                        <td>@counter</td>
+                                        <td>@r.CompanyCode</td>
+                                        <td>@r.EmployeeId</td>
+                                        <td>@r.Status</td>
+                                        <td>@r.EmployeeName</td>
+                                        <td>@r.fatherName</td>
+                                        <td>@r.EmailId</td>
+                                        <td>@r.MobileNumber</td>
+                                        <td>@r.AadhaarNumber</td>
+                                        <td>@r.PANNumber</td>
+                                        <td>@r.UANNo</td>
+                                        <td>@r.EmployeeEducation</td>
+                                        <td>@r.Skills</td>
+                                        <td>@r.Designation</td>
+                                        <td>@r.DateOfBirth.ToString("dd/MM/yyyy")</td>
+                                        <td>@r.ReportingTo</td>
+                                        <td>@r.DateOfJoin.ToString("dd/MM/yyyy")</td>
+                                        <td>@r.DateOfLeaving.ToString("dd/MM/yyyy")</td>
+
+                                    </tr>
+
+                                }
+                                totalItem = counter;
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="fixed-div" style="text-align:center;">
+                    <i style="float:right">Total Items : @totalItem</i>
+                    <MudButton @onclick="OpenExportDialog" Size="Size.Small" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Print" Color="Color.Primary">Export</MudButton>
+                    <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="CloseReport" EndIcon="@Icons.Material.Filled.Close" Color="Color.Error">Close</MudButton>
+                </div>
+            </div>
+
+        }
+        @if (showReport && SelectedOption == "Asset")
+        {
+            <div style="background: whitesmoke;border-radius: 5px;">
+                <div class="table-container table-responsive" style="overflow: auto; max-height:300px">
+                    <table id="printAssetContent" class="table table-striped table-hover print-table">
+                        <thead class="bg-secondary text-light fixed-div">
+                            <tr style="text-align:center">
+                                <td>SN.</td>
+                                <td>Company</td>
+                                <td>Asset Type</td>
+                                <td>Brand</td>
+                                <td>Model</td>
+                                <td>SerialNumber</td>
+                                <td>Status</td>
+                                @* <td>EmployeeId</td> *@
+                                <td>Emoloyee Name</td>
+                                <td>Emoloyee Email</td>
+                                <td>Aquire Date</td>
+                                <td>Discard Date</td>
+                  
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (responceDataOfAsset?.Count == 0)
+                            {
+                                <tr><td colspan="3">No data found</td></tr>
+                            }
+                            else
+                            {
+                                int counter = 0;
+                                foreach (var r in responceDataOfAsset)
+                                {
+                                    counter++;
+                                    <tr>
+                                        <td>@counter</td>
+                                        <td>@r.CompanyCode</td>
+                                        <td>@r.AssetType</td>
+                                        <td>@r.Brand</td>
+                                        <td>@r.Model</td>
+                                        <td>@r.SerialNumber</td>
+                                        <td>@r.Status</td>
+                                        @* <td>@r.EmployeeId</td> *@
+                                        <td>@r.EmployeeName</td>
+                                        <td>@r.EmployeeEmail</td>
+                                        <td>@r.AcquireDate.ToString("dd/MM/yyyy")</td>
+                                        <td>@r.DiscardDate?.ToString("dd/MM/yyyy")</td>
+                                        
+                                    </tr>
+
+                                }
+                                totalItem = counter;
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="fixed-div" style="text-align:center;">
+                    <i style="float:right">Total Items : @totalItem</i>
+                    <MudButton @onclick="OpenExportDialog" Size="Size.Small" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Print" Color="Color.Primary">Export</MudButton>
+                    <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="CloseReport" EndIcon="@Icons.Material.Filled.Close" Color="Color.Error">Close</MudButton>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private bool show = false;
+    string Message = string.Empty;
+    string MessageBody = "Thank you!";
+    bool IsError = false;
+    bool IsSuccess = false;
+    bool TaskCompleted = false;
+    bool Exported = false;
+    int totalItem = 0;
+    Employee employeeModel = new();
+    List<Company> company = new();
+    List<AssetType> assetType = new();
+    List<Asset> asset = new();
+    List<Employee> employee = new();
+    AllocationlogReportGenerate model = new();
+    List<Employee> responceDataOfEmployee = new();
+    List<Asset> responceDataOfAsset = new();
+
+    bool columnSelection = false;
+    //private DateRange _issueDate = new DateRange(DateTime.Now.Date, DateTime.Now.AddDays(5).Date);
+    private MudDateRangePicker _dateOfJoinPicker;
+    private MudDateRangePicker _resignDatePicker;
+    private MudDateRangePicker _returnDatePicker;
+    private DateRange _joinDate = new DateRange();
+    private DateRange _resignDate = new DateRange();
+    private DateRange _returnDate = new DateRange();
+    public string selectedEmployeeStatus { get; set; }
+
+    private MudDateRangePicker _aquireDatePicker;
+    private MudDateRangePicker _discardDatePicker;
+    private DateRange _aquireDate = new DateRange();
+    private DateRange _discardDate = new DateRange();
+    private string allocationStatus;
+    DateTime dateTime;
+
+    public string SelectedOption { get; set; }
+    public string[] SkillOptions = { };
+    private List<int> SelectedSkill { get; set; } = new();
+    ReportFilters reportFilters;
+    AssetReportFilters assetReportFilters;
+
+    protected override async Task OnInitializedAsync()
+    {
+        SelectedOption = "Employee";
+
+        reportFilters = await client.GetEmployeeReportFileters();
+        assetReportFilters = await client.GetAssetReportFileters();
+
+        var employeeSkills = await client.GetAllSkill();
+        SkillOptions = employeeSkills.Select(skill => skill.Skill).ToArray();
+
+
+        company = new List<Company>(await client.GetAllCompany());
+        //assetType = new List<AssetType>(await client.GetAllAssetType());
+        employee = new List<Employee>(await client.GetAllEmployee());
+        asset = new List<Asset>(await client.GetAllAsset());
+    }
+
+    //employee
+    private Company? selectedSourceCompany { get; set; }
+    private string? selectedJobProfile { get; set; }
+    private string? selectedManager { get; set; }
+    private string? selectedBranch { get; set; }
+    private string? selectedLocation { get; set; }
+
+    //asset
+    private Company? selectedSourceCompanyForAsset { get; set; }
+    private string? selectedAssetType { get; set; }
+    private string? selectedAssetBrand { get; set; }
+    private string? selectedAssetModel { get; set; }
+
+    private async Task<IEnumerable<Company>> SourceCompanySearch(string value)
+    {
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return company;
+        return company
+        .Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase) ||
+        x.CompanyCode.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task<IEnumerable<string>> JobProfileSearch(string value)
+    {
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return reportFilters.Designations;
+        return reportFilters.Designations
+        .Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+    private async Task<IEnumerable<string>> ManagerSearch(string value)
+    {
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return reportFilters.Managers;
+        return reportFilters.Managers
+        .Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+    private async Task<IEnumerable<string>> LocationSearch(string value)
+    {
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return reportFilters.Locations;
+        return reportFilters.Locations
+        .Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+    private async Task<IEnumerable<string>> BranchSearch(string value)
+    {
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return reportFilters.Branches;
+        return reportFilters.Branches
+        .Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    //Asset
+    private async Task<IEnumerable<Company>> AssetSourceCompanySearch(string value)
+    {
+        await Task.Delay(5);
+        selectedAssetType = null;
+        selectedAssetBrand = null;
+        selectedAssetModel = null;
+
+        if (string.IsNullOrEmpty(value))
+            return company;
+        return company
+        .Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase) ||
+        x.CompanyCode.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task<IEnumerable<string>> AssetTypeSearch(string value)
+    {
+        await Task.Delay(5);
+        selectedAssetBrand = null;
+        selectedAssetModel = null;
+        if (selectedSourceCompanyForAsset == null)
+        {
+            return null;
+        }
+        if (string.IsNullOrEmpty(value))
+            return assetReportFilters.AssetType.Where(o => o.CompanyCode == selectedSourceCompanyForAsset.CompanyCode).Select(x => x.AssetTypeName);
+
+        return assetReportFilters.AssetType.Where(o => o.CompanyCode == selectedSourceCompanyForAsset.CompanyCode)
+            .Where(x => x.AssetTypeName.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+            .Select(x => x.AssetTypeName);
+    }
+
+    private async Task<IEnumerable<string>> AssetBrandSearch(string value)
+    {
+        await Task.Delay(5);
+        selectedAssetModel = null;
+        if (selectedAssetType == null)
+        {
+            return null;
+        }
+        if (string.IsNullOrEmpty(value))
+            return assetReportFilters.Brand.Where(o => o.AssetType == selectedAssetType).Select(x => x.BrandName);
+
+        return assetReportFilters.Brand.Where(o => o.AssetType == selectedAssetType)
+            .Where(x => x.BrandName.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+            .Select(x => x.BrandName);
+    }
+
+    private async Task<IEnumerable<string>> AssetModelSearch(string value)
+    {
+        await Task.Delay(5);
+        if (selectedAssetBrand == null)
+        {
+            return null;
+        }
+        if (string.IsNullOrEmpty(value))
+            return assetReportFilters.Model.Where(o => o.Brand == selectedAssetBrand).Select(x => x.ModelName);
+
+        return assetReportFilters.Model.Where(o => o.Brand == selectedAssetBrand)
+            .Where(x => x.ModelName.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+            .Select(x => x.ModelName);
+    }
+
+
+    private bool multiselectionTextChoice;
+    private string value { get; set; } = "Nothing selected";
+    private IEnumerable<string> selectedSkills { get; set; } = new HashSet<string>() { };
+
+    EmployeeFilterModel employeeFilterModel = new();
+    AssetFilterModel assetFilterModel = new();
+
+    private string GetMultiSelectionText(List<string> selectedValues)
+    {
+        if (multiselectionTextChoice)
+        {
+            return $"Selected skills{(selectedValues.Count > 1 ? "s" : "")}: {string.Join(", ", selectedValues.Select(x => x))}";
+        }
+        else
+        {
+            return $"{selectedValues.Count} skill{(selectedValues.Count > 1 ? "s have" : " has")} been selected";
+        }
+    }
+
+
+
+    public async Task ViewReportData()
+    {
+        totalItem = 0;
+        showReport = true;
+        if (SelectedOption == "Employee")
+        {
+            employeeFilterModel.Company = selectedSourceCompany?.CompanyCode;
+            employeeFilterModel.Designation = selectedJobProfile;
+            employeeFilterModel.ManagerName = selectedManager;
+            employeeFilterModel.BranchOffice = selectedBranch;
+            employeeFilterModel.Location = selectedLocation;
+            employeeFilterModel.Skills = selectedSkills;
+            employeeFilterModel.EmployeeStatus = selectedEmployeeStatus;
+
+            if (_joinDate != null)
+            {
+                if (_joinDate.Start != null && _joinDate.End != null)
+                {
+                    CultureInfo culture = new CultureInfo("en-US");
+                    employeeFilterModel.JoinDateStart = Convert.ToDateTime(_joinDate.Start, culture);
+                    employeeFilterModel.JoinDateEnd = Convert.ToDateTime(_joinDate.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+                }
+            }
+            else
+            {
+                employeeFilterModel.JoinDateStart = new DateTime();
+                employeeFilterModel.JoinDateEnd = new DateTime();
+            }
+            if (_resignDate != null)
+            {
+                if (_resignDate.Start != null && _resignDate.End != null)
+                {
+                    CultureInfo culture = new CultureInfo("en-US");
+                    employeeFilterModel.ResignDateStart = Convert.ToDateTime(_resignDate.Start, culture);
+                    employeeFilterModel.ResignDateEnd = Convert.ToDateTime(_resignDate.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+                }
+            }
+            else
+            {
+                employeeFilterModel.ResignDateStart = new DateTime();
+                employeeFilterModel.ResignDateEnd = new DateTime();
+            }
+
+            responceDataOfEmployee = await client.GetFilteredEmployeeReport(employeeFilterModel);
+        }
+        else
+        {
+            assetFilterModel.Status = null;
+            assetFilterModel.Company = selectedSourceCompanyForAsset?.CompanyCode;
+            assetFilterModel.AssetType = selectedAssetType;
+            assetFilterModel.Brand = selectedAssetBrand;
+            assetFilterModel.Model = selectedAssetModel;
+            if (allocationStatus == "Free")
+                assetFilterModel.Status = AllocationStatus.Free;
+            if (allocationStatus == "Allocated")
+                assetFilterModel.Status = AllocationStatus.Allocated;
+
+            if (_aquireDate != null)
+            {
+                if (_aquireDate.Start != null && _aquireDate.End != null)
+                {
+                    CultureInfo culture = new CultureInfo("en-US");
+                    assetFilterModel.AquireDateStart = Convert.ToDateTime(_aquireDate.Start, culture);
+                    assetFilterModel.AquireDateEnd = Convert.ToDateTime(_aquireDate.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+                }
+            }
+            else
+            {
+                assetFilterModel.AquireDateStart = new DateTime();
+                assetFilterModel.AquireDateEnd = new DateTime();
+            }
+            if (_discardDate != null)
+            {
+                if (_discardDate.Start != null && _discardDate.End != null)
+                {
+                    CultureInfo culture = new CultureInfo("en-US");
+                    assetFilterModel.DiscardDateStart = Convert.ToDateTime(_discardDate.Start, culture);
+                    assetFilterModel.DiscardDateEnd = Convert.ToDateTime(_discardDate.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+                }
+            }
+            else
+            {
+                assetFilterModel.DiscardDateStart = new DateTime();
+                assetFilterModel.DiscardDateEnd = new DateTime();
+            }
+
+            responceDataOfAsset = await client.GetFilteredAssetReport(assetFilterModel);
+        }
+
+    }
+
+    bool showReport = false;
+    public void CloseReport()
+    {
+        showReport = false;
+    }
+    public void ClearFilter()
+    {
+        showReport = false;
+        selectedSourceCompany = null;
+        selectedJobProfile = null;
+        selectedManager = null;
+        selectedBranch = null;
+        selectedLocation = null;
+        selectedSkills = null;
+        selectedEmployeeStatus = "All";
+        _dateOfJoinPicker = new();
+        _resignDatePicker = new();
+
+    }
+
+    public void ClearAssetFilter()
+    {
+        showReport = false;       
+        selectedSourceCompanyForAsset = null;
+        selectedAssetType = null;
+        selectedAssetBrand = null;
+        selectedAssetModel = null;
+        selectedEmployeeStatus = null;
+        _aquireDatePicker.Clear();
+        _discardDatePicker.Clear();
+    }
+    protected async Task ExportExcelReport()
+    {
+        if(SelectedOption == "Employee")
+        {
+            var responceData = await client.EmployeeExportToExcel(employeeFilterModel);
+            var fileName = $"EmployeeReport {DateTime.Now.ToString()}.xlsx";
+            var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            await using (var memoryStream = new MemoryStream(responceData))
+            {
+                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, mimeType, memoryStream.ToArray());
+            }
+        }
+        if (SelectedOption == "Asset")
+        {
+            var responceData = await client.AssetExportToExcel(assetFilterModel);
+            var fileName = $"AssetReport {DateTime.Now.ToString()}.xlsx";
+            var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            await using (var memoryStream = new MemoryStream(responceData))
+            {
+                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, mimeType, memoryStream.ToArray());
+            }
+        }
+    }
+   
+    private async Task PrintPDF()
+    {
+        if(SelectedOption == "Employee")
+            await JSRuntime.InvokeVoidAsync("printDiv", "printContent");
+        // await JSRuntime.InvokeVoidAsync("printInterop.printDiv", "printContent");
+
+        if (SelectedOption == "Asset")
+            await JSRuntime.InvokeVoidAsync("printDiv", "printAssetContent");
+    }
+
+    private async Task OpenExportDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialogResult = await DialogService.Show<DialogTemplateExample_Dialog>("Export to", options).Result;
+
+        if (dialogResult != null)
+        {
+            if (dialogResult.Data != null)
+            {
+                if (dialogResult.Data.Equals("Excel"))
+                {
+                    await ExportExcelReport();
+                }
+                else if (dialogResult.Data.ToString() == "PDF")
+                {
+                    await PrintPDF();
+                }
+            }
+        }
+    }
+
+    private void OnRadioChange()
+    {
+        showReport = false; 
+    }
+    private void OnStatusChange()
+    {
+        if(_resignDatePicker != null)
+            _resignDatePicker.Clear();
+    }
+}

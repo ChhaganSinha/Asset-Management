@@ -1,0 +1,23 @@
+﻿@using AssetManagement.Client.Pages.AppPages.Company;
+@using AssetManagement.Dto.Models;
+@using GridShared
+@using GridShared.Columns
+@using GridShared.Utility
+@using Microsoft.Extensions.Primitives
+@implements ICustomGridComponent<EmployeeOnboardingDto>
+@inject NavigationManager NavigationManager
+
+<button class='btn btn-sm btn-warning' style="border-radius:15px" @onclick="MyClickHandler" title="Edit"><i class="fa fa-pencil-square-o"></i></button>
+
+@code {
+    [Parameter]
+    public EmployeeOnboardingDto Item { get; set; }
+
+    [Parameter]
+    public CGrid<EmployeeOnboardingDto> Grid { get; set; }
+
+    private void MyClickHandler(MouseEventArgs e)
+    {
+        NavigationManager.NavigateTo($"/EmployeeOnBoarding/{"e&v"}/{Item.SecurityStamp}");
+    }
+}

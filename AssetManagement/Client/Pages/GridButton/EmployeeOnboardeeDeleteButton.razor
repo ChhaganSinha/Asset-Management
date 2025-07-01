@@ -1,0 +1,95 @@
+﻿@using AssetManagement.Client.Client;
+@using AssetManagement.Client.Pages.AppPages.Company;
+@using AssetManagement.Client.Pages.GridComponent;
+@using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Dto.Models;
+@using GridShared
+@using GridShared.Columns
+@using GridShared.Utility
+@using Microsoft.Extensions.Primitives
+@inject AppClient client
+@implements ICustomGridComponent<EmployeeOnboardingDto>
+@inject NavigationManager NavigationManager
+
+<button class='btn btn-sm btn-danger' style="border-radius:15px" @onclick="MyClickHandler" title="Delete"><i class="fa fa-trash"></i></button>
+<SimpleDailog Title="@Title" Show="@show" OnCloseDialog="ResetForm">
+    @if (show)
+    {
+        @if (!TaskCompleted && !process)
+        {
+            <div style="text-align:center;">
+                <h6 class="pb-2">Are you sure want to Delete?</h6>
+
+                <button class="btn btn-danger" @onclick="Delete">Yes</button>
+                <button class="btn btn-primary" @onclick="ResetForm">No</button>
+            </div>
+        }
+        else if (TaskCompleted && !process)
+        {
+            <div style="text-align:center;">
+                @MessageBody
+            </div>
+            <br />
+        }
+        else
+        {
+            <div style="text-align:center">
+                <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+            </div>
+        }
+        <br />
+    }
+</SimpleDailog>
+
+@code {
+    [Parameter]
+    public EmployeeOnboardingDto Item { get; set; }
+
+    [Parameter]
+    public CGrid<EmployeeOnboardingDto> Grid { get; set; }
+
+    [Parameter]
+    public IList<Action<object>> Actions { get; set; }
+
+    bool show = false;
+    bool process = false;
+    bool TaskCompleted = false;
+    string MessageBody = string.Empty;
+    string Title = "Delete this data";
+
+    private async void Delete()
+    {
+        process = true;
+        var responce = await client.DeleteOnboardeeById(Item.Id);
+        if (responce.Item1 == true)
+        {
+            MessageBody = responce.Item2;
+        }
+        else
+        {
+            MessageBody = responce.Item2;
+        }
+
+        TaskCompleted = true;
+        process = false;
+        StateHasChanged();
+    }
+    private void MyClickHandler(MouseEventArgs e)
+    {
+        show = true;
+        MessageBody = string.Empty;
+        TaskCompleted = false;
+    }
+
+    public void ResetForm()
+    {
+
+        show = false;
+        TaskCompleted = false;
+        process = false;
+        MessageBody = string.Empty;
+        StateHasChanged();
+        Actions[0]?.Invoke(Item);
+    }
+
+}

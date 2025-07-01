@@ -1,0 +1,141 @@
+﻿@using AssetManagement.Client.Client;
+@using AssetManagement.Dto
+@using AssetManagement.Dto.Dashboard;
+@inject IJSRuntime JSRuntime
+@inject AppClient client
+@inject NavigationManager NavManager
+<canvas id="@Id" style="width:100%; height:200px;"></canvas>
+
+
+@code {
+
+    [Parameter]
+    public string Id { get; set; }
+
+    [Parameter]
+    public Dto.Dashboard.ChartType Type { get; set; }
+
+    [Parameter]
+    public string[] Data { get; set; }
+
+    [Parameter]
+    public string[] BackgroundColor { get; set; }
+
+    [Parameter]
+    public string[] Labels { get; set; }
+
+    [Parameter]
+    public int[] Ids { get; set; }
+
+    [Parameter]
+    public bool Responsive { get; set; } = true;
+
+    [Parameter]
+    public bool AspectRatio { get; set; } = true;
+
+    [Parameter]
+    public bool IsStacked { get; set; }
+
+    [Parameter]
+    public List<ChartJsDataset> Datasets { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnChartClick { get; set; }
+
+    [Parameter]
+    public bool IsClickable { get; set; } = true;
+
+    [Parameter]
+    public int borderRadius { get; set; } = 0;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Here we create an anonymous type with all the options
+        // that need to be sent to Chart.js
+
+        if (Datasets == null || Datasets.Count() == 0)
+            return;
+
+        if (!IsStacked)
+        {
+            var config = new
+            {
+                Type = Type.ToString().ToLower(),
+                Options = new
+                {
+                    Responsive = Responsive,
+                    maintainAspectRatio = AspectRatio,
+                    Scales = new
+                    {
+
+                        YAxes = new[]
+                        {
+                                new
+                                {
+                                    Ticks = new { BeginAtZero = true },
+                                    Stacked = IsStacked,
+                                    //max=1
+                                }
+                },
+
+                        XAxes = new[]
+                        {
+                                new
+                                {
+                                    Ticks = new {  BeginAtZero = true},
+                                    Stacked = IsStacked,
+                                    //max=1
+                                }
+                }
+
+                    },
+
+
+
+                },
+
+                Data = new
+                {
+                    Labels = Labels,
+                    Ids = Ids,
+                    Datasets = Datasets.Select(o => new
+                    {
+                        Label = o.Label,
+                        Data = o.Data,
+                        Tension = 0.4,
+                        borderWidth = 2,
+                        borderRadius = borderRadius,
+                        BackgroundColor = o.BackgroundColor,
+                        Stack = o.Stack,
+                    })
+
+                },
+
+
+
+
+
+            };
+            var ObjRef = DotNetObjectReference.Create(this);
+
+            await JSRuntime.InvokeVoidAsync("setup", Id, config, ObjRef);
+
+        }
+
+    }
+
+    [JSInvokable]
+    public async Task ChartClick(string cmp, string label, string ChartId)
+    {
+        if (ChartId == "employeebar")
+        {
+            NavManager.NavigateTo($"/employees/{cmp}/{label}");
+        }
+    }
+    [JSInvokable]
+    public static async Task StackChartHover()
+    {
+        //Console.WriteLine("MouseHovered");
+    }
+
+}
