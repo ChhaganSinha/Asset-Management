@@ -18,15 +18,15 @@ namespace AssetManagement.Server.Controllers.Api
     [Authorize]
     public class ReportController : Controller
     {
-        readonly AppRepository _appRepository;
+        readonly IReportRepository _reportRepository;
         readonly Microsoft.Extensions.Logging.ILogger _logger;
         readonly IConfiguration _configuration;
         private readonly IMailService _mailService;
         private readonly IWebHostEnvironment _env;
 
-        public ReportController(ILogger<ReportController> logger, IConfiguration appConfig, IAppRepository appRepository, IMailService mailService, IWebHostEnvironment env) : base()
+        public ReportController(ILogger<ReportController> logger, IConfiguration appConfig, IReportRepository reportRepository, IMailService mailService, IWebHostEnvironment env) : base()
         {
-            _appRepository = (AppRepository?)appRepository;
+            _reportRepository = reportRepository;
             _logger = logger;
             _configuration = appConfig;
             _mailService = mailService;
@@ -39,7 +39,7 @@ namespace AssetManagement.Server.Controllers.Api
         public async Task<IActionResult> AllocationlogExcelReport([FromQuery] AllocationlogReportGenerate data)
         {
            
-            var allocationLogs = await _appRepository.GetAllAllocationLog();
+            var allocationLogs = await _reportRepository.GetAllAllocationLog();
             if (data.CompanyCode && !(data.CompanyCodeSelected[0] == null))
             {
                 var companyCodeString = string.Join(",", data.CompanyCodeSelected);
@@ -148,7 +148,7 @@ namespace AssetManagement.Server.Controllers.Api
         public async Task<IActionResult> ExportEmployeeReport(EmployeeFilterModel model)
         {
 
-            var responce = await _appRepository.GetFilteredEmployeeReport(model);
+            var responce = await _reportRepository.GetFilteredEmployeeReport(model);
 
 
             using (MemoryStream stream = new MemoryStream())
@@ -246,7 +246,7 @@ namespace AssetManagement.Server.Controllers.Api
         public async Task<IActionResult> AssetEmployeeReport(AssetFilterModel model)
         {
 
-            var responce = await _appRepository.GetFilteredAssetReport(model);
+            var responce = await _reportRepository.GetFilteredAssetReport(model);
 
 
             using (MemoryStream stream = new MemoryStream())
