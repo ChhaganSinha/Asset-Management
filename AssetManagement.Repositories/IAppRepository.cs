@@ -14,7 +14,6 @@ namespace AssetManagement.Repositories
         Task<ApiResponse<Asset>> AssetTransfer(AssetTransferModel data);
         Task<ApiResponse<string>> ChangeReturnUrl();
         Task<(bool, string)> DeleteAssetById(Asset data);
-        Task<(bool, string)> DeleteCompanyById(Company data);
         Task<(bool, string)> DeleteEmployeeById(int id);
         Task<(bool, string)> DeleteOnboardeeById(int id);
         Task<ApiResponse<UserProfilePicUpld>> DeleteProfBgPic(UserProfilePicUpld userProfilePicUpld);
@@ -28,7 +27,6 @@ namespace AssetManagement.Repositories
         Task<IEnumerable<AllocationLog>> GetAllAllocationLog();
         Task<IEnumerable<Asset>> GetAllAsset();
         Task<IEnumerable<AssetType>> GetAllAssetType();
-        Task<IEnumerable<Company>> GetAllCompany();
         Task<IEnumerable<DesignationDTO>> GetAllDesignations();
         Task<IEnumerable<Employee>> GetAllEmployee();
         Task<IEnumerable<EmployeeFilesMapping>> GetAllEmployeeFileMap();
@@ -39,7 +37,6 @@ namespace AssetManagement.Repositories
         Task<Asset> GetAssetById(int id);
         Task<AssetReportFilters> GetAssetReportFilters();
         Task<AssetType> GetAssetTypeById(int id);
-        Task<Company> GetCompanyById(int id);
         Task<ApiResponse<EmployeePortalSPFX>> GetEmployeeByEmail(string? email);
         Task<Employee> GetEmployeeById(int id);
         Task<EmployeeFilesMapping> GetEmployeeFilesById(int id);
@@ -56,7 +53,6 @@ namespace AssetManagement.Repositories
         Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataByID(string param);
         Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataByKey(string param);
         Task<UserProfilePicUpld> GetProfilePicByEmail(string email);
-        Task<IEnumerable<SubOffice>> GetSubOfficeById(int id);
         Task<ZoneArea> GetZoneAreaById(int id);
         Task<string> ReadAllocationCommentById(int id);
         Task<Allocation> ShareAllocationDetailsToEmployeeViaEmail(int id);
@@ -67,7 +63,6 @@ namespace AssetManagement.Repositories
         Task<ApiResponse<Allocation>> UpsertAllocationAsync(Allocation data);
         Task<ApiResponse<Asset>> UpsertAssetAsync(Asset data);
         Task<ApiResponse<AssetType>> UpsertAssetTypeAsync(AssetType data);
-        Task<ApiResponse<Company>> UpsertCompanyAsync(Company data);
         Task<EmployeeOnboardingDto> UpsertConfirmOnboardingAsync(OnBoardingConfirmationDto data);
         Task<List<DesignationDTO>> UpsertDesignation(List<DesignationDTO> details);
         Task<ApiResponse<Employee>> UpsertEmployeeAsync(Employee data);
@@ -78,7 +73,6 @@ namespace AssetManagement.Repositories
         Task<ApiResponse<List<AssetImport>>> UpsertImportAssetAsync(List<AssetImport> data);
         Task<ApiResponse<List<EmployeeImport>>> UpsertImportEmployeeAsync(List<EmployeeImport> data);
         Task<ApiResponse<UserProfilePicUpld>> UpsertProfilePic(UserProfilePicUpld data);
-        Task<List<SubOffice>> UpsertSubOffice(List<SubOffice> data);
         Task<List<ZoneArea>> UpsertZoneArea(List<ZoneArea> details);
     }
 }

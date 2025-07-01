@@ -130,6 +130,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddLogging();
 builder.Services.AddScoped<BaseRepository>();
 builder.Services.AddScoped<IAppRepository, AppRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
 builder.Services.AddSingleton(builder.Configuration.GetSection("MailSettings").Get<MailSettings>());
 builder.Services.AddScoped<IMailService, MailService>();
