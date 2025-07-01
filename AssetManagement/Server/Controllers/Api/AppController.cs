@@ -189,34 +189,6 @@ namespace AssetManagement.Server.Controllers.Api
         {
             return await _employeeRepository.GetEmployeeByIdAsync(id);
         }
-        [HttpGet]
-        [Route("EmployeeOnboarding/{id}")]
-        [AllowAnonymous]
-        public async Task<EmployeeOnboardingDto> GetEmployeeOnboardingById(int id)
-        {
-            var data =  await _appRepository.GetEmployeeOnboardingById(id);
-            return data;
-        }
-        [HttpPost]
-        [Route("UpsertEmployeeOnboardingDto")]
-        [AllowAnonymous]
-        public async Task<IActionResult> UpsertConfirmOnboardingAsync(OnBoardingConfirmationDto data)
-        {
-            if (data == null)
-            {
-                return BadRequest("Invalid data received.");
-            }
-
-            try
-            {
-                var result = await _appRepository.UpsertConfirmOnboardingAsync(data);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
 
         [HttpGet]
         [Route("EmployeeInsurance/{id}")]
@@ -299,126 +271,6 @@ namespace AssetManagement.Server.Controllers.Api
             return result;
         }
 
-        [HttpPost]
-        [Route("EmployeeOnboarding")]
-        [AllowAnonymous]
-        public async Task<ApiResponse<EmployeeOnboardingDto>> UpsertEmployeeOnboarding(EmployeeOnboardingDto data)
-        {
-            var result = new ApiResponse<EmployeeOnboardingDto>();
-
-            try
-            {
-                data.CreatedBy = User?.Identity?.Name;
-                var HRName = "Pradeep Sharma";
-                var HRMobile = "9312291234";
-                //var HRId = data.HR;
-                //var hr = await _appRepository.GetEmployeeById(int.Parse(data.HR));
-                //var HRMobile = hr.MobileNumber;
-                //var HRName = hr.EmployeeName;
-                string baseUrl = $"{Request.Scheme}://{Request.Host.Value}";
-                data.BaseUrl = baseUrl;
-                //data.CreatedBy = HttpContext.User.Identity.Name ?? "System";
-                result = await _appRepository.UpsertEmployeeOnboarding(data);
-                if (result.IsSuccess == true)
-                {
-                    string path;
-#if DEBUG
-                    path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\AssetManagement\\Client\\wwwroot\\EmailTemplets\\OnboardingForm.txt";
-#else
-                path = Path.Combine(_env.ContentRootPath, "wwwroot", "EmailTemplets/OnboardingForm.txt");
-#endif
-
-                    var RawContents = System.IO.File.ReadAllText($"{path}");
-                    var Contents = RawContents.Replace("<###RETURN_URL###>", result.Result.ReturnUrl)
-                        .Replace("<###CandidateName###>", result.Result.Name)
-                        .Replace("<###CompanyName###>", result.Result.CompanyName)
-                        .Replace("<###HRName###>", HRName)
-                        .Replace("<###HRMobile###>", HRMobile)
-                        .Replace("<###ManagerName###>", result.Result.ReportingTo)
-                        .Replace("<###ManagerMobile###>", result.Result.ManagerMobile);
-                    string To = result.Result.ExternalEmailId;
-                    string Subject = "AssetManagement Application Onboarding Form";
-                    string Body = Contents;
-
-                    await _mailService.SendEmailAsync(To, Subject, Body);
-
-                    return result;
-                }
-            }
-            catch (Exception ex)
-            {
-                result.IsSuccess = false;
-                result.Message = ex.Message;
-            }
-            return result;
-        }
-
-        [HttpPost]
-        [Route("employee-Onboard")]
-        [AllowAnonymous]
-        public async Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataByKey(GenericApiRequest<string> request)
-        {
-            return await _appRepository.GetOnboardingDataByKey(request.Param);
-        }
-
-        [HttpPost]
-        [Route("employeeOnboardByID")]
-        public async Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataById(GenericApiRequest<string> request)
-        {
-            return await _appRepository.GetOnboardingDataByID(request.Param);
-        }
-        [HttpGet]
-        [Route("EmployeeOnboarding/{id}")]
-        public async Task<EmployeeOnboardingDto> GetEmployeeonboardingById(int id)
-        {
-            var data = await _appRepository.GetEmployeeonboardingById(id);
-            return data;
-        }
-
-        [HttpPost]
-        [Route("UpsertEmployeeFiles")]
-        [AllowAnonymous]
-        public async Task<ApiResponse<EmployeeFilesMapping>> UpsertEmployeeFiles(EmployeeFilesMapping data)
-        {
-            var result = new ApiResponse<EmployeeFilesMapping>();
-
-            try
-            {
-                result = await _appRepository.UpsertEmployeeFilesAsync(data);
-                if (!result.IsSuccess)
-                {
-                    result.Message = result.Message;
-                }
-                else
-                {
-                    result.Result = data;
-                    result.IsSuccess = true;
-                    result.Message = string.Empty;
-                }
-            }
-            catch (Exception ex)
-            {
-                result.IsSuccess = false;
-                result.Message = ex.Message;
-            }
-
-            return result;
-        }
-
-        [HttpGet]
-        [Route("EmployeeFilesById/{id}")]
-        [AllowAnonymous]
-        public async Task<EmployeeFilesMapping> EmployeeFilesById(int id)
-        {
-            return await _appRepository.GetEmployeeFilesById(id);
-        }
-
-        [HttpGet]
-        [Route("all-EmployeeFileMap")]
-        public async Task<IEnumerable<EmployeeFilesMapping>> GetAllEmployeeFileMap()
-        {
-            return await _appRepository.GetAllEmployeeFileMap();
-        }
 
         [HttpPost]
         [Route("UpsertImportEmployee")]
@@ -565,43 +417,6 @@ namespace AssetManagement.Server.Controllers.Api
             return result;
         }
 
-        [HttpGet]
-        [Route("ShareFormWithOnboardeeViaEmail/{id}")]
-        public async Task<ApiResponse<EmployeeOnboardingDto>> ShareFormWithOnboardeeViaEmail(int id)
-        {
-            var result = new ApiResponse<EmployeeOnboardingDto>();
-            var onboardee = await _appRepository.ShareFormWithOnboardeeViaEmail(id);
-            if (onboardee != null)
-            {
-                string path;
-#if DEBUG
-                path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\AssetManagement\\Client\\wwwroot\\EmailTemplets\\OnboardingForm.txt";
-#else
-                path = Path.Combine(_env.ContentRootPath, "wwwroot", "EmailTemplets/OnboardingForm.txt");
-#endif
-
-                var RawContents = System.IO.File.ReadAllText($"{path}");
-                var Contents = RawContents.Replace("<###RETURN_URL###>", onboardee.ReturnUrl).Replace("<CandidateName>", onboardee.Name).Replace("<CompanyName>", onboardee.CompanyName).Replace("<HRContact>", "");
-                string To = onboardee.ExternalEmailId;
-                string Subject = $"Welcome to {onboardee.CompanyName}! Please Complete the Onboarding Form";
-                string Body = Contents;
-
-                try
-                {
-                    await _mailService.SendEmailAsync(To, Subject, Body);
-                    result.IsSuccess = true;
-                    result.Message = "Successfully shared with candidate";
-                    result.Result = onboardee;
-                }
-                catch (Exception ex)
-                {
-                    result.IsSuccess = true;
-                    result.Message = ex.Message;
-                }
-
-            }
-            return result;
-        }
 
 
         [HttpPost]

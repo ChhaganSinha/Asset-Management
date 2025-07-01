@@ -131,6 +131,7 @@ builder.Services.AddLogging();
 builder.Services.AddScoped<BaseRepository>();
 builder.Services.AddScoped<IAppRepository, AppRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeOnboardingRepository, EmployeeOnboardingRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IAllocationRepository, AllocationRepository>();
