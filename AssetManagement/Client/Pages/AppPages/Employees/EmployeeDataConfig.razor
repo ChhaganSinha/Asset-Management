@@ -55,10 +55,10 @@
                 <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
-                    <div class="form-group row mb-2">
-                        <label class="col-form-label col-md-2 bold-font required-field">Company Code</label>
-                        <div class="col-md-2">
-                            <InputSelect id="CompanyCode" @bind-Value="model.CompanyCode" class="form-control" disabled="@(model.Id > 0)" @onclick="GetEmployeeId">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Company Code</label>
+                            <InputSelect id="CompanyCode" @bind-Value="model.CompanyCode" class="form-select" disabled="@(model.Id > 0)" @onclick="GetEmployeeId">
                                 <option selected>- Select -</option>
                                 @foreach (var c in company.ToList())
                                 {
@@ -67,9 +67,9 @@
                             </InputSelect>
                             <ValidationMessage For="() => model.CompanyCode" />
                         </div>
-                        <label class="col-form-label col-md-2 bold-font required-field">Employee Status</label>
-                        <div class="col-md-2">
-                            <InputSelect id="Status" @bind-Value="model.Status" class="form-control" @onclick="GetEmployeeId">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Employee Status</label>
+                            <InputSelect id="Status" @bind-Value="model.Status" class="form-select" @onclick="GetEmployeeId">
                                 @foreach (var s in Enum.GetValues(typeof(EmployeeStatus)))
                                 {
                                     <option value="@s">@s</option>
@@ -77,17 +77,16 @@
                             </InputSelect>
                             <ValidationMessage For="() => model.Status" />
                         </div>
-
-                        <label class="col-form-label col-md-2 bold-font required-field">Name</label>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Name</label>
                             <InputText id="EmployeeName" @bind-Value="model.EmployeeName" class="form-control" />
                             <ValidationMessage For="() => model.EmployeeName" />
                         </div>
                     </div>
-                    <div class="form-group row mb-2">
-                        <label class="col-form-label col-md-2 bold-font">Vendor Name</label>
-                        <div class="col-md-2">
-                            <InputSelect id="vendorName" @bind-Value="model.vendorName" class="form-control">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font">Vendor Name</label>
+                            <InputSelect id="vendorName" @bind-Value="model.vendorName" class="form-select">
                                 <option selected>- Select -</option>
                                 @foreach (var c in vendordata.ToList())
                                 {
@@ -96,16 +95,13 @@
                             </InputSelect>
                             <ValidationMessage For="() => model.vendorName" />
                         </div>
-                        <label class="col-form-label col-md-2 bold-font">Pin Code</label>
-                        <div class="col-md-2">
-                            <InputNumber class="form-control" @bind-Value="model.VendorPincode" maxlength="6" @oninput="async () => { if(model.VendorPincode.ToString().Length == 6) await SeachPin(); }"
-                            @onblur="SeachPin"
-                            />
+                        <div class="col-md-4">
+                            <label class="form-label bold-font">Pin Code</label>
+                            <InputNumber class="form-control" @bind-Value="model.VendorPincode" maxlength="6" @oninput="async () => { if(model.VendorPincode.ToString().Length == 6) await SeachPin(); }" @onblur="SeachPin" />
                         </div>
-                        <label class="col-form-label col-md-2 bold-font">Vendor Location</label>
-                        @* @model.vendorLocation *@
-                        <div class="col-md-2">
-                            <InputSelect id="vendorLocation" @bind-Value="model.vendorLocation" class="form-control">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font">Vendor Location</label>
+                            <InputSelect id="vendorLocation" @bind-Value="model.vendorLocation" class="form-select">
                                 <option selected>- Select -</option>
                                 @foreach (var a in FirstAdd.ToList())
                                 {
