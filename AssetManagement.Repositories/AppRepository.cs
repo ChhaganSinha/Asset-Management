@@ -2230,6 +2230,7 @@ namespace AssetManagement.Repositories
                             string BankPassBook = ReplaceFirstWordAfterHyphen(fileMapping.BankPassbookFile, data.NewEmployeeId);
                             string Cert = ReplaceFirstWordAfterHyphen(fileMapping.CertificateFile, data.NewEmployeeId);
                             string Profile = ReplaceFirstWordAfterHyphen(fileMapping.ProfilePhotoFile, data.NewEmployeeId);
+                            string Resume = ReplaceFirstWordAfterHyphen(fileMapping.ResumeFile, data.NewEmployeeId);
 
                             // Copy the files on the file system
                             CopyFile(fileMapping.AadhaarFile, Aadhaar);
@@ -2237,6 +2238,7 @@ namespace AssetManagement.Repositories
                             CopyFile(fileMapping.BankPassbookFile, BankPassBook);
                             CopyFile(fileMapping.CertificateFile, Cert);
                             CopyFile(fileMapping.ProfilePhotoFile, Profile);
+                            CopyFile(fileMapping.ResumeFile, Resume);
 
                             var newFileMapping = new EmployeeFilesMapping
                             {
@@ -2245,7 +2247,8 @@ namespace AssetManagement.Repositories
                                 PanFile = Pan,
                                 BankPassbookFile = BankPassBook,
                                 CertificateFile = Cert,
-                                ProfilePhotoFile = Profile
+                                ProfilePhotoFile = Profile,
+                                ResumeFile = Resume
                             };
 
                             AppDbCxt.EmployeeFilesMapping.Add(newFileMapping);
