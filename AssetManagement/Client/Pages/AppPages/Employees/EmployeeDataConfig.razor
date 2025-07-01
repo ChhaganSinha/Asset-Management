@@ -223,64 +223,33 @@
 
                     </div>
 
-                    <div class="form-group row mb-2">
-                        <label class="col-form-label col-md-2 bold-font required-field">Reporting To</label>
-                        <div class="col-md-2">
-                            <MudGrid>
-                                <MudItem xs="12" sm="12" md="12">
-                                    <MudAutocomplete Label="Select" T="Employee" @bind-Value="selectedManager" SearchFunc="@ManagerSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                    ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} ({e.EmailId})")"
-                                    Required="false"
-                                    ResetValueOnEmptyText="true"
-                                    CoerceText="true"
-                                    CoerceValue="true"
-                                    MaxItems="null">
-
-                                    </MudAutocomplete>
-                                </MudItem>
-                            </MudGrid>
-                            @if (selectedManager != null) { model.ReportingTo = selectedManager.EmployeeId; }
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label bold-font required-field">Reporting To</label>
+                            <DropdownSelect @bind-Value="model.ReportingTo"
+                                           DataSource="EmployeeDropdown"
+                                           EmptyText="-- Select --"
+                                           Css="form-select" />
                             <ValidationMessage For="() => model.ReportingTo" />
                         </div>
-                        <label class="col-form-label col-md-2 bold-font required-field">Reference From</label>
-                        <div class="col-md-2">
-                            <MudGrid>
-                                <MudItem xs="12" sm="12" md="12">
-                                    <MudAutocomplete Label="Select" T="Employee" @bind-Value="selectedReference" SearchFunc="@ReferenceSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                    ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} ({e.EmailId})")"
-                                    Required="false"
-                                    ResetValueOnEmptyText="true"
-                                    CoerceText="true"
-                                    CoerceValue="true"
-                                    MaxItems="null">
-
-                                    </MudAutocomplete>
-                                </MudItem>
-                            </MudGrid>
-                            @if (selectedReference != null) { model.Reference = selectedReference.EmployeeId; }
+                        <div class="col-md-3">
+                            <label class="form-label bold-font required-field">Reference From</label>
+                            <DropdownSelect @bind-Value="model.Reference"
+                                           DataSource="EmployeeDropdown"
+                                           EmptyText="-- Select --"
+                                           Css="form-select" />
                             <ValidationMessage For="() => model.Reference" />
                         </div>
-
-                        <label class="col-form-label col-md-1 bold-font required-field">Designation</label>
-                        <div class="col-md-2">
-                            <MudGrid>
-                                <MudItem xs="12" sm="12" md="12">
-                                    <MudAutocomplete Label="Select" T="DesignationDTO" @bind-Value="selectedDesigantion" SearchFunc="@DesignationSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                    ToStringFunc="@(e => e == null ? null : $"{e.Designation}")"
-                                    Required="false"
-                                    ResetValueOnEmptyText="true"
-                                    CoerceText="true"
-                                    CoerceValue="true"
-                                    MaxItems="null">
-
-                                    </MudAutocomplete>
-                                </MudItem>
-                            </MudGrid>
-                            @if (selectedDesigantion != null) { model.Designation = selectedDesigantion.Designation; }
+                        <div class="col-md-3">
+                            <label class="form-label bold-font required-field">Designation</label>
+                            <DropdownSelect @bind-Value="model.Designation"
+                                           DataSource="DesignationDropdown"
+                                           EmptyText="-- Select --"
+                                           Css="form-select" />
                             <ValidationMessage For="() => model.Designation" />
                         </div>
-                        <div class="col-md-1">
-                            <a type="button" class="btn btn-primary" @onclick="(() => AddDesigntions = true)" style="margin-top:5px;">Add</a>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <a type="button" class="btn btn-primary w-100" @onclick="(() => AddDesigntions = true)">Add</a>
                         </div>
                     </div>
 
@@ -756,18 +725,11 @@
                                 @if (model.EMS)
                                 {
                                     <div class="col-md-3 mb-2" style="margin-top:-3px">
-                                        <MudGrid>
-                                            <MudItem xs="12" sm="6" md="12">
-                                                <MudAutocomplete T="Employee" Label="Select Manager" @bind-Value="selectedEMS" SearchFunc="@EmsSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} - {e.CompanyCode}")"
-                                                Required="false"
-                                                ResetValueOnEmptyText="true"
-                                                CoerceText="true"
-                                                CoerceValue="true"
-                                                MaxItems="null">
-                                                </MudAutocomplete>
-                                            </MudItem>
-                                        </MudGrid>
+                                        <DropdownSelect @bind-Value="selectedEmsId"
+                                                       EventDropdown="OnEMSChanged"
+                                                       DataSource="EmployeeDropdown"
+                                                       EmptyText="-- Select Manager --"
+                                                       Css="form-select" />
                                         @if (selectedEMS != null) { model.EmsManagerEmpId = selectedEMS.EmployeeId; model.EmsManagerEmail = selectedEMS.EmailId; }
                                         else
                                         {
@@ -794,18 +756,11 @@
                                 @if (model.LM)
                                 {
                                     <div class="col-md-3 mb-2" style="margin-top:-3px">
-                                        <MudGrid>
-                                            <MudItem xs="12" sm="6" md="12">
-                                                <MudAutocomplete T="Employee" Label="Select Manager" @bind-Value="selectedLM" SearchFunc="@EmsSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} - {e.CompanyCode}")"
-                                                Required="false"
-                                                ResetValueOnEmptyText="true"
-                                                CoerceText="true"
-                                                CoerceValue="true"
-                                                MaxItems="null">
-                                                </MudAutocomplete>
-                                            </MudItem>
-                                        </MudGrid>
+                                        <DropdownSelect @bind-Value="selectedLmId"
+                                                       EventDropdown="OnLMChanged"
+                                                       DataSource="EmployeeDropdown"
+                                                       EmptyText="-- Select Manager --"
+                                                       Css="form-select" />
                                         @if (selectedLM != null) { model.LmManagerEmpId = selectedLM.EmployeeId; model.LmManagerEmail = selectedLM.EmailId; }
                                         else
                                         {
@@ -907,6 +862,8 @@
     private DesignationDTO? selectedDesigantion { get; set; }
     private Employee? selectedManager { get; set; }
     private Employee? selectedReference { get; set; }
+    private string? selectedEmsId { get; set; }
+    private string? selectedLMId { get; set; }
 
 
     private bool IsImageFile(string filePath)
@@ -1216,7 +1173,9 @@
                 model.EMS = listData.EMS;
                 model.CMS = listData.CMS;
                 selectedLM = employee.Where(x => x.EmailId == listData.LMManagerEmail).FirstOrDefault();
+                selectedLMId = selectedLM?.EmployeeId;
                 selectedEMS = employee.Where(x => x.EmailId == listData.EMSManagerEmail).FirstOrDefault();
+                selectedEmsId = selectedEMS?.EmployeeId;
             }
 
         }
@@ -1722,7 +1681,23 @@
             return employee;
         return employee
         .Where(x => x.EmployeeName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-    }private async Task<IEnumerable<Employee>> ReferenceSearch(string value)
+    }
+
+    private Task OnEMSChanged(string val)
+    {
+        selectedEmsId = val;
+        selectedEMS = employee.FirstOrDefault(e => e.EmployeeId == val);
+        return Task.CompletedTask;
+    }
+
+    private Task OnLMChanged(string val)
+    {
+        selectedLMId = val;
+        selectedLM = employee.FirstOrDefault(e => e.EmployeeId == val);
+        return Task.CompletedTask;
+    }
+
+    private async Task<IEnumerable<Employee>> ReferenceSearch(string value)
     {
         await Task.Delay(5);
         if (string.IsNullOrEmpty(value))
@@ -1730,5 +1705,11 @@
         return employee
         .Where(x => x.EmployeeName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
+
+    private List<KeyValuePair<string, string>> EmployeeDropdown =>
+        employee.Select(e => new KeyValuePair<string, string>(e.EmployeeId, $"{e.EmployeeName} ({e.EmailId})")).ToList();
+
+    private List<KeyValuePair<string, string>> DesignationDropdown =>
+        designation.Select(d => new KeyValuePair<string, string>(d.Designation, d.Designation)).ToList();
 }
 
