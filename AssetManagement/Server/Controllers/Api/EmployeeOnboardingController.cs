@@ -1,6 +1,7 @@
 using AssetManagement.Dto;
 using AssetManagement.Dto.Models;
 using AssetManagement.Repositories;
+using AssetManagement.Server.EmailService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
