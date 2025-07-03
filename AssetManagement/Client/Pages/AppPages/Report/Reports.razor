@@ -4,6 +4,7 @@
 @using AssetManagement.Client.Client;
 @using AssetManagement.Client.Pages.GridComponent
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Models;
 @using System.Globalization;
 @using MudBlazor
@@ -22,10 +23,7 @@
             Generate Report
         </MudButton>
         <div style="margin-left: auto;">
-            <ol class="breadcrumb" style="display: flex; justify-content: flex-end; align-items: center; list-style: none; padding: 0; margin: 0;">
-                <li class="breadcrumb-item"><a href="/"><i class="fa fa-home" aria-hidden="true"></i></a></li>
-                <li class="breadcrumb-item active">Reports</li>
-            </ol>
+            <Breadcrumb Items="breadcrumbItems" />
         </div>
 
     </div>
@@ -330,6 +328,7 @@
     bool Exported = false;
     int totalItem = 0;
     List<Company> company = new();
+    private List<BreadcrumbItem> breadcrumbItems = new();
     List<AssetType> assetType = new();
     List<Asset> asset = new();
     List<Employee> employee = new();
@@ -348,6 +347,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "Reports", IsActive = true }
+        };
         company = new List<Company>(await client.GetAllCompany());
         assetType = new List<AssetType>(await client.GetAllAssetType());
         employee = new List<Employee>(await client.GetAllEmployee());

@@ -4,6 +4,7 @@
 @using AssetManagement.Client.Client
 @using AssetManagement.Client.Pages.AppPages.Assets.Component
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Models
 @inject AppClient client
 @inject ILogger<AssetDataConfig> logger
@@ -11,12 +12,7 @@
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">@Title</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 @if (!canView)
 {
@@ -192,6 +188,7 @@ else
     string MessageBody = "Thank you!";
 
     private Asset model;
+    private List<BreadcrumbItem> breadcrumbItems = new();
     private List<Company> company = new();
     private List<AssetType> assetType = new();
     private AssetType assetTypeFilter = new();
@@ -200,6 +197,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = Title, IsActive = true }
+        };
         var permissions = await PermissionService.HasPermission("Add Asset");
         if (permissions is not null)
         {

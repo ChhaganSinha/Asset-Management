@@ -3,18 +3,14 @@
 @using AssetManagement.Client.Pages.GridComponent
 @using AssetManagement.Dto.Models
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @inject ILogger<AllAssetGrid> logger
 @inject AppClient client
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime
 
 <!-- Breadcrumb Section -->
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Assets</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 <!-- Action Buttons Row -->
 <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
@@ -110,8 +106,18 @@
     List<AssetImport> assets = new List<AssetImport>();
     int MaxAllowedFileSize = 512000;
     int NumberOfColumnInSheet = 10;
-    static bool filter = true;
-    IBrowserFile files;
+static bool filter = true;
+IBrowserFile files;
+private List<BreadcrumbItem> breadcrumbItems = new();
+
+    protected override void OnInitialized()
+    {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "Assets", IsActive = true }
+        };
+    }
 
     private async Task OnFileChange(InputFileChangeEventArgs e)
     {

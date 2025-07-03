@@ -1,5 +1,6 @@
 ﻿@page "/profile"
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Auth
 @inject IdentityAuthenticationStateProvider authStateProvider
 @inject IAuthorizeApi authorizeApi
@@ -8,10 +9,7 @@
 <div class="card">
     <div class="card-header" style="padding: 8px !important; display: flex; align-items: center;">
         <div style="margin-left: auto;">
-            <ol class="breadcrumb" style="display: flex; justify-content: flex-end; align-items: center; list-style: none; padding: 0; margin: 0;">
-                <li class="breadcrumb-item"><a href="/"><i class="fa fa-home" aria-hidden="true"></i></a></li>
-                <li class="breadcrumb-item active">User Profile</li>
-            </ol>
+            <Breadcrumb Items="breadcrumbItems" />
         </div>
 
     </div>
@@ -103,12 +101,19 @@
     bool TaskCompleted = false;
     bool Loading = false;
 
+    private List<BreadcrumbItem> breadcrumbItems = new();
+
     bool showPasswordChange = false;
     bool showProfileChange = false;
 
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "User Profile", IsActive = true }
+        };
         userInfo = await authorizeApi.GetUserInfo();
         userEmail = userInfo.ExposedClaims.Values.ElementAt(2);
         userRoles = userInfo.Roles.FirstOrDefault();

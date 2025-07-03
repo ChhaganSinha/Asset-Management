@@ -2,6 +2,7 @@
 @page "/allocation-config/{Id:int}"
 @using AssetManagement.Client.Client;
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Models
 @using MudBlazor
 @inject AppClient client
@@ -64,12 +65,7 @@
     }
 </style>
 
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Asset Transfer</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 @if (!canView)
 {
@@ -297,6 +293,7 @@ else
     bool IsSuccess = false;
     bool TaskCompleted = false;
     Allocation model = new();
+    private List<BreadcrumbItem> breadcrumbItems = new();
     List<Company> company = new();
     List<AssetType> assetType = new();
     List<Asset> asset = new();
@@ -306,6 +303,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "Asset Transfer", IsActive = true }
+        };
         var perms = await PermissionService.HasPermission("New Allocation");
         canView = perms?.CanView == true;
         if (!canView) { NavigationManager.NavigateTo("/unauthorized"); return; }

@@ -8,15 +8,10 @@
 @inject NavigationManager navigationManager
 @inject IAuthorizeApi authorizeApi
 @attribute [Authorize(Roles = "SuperAdmin,Admin")]
+@using AssetManagement.Client.Shared
 
 <!-- Breadcrumb Section -->
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item">Settings</li>
-        <li class="breadcrumb-item active" aria-current="page">Add Users</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 <div class="container">
     <div class="row justify-content-md-center">
@@ -111,9 +106,16 @@
     private static bool canView = false;
     private static bool canEdit = false;
     private static bool hasFullAccess = false;
+    private List<BreadcrumbItem> breadcrumbItems = new();
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "Settings" },
+            new BreadcrumbItem { Text = "Add Users", IsActive = true }
+        };
         alert ??= new();
         alert?.Clear();
         users = await authorizeApi.GetUsers();

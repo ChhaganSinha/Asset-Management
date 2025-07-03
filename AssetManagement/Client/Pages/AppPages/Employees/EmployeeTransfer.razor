@@ -2,6 +2,7 @@
 @using AssetManagement.Client.Client;
 @using AssetManagement.Client.Pages.AppPages.Employees.Component
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Models
 @using AssetManagement.Dto;
 @using System.Text.Json
@@ -14,12 +15,7 @@
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">@Title</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 <div>
     <div class="card borderd" style="background: darkgrey">
@@ -204,9 +200,15 @@
     List<Employee> employee = new();
     Employee model = new();
     EmployeeTransferModel employeeTransfer = new();
+    private List<BreadcrumbItem> breadcrumbItems = new();
     string Title = "Employee Transfer";
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = Title, IsActive = true }
+        };
         var BaseUri = NavigationManager.BaseUri;
         employee = new List<Employee>(await client.GetAllEmployee());
         company = new List<Company>(await client.GetAllCompany());

@@ -6,6 +6,8 @@
 @inject PermissionService PermissionService
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
+@using AssetManagement.Client.Shared
+@using AssetManagement.Client.Shared
 
 <style>
     .view-table {
@@ -63,12 +65,7 @@
     }
 </style>
 
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Asset Transfer</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 @if (!canView)
 {
@@ -204,6 +201,7 @@ else
 
     private Asset model = new();
     private AssetTransferModel transfer = new();
+    private List<BreadcrumbItem> breadcrumbItems = new();
 
     // Filtered lists
     private List<KeyValuePair<string, string>> FilteredAssetDropdown =>
@@ -219,6 +217,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem{ Text = "Home", Url = "/" },
+            new BreadcrumbItem{ Text = "Asset Transfer", IsActive = true }
+        };
         var perms = await PermissionService.HasPermission("Asset Transfer");
         canView = perms?.CanView == true;
         if (!canView) { NavigationManager.NavigateTo("/unauthorized"); return; }
