@@ -7,29 +7,18 @@
 @using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Models;
 @using System.Globalization;
-@using MudBlazor
 @inject AppClient client
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 
+<Breadcrumb Items="breadcrumbItems" />
+
+<div class="mb-2">
+    <button class="btn btn-outline-secondary btn-sm" @onclick="GenerateReport">Generate Report</button>
+</div>
+
 <div class="card">
-    <div class="card-header" style="padding: 8px !important; display: flex; align-items: center;">
-        <MudButton OnClick="GenerateReport"
-                   Variant="Variant.Outlined"
-                   Color="MudBlazor.Color.Tertiary"
-                   Size="Size.Small"
-                   Disabled=false>
-            Generate Report
-        </MudButton>
-        <div style="margin-left: auto;">
-            <Breadcrumb Items="breadcrumbItems" />
-        </div>
-
-    </div>
-
-
-
     <div class="card-body">
         <ReportsGrid />
     </div>
@@ -108,6 +97,30 @@
                         </div>
                     </div>
                     <div class="form-group row mb-1">
+                        <label class="col-form-label col-md-3 bold-font">Description</label>
+                        <div class="col-md-1">
+                            <input class="form-check-input mt-3" type="checkbox" @bind="@model.Description">
+                        </div>
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label class="col-form-label col-md-3 bold-font">Employee Company Code</label>
+                        <div class="col-md-1">
+                            <input class="form-check-input mt-3" type="checkbox" @bind="@model.EmployeeCompanyCode">
+                        </div>
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label class="col-form-label col-md-3 bold-font">Employee Phone</label>
+                        <div class="col-md-1">
+                            <input class="form-check-input mt-3" type="checkbox" @bind="@model.EmployeeMobileNumber">
+                        </div>
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label class="col-form-label col-md-3 bold-font">Employee Designation</label>
+                        <div class="col-md-1">
+                            <input class="form-check-input mt-3" type="checkbox" @bind="@model.EmployeeDesignation">
+                        </div>
+                    </div>
+                    <div class="form-group row mb-1">
                         <label class="col-form-label col-md-3 bold-font">Allocation Type</label>
                         <div class="col-md-1">
                             <input class="form-check-input mt-3" type="checkbox" @bind="@model.AllocationType" @oninput="CopyAddress">
@@ -135,13 +148,10 @@
                         {
                             <label class="col-form-label col-md-3 bold-font">IssueDate Range</label>
                             <div class="col-md-4">
-                                <MudDateRangePicker @ref="_issueDatePicker" @bind-DateRange="_issueDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM">
-                                    <PickerActions Context="pickerActionsContext">
-                                        <MudButton Class="mr-auto align-self-start" OnClick="@(() => _issueDatePicker.Clear())">Clear</MudButton>
-                                        <MudButton OnClick="@(() => _issueDatePicker.Close(false))">Cancel</MudButton>
-                                        <MudButton Color="Color.Primary" OnClick="@(() => _issueDatePicker.Close())">Ok</MudButton>
-                                    </PickerActions>
-                                </MudDateRangePicker>
+                                <div class="d-flex gap-1">
+                                    <InputDate @bind-Value="issueDateStart" class="form-control" />
+                                    <InputDate @bind-Value="issueDateEnd" class="form-control" />
+                                </div>
                             </div>
                         }
                     </div>
@@ -154,13 +164,10 @@
                         {
                             <label class="col-form-label col-md-3 bold-font">IssueTill Range</label>
                             <div class="col-md-4">
-                                <MudDateRangePicker @ref="_issueTillPicker" @bind-DateRange="_issueTill" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM">
-                                    <PickerActions Context="pickerActionsContext">
-                                        <MudButton Class="mr-auto align-self-start" OnClick="@(() => _issueTillPicker.Clear())">Clear</MudButton>
-                                        <MudButton OnClick="@(() => _issueTillPicker.Close(false))">Cancel</MudButton>
-                                        <MudButton Color="Color.Primary" OnClick="@(() => _issueTillPicker.Close())">Ok</MudButton>
-                                    </PickerActions>
-                                </MudDateRangePicker>
+                                <div class="d-flex gap-1">
+                                    <InputDate @bind-Value="issueTillStart" class="form-control" />
+                                    <InputDate @bind-Value="issueTillEnd" class="form-control" />
+                                </div>
                             </div>
                         }
                     </div>
@@ -173,13 +180,10 @@
                         {
                             <label class="col-form-label col-md-3 bold-font">ReturnDate Range</label>
                             <div class="col-md-4">
-                                <MudDateRangePicker Style="left: 50% !important;top: 50% !important;transform: translate(-50%, -50%);" @ref="_returnDatePicker" @bind-DateRange="_returnDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM">
-                                    <PickerActions Context="pickerActionsContext">
-                                        <MudButton Class="mr-auto align-self-start" OnClick="@(() => _returnDatePicker.Clear())">Clear</MudButton>
-                                        <MudButton OnClick="@(() => _returnDatePicker.Close(false))">Cancel</MudButton>
-                                        <MudButton Color="Color.Primary" OnClick="@(() => _returnDatePicker.Close())">Ok</MudButton>
-                                    </PickerActions>
-                                </MudDateRangePicker>
+                                <div class="d-flex gap-1">
+                                    <InputDate @bind-Value="returnDateStart" class="form-control" />
+                                    <InputDate @bind-Value="returnDateEnd" class="form-control" />
+                                </div>
                             </div>
                         }
                     </div>
@@ -336,13 +340,12 @@
     List<AllocationLog> responceData = new();
 
     bool columnSelection = false;
-    //private DateRange _issueDate = new DateRange(DateTime.Now.Date, DateTime.Now.AddDays(5).Date);
-    private MudDateRangePicker _issueDatePicker;
-    private MudDateRangePicker _issueTillPicker;
-    private MudDateRangePicker _returnDatePicker;
-    private DateRange _issueDate = new DateRange();
-    private DateRange _issueTill = new DateRange();
-    private DateRange _returnDate = new DateRange();
+    private DateTime? issueDateStart;
+    private DateTime? issueDateEnd;
+    private DateTime? issueTillStart;
+    private DateTime? issueTillEnd;
+    private DateTime? returnDateStart;
+    private DateTime? returnDateEnd;
     DateTime dateTime;
 
     protected override async Task OnInitializedAsync()
@@ -372,42 +375,35 @@
         model.AssetTypeSelected = model.AssetType ? model.AssetTypeSelected : null;
         model.AllocationTypeSelected = model.AllocationType ? model.AllocationTypeSelected : null;
 
-        if (model.IssueDate && _issueDate != null)
+        if (model.IssueDate && issueDateStart != null && issueDateEnd != null)
         {
-            if (_issueDate.Start != null && _issueDate.End != null)
-            {               
-                CultureInfo culture = new CultureInfo("en-US");
-                model.IssueDateRangeStart = Convert.ToDateTime(_issueDate.Start, culture);
-                model.IssueDateRangedEnd = Convert.ToDateTime(_issueDate.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-            }
+            CultureInfo culture = new CultureInfo("en-US");
+            model.IssueDateRangeStart = Convert.ToDateTime(issueDateStart, culture);
+            model.IssueDateRangedEnd = Convert.ToDateTime(issueDateEnd, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
         }
         else
         {
             model.IssueDateRangeStart = new DateTime();
             model.IssueDateRangedEnd = new DateTime();
         }
-        if (model.IssueTill && _issueTill != null)
+
+        if (model.IssueTill && issueTillStart != null && issueTillEnd != null)
         {
-            if (_issueTill.Start != null && _issueTill.End != null)
-            {
-                CultureInfo culture = new CultureInfo("en-US");
-                model.IssueTillRangeStart = Convert.ToDateTime(_issueTill.Start, culture);
-                model.IssueTillRangeEnd = Convert.ToDateTime(_issueTill.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-            }
+            CultureInfo culture = new CultureInfo("en-US");
+            model.IssueTillRangeStart = Convert.ToDateTime(issueTillStart, culture);
+            model.IssueTillRangeEnd = Convert.ToDateTime(issueTillEnd, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
         }
         else
         {
             model.IssueTillRangeStart = new DateTime();
             model.IssueTillRangeEnd = new DateTime();
         }
-        if (model.ReturnDate && _returnDate != null)
+
+        if (model.ReturnDate && returnDateStart != null && returnDateEnd != null)
         {
-            if (!_returnDate.Start.Equals(null) && _returnDate.End != null)
-            {
-                CultureInfo culture = new CultureInfo("en-US");
-                model.ReturnDateRangeStart = Convert.ToDateTime(_returnDate.Start, culture);
-                model.ReturnDateRangeEnd = Convert.ToDateTime(_returnDate.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-            }
+            CultureInfo culture = new CultureInfo("en-US");
+            model.ReturnDateRangeStart = Convert.ToDateTime(returnDateStart, culture);
+            model.ReturnDateRangeEnd = Convert.ToDateTime(returnDateEnd, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
         }
         else
         {
@@ -505,17 +501,26 @@
     public void CallIssueDate()
     {
         if (model.IssueDate)
-            _issueDatePicker.Clear();
+        {
+            issueDateStart = null;
+            issueDateEnd = null;
+        }
     }
     public void CallIssueTill()
     {
         if (model.IssueTill)
-            _issueTillPicker.Clear();
+        {
+            issueTillStart = null;
+            issueTillEnd = null;
+        }
     }
     public void CallReturnDate()
     {
         if (model.ReturnDate)
-            _returnDatePicker.Clear();
+        {
+            returnDateStart = null;
+            returnDateEnd = null;
+        }
     }
 
     private async Task PrintPDF()
