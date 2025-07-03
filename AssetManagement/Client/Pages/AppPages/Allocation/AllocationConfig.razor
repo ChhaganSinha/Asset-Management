@@ -293,7 +293,7 @@ else
     bool IsSuccess = false;
     bool TaskCompleted = false;
     Allocation model = new();
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
     List<Company> company = new();
     List<AssetType> assetType = new();
     List<Asset> asset = new();
@@ -305,8 +305,8 @@ else
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = "Asset Transfer", IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = "Asset Transfer", IsActive = true }
         };
         var perms = await PermissionService.HasPermission("New Allocation");
         canView = perms?.CanView == true;

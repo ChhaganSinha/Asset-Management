@@ -275,7 +275,7 @@
     UserDetailsUpdateParameters userDetailsUpdateParameters = new();
     [CascadingParameter]
     protected AlertModel? alert { get; set; }
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     private string imageDataUrl;
     private string BgimageDataUrl;
@@ -303,8 +303,8 @@
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = "Profile", IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = "Profile", IsActive = true }
         };
         alerts ??= new AlertModel();
         userInfo = await authorizeApi.GetUserInfo();

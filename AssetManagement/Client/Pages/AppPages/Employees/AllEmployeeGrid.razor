@@ -123,14 +123,14 @@
     List<EmployeeImport> employees = new List<EmployeeImport>();
     int MaxAllowedFileSize = 512000;
 int NumberOfColumnInSheet = 30;
-private List<BreadcrumbItem> breadcrumbItems = new();
+private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     protected override void OnInitialized()
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = "Employees", IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = "Employees", IsActive = true }
         };
     }
 

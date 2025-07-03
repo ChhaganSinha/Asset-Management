@@ -108,14 +108,14 @@
     int NumberOfColumnInSheet = 10;
 static bool filter = true;
 IBrowserFile files;
-private List<BreadcrumbItem> breadcrumbItems = new();
+private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     protected override void OnInitialized()
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = "Assets", IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = "Assets", IsActive = true }
         };
     }
 

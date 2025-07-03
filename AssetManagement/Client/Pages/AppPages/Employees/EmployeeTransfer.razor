@@ -200,14 +200,14 @@
     List<Employee> employee = new();
     Employee model = new();
     EmployeeTransferModel employeeTransfer = new();
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
     string Title = "Employee Transfer";
     protected override async Task OnInitializedAsync()
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = Title, IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = Title, IsActive = true }
         };
         var BaseUri = NavigationManager.BaseUri;
         employee = new List<Employee>(await client.GetAllEmployee());

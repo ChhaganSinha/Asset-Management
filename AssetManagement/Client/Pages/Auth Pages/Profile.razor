@@ -101,7 +101,7 @@
     bool TaskCompleted = false;
     bool Loading = false;
 
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     bool showPasswordChange = false;
     bool showProfileChange = false;
@@ -111,8 +111,8 @@
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = "User Profile", IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = "User Profile", IsActive = true }
         };
         userInfo = await authorizeApi.GetUserInfo();
         userEmail = userInfo.ExposedClaims.Values.ElementAt(2);

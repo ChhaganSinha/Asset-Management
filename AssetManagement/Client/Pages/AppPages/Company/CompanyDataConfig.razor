@@ -359,7 +359,7 @@ else
     private static bool canEdit = false;
     private static bool hasFullAccess = false;
     private bool AddZone = false;
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
     
     public string Title => model?.Id > 0 ? "Modify Company" : "Add Company";
 
@@ -375,8 +375,8 @@ else
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = Title, IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = Title, IsActive = true }
         };
         var permissions = await PermissionService.HasPermission("Add Company");
         if (permissions != null)

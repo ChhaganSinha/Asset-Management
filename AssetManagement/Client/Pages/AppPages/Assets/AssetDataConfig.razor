@@ -188,7 +188,7 @@ else
     string MessageBody = "Thank you!";
 
     private Asset model;
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
     private List<Company> company = new();
     private List<AssetType> assetType = new();
     private AssetType assetTypeFilter = new();
@@ -199,8 +199,8 @@ else
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = Title, IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = Title, IsActive = true }
         };
         var permissions = await PermissionService.HasPermission("Add Asset");
         if (permissions is not null)

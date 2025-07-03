@@ -850,7 +850,7 @@
     bool EmailRequest = false;
     private IEnumerable<dynamic> listItems;
     bool submit = false;
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
     private DesignationDTO? selectedDesigantion { get; set; }
     private Employee? selectedManager { get; set; }
     private Employee? selectedReference { get; set; }
@@ -1060,8 +1060,8 @@
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = Title, IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = Title, IsActive = true }
         };
         Onload = true;
         BaseUri = NavigationManager.BaseUri;

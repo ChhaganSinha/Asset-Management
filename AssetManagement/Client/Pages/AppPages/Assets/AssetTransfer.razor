@@ -201,7 +201,7 @@ else
 
     private Asset model = new();
     private AssetTransferModel transfer = new();
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     // Filtered lists
     private List<KeyValuePair<string, string>> FilteredAssetDropdown =>
@@ -219,8 +219,8 @@ else
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem{ Text = "Home", Url = "/" },
-            new BreadcrumbItem{ Text = "Asset Transfer", IsActive = true }
+            new ClientBreadcrumbItem{ Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem{ Text = "Asset Transfer", IsActive = true }
         };
         var perms = await PermissionService.HasPermission("Asset Transfer");
         canView = perms?.CanView == true;

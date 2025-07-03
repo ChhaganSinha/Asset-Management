@@ -218,7 +218,7 @@ else
     public List<string> AssetChartBackground { get; set; } = new List<string>() { "#CCD1D1", "#FF5370", "#0e9e4a", "#FFB64D", "#00E396", "#775DD0", "#4099ff", "#f2930a", "#00bcd4" };
     public List<string> AssetChartLabels { get; set; } = new List<string>();
 
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     public List<string> CompanyCodes = new();
     DashboardStatics dashboardStatics = new();
@@ -232,8 +232,8 @@ else
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem{ Text = "Home", Url = "/" },
-            new BreadcrumbItem{ Text = "Dashboard", IsActive = true }
+            new ClientBreadcrumbItem{ Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem{ Text = "Dashboard", IsActive = true }
         };
         IsLoading = true;
         var permissions = await PermissionService.HasPermission("Dashboard");

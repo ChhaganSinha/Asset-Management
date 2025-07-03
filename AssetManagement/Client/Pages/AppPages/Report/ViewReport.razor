@@ -433,7 +433,7 @@
     int totalItem = 0;
     Employee employeeModel = new();
     List<Company> company = new();
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
     List<AssetType> assetType = new();
     List<Asset> asset = new();
     List<Employee> employee = new();
@@ -468,8 +468,8 @@
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = "Reports", IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = "Reports", IsActive = true }
         };
         SelectedOption = "Employee";
 
