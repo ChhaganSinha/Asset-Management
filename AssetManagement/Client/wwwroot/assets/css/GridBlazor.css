@@ -150,12 +150,13 @@ table.grid-table .grid-header {
 @media print {
     .print-table {
         width: 100%;
-        table-layout: fixed;
+        table-layout: auto;
+        font-size: 12px;
     }
 
         .print-table td,
         .print-table th {
-            word-break: break-all;
+            word-break: break-word;
         }
 }
 

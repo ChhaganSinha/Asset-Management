@@ -35,17 +35,25 @@ window.MoveElementToClass = (fromElement, toClass) => {
 function printDiv(divId) {
     var printContent = document.getElementById(divId).outerHTML;
     var newWin = window.open('', '_blank');
-    newWin.document.write('<html><head><title>Print</title></head><body>');
+    newWin.document.write('<html><head><title>Print</title>');
 
-    // Add some additional styling for better print format
-    newWin.document.write('<style>body { font-size: 12pt; } @page { size: auto; margin: 10mm; } </style>');
+    // bring in bootstrap and app styles for proper table layout
+    newWin.document.write('<link rel="stylesheet" href="assets/bootstrap-5.3.3/css/bootstrap.min.css" />');
+    newWin.document.write('<link rel="stylesheet" href="assets/css/GridBlazor.css" />');
+
+    // Add print formatting
+    newWin.document.write('<style>');
+    newWin.document.write('@page { size: A4 landscape; margin: 10mm; }');
+    newWin.document.write('body { font-size: 12pt; }');
+    newWin.document.write('.print-table { width: 100%; }');
+    newWin.document.write('</style></head><body>');
 
     newWin.document.write(printContent);
     newWin.document.write('</body></html>');
     newWin.document.close();
 
-    // Wait for the content to load before printing
     newWin.onload = function () {
+        newWin.focus();
         newWin.print();
         newWin.close();
     };
