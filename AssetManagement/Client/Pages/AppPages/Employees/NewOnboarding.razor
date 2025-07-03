@@ -26,15 +26,15 @@
     </div>
 </div>
 @code {
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     protected override void OnInitialized()
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = "Employees", Url = "/employees" },
-            new BreadcrumbItem { Text = "Onboarding", IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = "Employees", Url = "/employees" },
+            new ClientBreadcrumbItem { Text = "Onboarding", IsActive = true }
         };
     }
 }

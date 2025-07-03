@@ -197,15 +197,15 @@ else
     private static bool canView = false;
     private static bool canEdit = false;
     private static bool hasFullAccess = false;
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     protected override async Task OnInitializedAsync()
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = "Settings" },
-            new BreadcrumbItem { Text = "User Management", IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = "Settings" },
+            new ClientBreadcrumbItem { Text = "User Management", IsActive = true }
         };
         try
         {

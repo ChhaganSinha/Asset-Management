@@ -1,6 +1,6 @@
 namespace AssetManagement.Client.Shared;
 
-public class BreadcrumbItem
+public class ClientBreadcrumbItem
 {
     public string Text { get; set; } = string.Empty;
     public string? Url { get; set; }

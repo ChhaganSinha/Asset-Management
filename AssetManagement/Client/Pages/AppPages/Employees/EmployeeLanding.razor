@@ -631,7 +631,7 @@
     bool TaskCompleted = false;
     Employee model = new Employee();
     List<EmployeeSkills> SkillOptions = new();
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     EmployeeFilesMapping employeeFiles = new();
     EmployeeOnboardingDto employeeOnboardingDto = new();
@@ -748,8 +748,8 @@
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = Title, IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = Title, IsActive = true }
         };
         BaseUri = NavigationManager.BaseUri;
         TaskCompleted = false;

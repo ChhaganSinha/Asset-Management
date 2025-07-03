@@ -139,14 +139,14 @@
     public int Id { get; set; }
     Employee model = new();
     public string Title = "Employee Details";
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     protected override async Task OnInitializedAsync()
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = Title, IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = Title, IsActive = true }
         };
         model = await client.GetEmployeeById(Id);
     }

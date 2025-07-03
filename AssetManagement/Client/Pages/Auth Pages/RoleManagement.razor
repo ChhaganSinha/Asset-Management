@@ -87,7 +87,7 @@
     private string SelectedRoleName;
     private RoleViewModel SelectedRole;
     private List<RoleViewModel> roles = new();
-    private List<BreadcrumbItem> breadcrumbItems = new();
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
     private List<string> allPages = new() { 
         "Dashboard",
@@ -118,9 +118,9 @@
     {
         breadcrumbItems = new()
         {
-            new BreadcrumbItem { Text = "Home", Url = "/" },
-            new BreadcrumbItem { Text = "Settings" },
-            new BreadcrumbItem { Text = "Role Management", IsActive = true }
+            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+            new ClientBreadcrumbItem { Text = "Settings" },
+            new ClientBreadcrumbItem { Text = "Role Management", IsActive = true }
         };
         alert ??= new();
         alert?.Clear();
