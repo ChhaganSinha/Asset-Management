@@ -59,7 +59,7 @@ public partial class DropdownSelect<TValue> : InputSelect<TValue>, IAsyncDisposa
             int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedValue);
             CurrentValue = (TValue)(object)parsedValue;
         }
-        else if (typeof(TValue) == typeof(int))
+        else if (typeof(TValue) == typeof(int?))
         {
             if (value == null)
             {

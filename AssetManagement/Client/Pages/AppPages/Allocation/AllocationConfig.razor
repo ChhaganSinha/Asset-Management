@@ -125,13 +125,13 @@ else
                         <label class="col-form-label bold-font">Asset Details</label>
                         <div class="card" style="background:darkcyan">
                             <div class="card-body">
-                                @if (model.AssetId == 0)
+                                @if (!model.AssetId.HasValue || model.AssetId == 0)
                                 {
                                     <p class="mb-0 text-muted">No Asset Selected!</p>
                                 }
                                 else
                                 {
-                                    <p class="mb-0">@asset.Where(a => a.Id == model.AssetId).Select(d => d.Description).FirstOrDefault()</p>
+                                    <p class="mb-0">@asset.FirstOrDefault(a => a.Id == model.AssetId)?.Description</p>
                                 }
                             </div>
                         </div>
