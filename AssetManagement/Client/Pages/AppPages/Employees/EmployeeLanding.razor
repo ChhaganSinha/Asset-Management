@@ -2,6 +2,7 @@
 @using AssetManagement.Client.Client;
 @using AssetManagement.Client.Pages.AppPages.Employees.Component
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Models
 @using System.Text.Json;
 @using AssetManagement.Dto;
@@ -14,12 +15,7 @@
 @layout NoLayout
 @attribute [AllowAnonymous]
 
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">@Title</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 <div>
     @if (model == null && !TaskCompleted)
@@ -635,6 +631,7 @@
     bool TaskCompleted = false;
     Employee model = new Employee();
     List<EmployeeSkills> SkillOptions = new();
+    private List<BreadcrumbItem> breadcrumbItems = new();
 
     EmployeeFilesMapping employeeFiles = new();
     EmployeeOnboardingDto employeeOnboardingDto = new();
@@ -749,6 +746,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = Title, IsActive = true }
+        };
         BaseUri = NavigationManager.BaseUri;
         TaskCompleted = false;
         try

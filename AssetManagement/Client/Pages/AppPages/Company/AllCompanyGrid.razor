@@ -1,16 +1,12 @@
 ﻿@page "/companies"
 @using AssetManagement.Client.Pages.GridComponent
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @inject PermissionService PermissionService
 @attribute [Authorize]
 
 <!-- Breadcrumb Section -->
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Companies</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 @if (canEdit || hasFullAccess)
 {
@@ -39,9 +35,15 @@ else
     private static bool canView = true;
     private static bool canEdit = true;
     private static bool hasFullAccess = true;
+    private List<BreadcrumbItem> breadcrumbItems = new();
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "Companies", IsActive = true }
+        };
         try
         {
             var permissions = await PermissionService.HasPermission("All Company");

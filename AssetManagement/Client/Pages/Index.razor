@@ -4,6 +4,7 @@
 @using AssetManagement.Client.Shared.ChartJs
 @using AssetManagement.Dto.Dashboard;
 @using AssetManagement.Dto.Models;
+@using AssetManagement.Client.Shared
 @inject PermissionService PermissionService
 @inject NavigationManager NavigationManager
 @inject AppClient client
@@ -12,12 +13,7 @@
 
 <PageTitle>Asset | Dashboard</PageTitle>
 <!-- Breadcrumb Section -->
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 @if (IsLoading)
 {
@@ -222,6 +218,8 @@ else
     public List<string> AssetChartBackground { get; set; } = new List<string>() { "#CCD1D1", "#FF5370", "#0e9e4a", "#FFB64D", "#00E396", "#775DD0", "#4099ff", "#f2930a", "#00bcd4" };
     public List<string> AssetChartLabels { get; set; } = new List<string>();
 
+    private List<BreadcrumbItem> breadcrumbItems = new();
+
     public List<string> CompanyCodes = new();
     DashboardStatics dashboardStatics = new();
     MasterStatics MasterStatics = new();
@@ -232,6 +230,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem{ Text = "Home", Url = "/" },
+            new BreadcrumbItem{ Text = "Dashboard", IsActive = true }
+        };
         IsLoading = true;
         var permissions = await PermissionService.HasPermission("Dashboard");
         if (permissions != null)

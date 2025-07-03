@@ -6,6 +6,7 @@
 @using AssetManagement.Dto
 @using AssetManagement.Dto.Auth
 @using AssetManagement.Client.Client
+@using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Enum
 @inject AppClient client
 @inject NavigationManager navigationManager
@@ -15,12 +16,7 @@
 @attribute [Authorize]
 
 <!-- Breadcrumb Section -->
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Profile</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 <div class="">
     <div class="card-header border-0 p-0">
@@ -279,6 +275,7 @@
     UserDetailsUpdateParameters userDetailsUpdateParameters = new();
     [CascadingParameter]
     protected AlertModel? alert { get; set; }
+    private List<BreadcrumbItem> breadcrumbItems = new();
 
     private string imageDataUrl;
     private string BgimageDataUrl;
@@ -304,6 +301,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "Profile", IsActive = true }
+        };
         alerts ??= new AlertModel();
         userInfo = await authorizeApi.GetUserInfo();
         userDetailsUpdateParameters.NewUserName = userInfo.UserName;

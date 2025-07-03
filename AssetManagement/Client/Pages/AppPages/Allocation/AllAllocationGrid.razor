@@ -2,6 +2,7 @@
 @page "/allocations/{cmp}/{label?}"
 @using AssetManagement.Client.Pages.GridComponent
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @using GridBlazor
 @using GridBlazor.Pages
 @using GridShared
@@ -13,12 +14,7 @@
 @inject HttpClient HttpClient
 
 <!-- Breadcrumb Section -->
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Allocations</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 <!-- Action Button -->
 <div class="mb-2">
@@ -65,7 +61,18 @@
 
     private CGrid<Allocation> _grid;
     private Task _task;
-    static bool filter = false;
+static bool filter = false;
+private List<BreadcrumbItem> breadcrumbItems = new();
+
+    protected override void OnInitialized()
+    {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "Allocations", IsActive = true }
+        };
+    }
+    private List<BreadcrumbItem> breadcrumbItems = new();
 
     Action<IGridColumnCollection<Allocation>> columns = c =>
     {

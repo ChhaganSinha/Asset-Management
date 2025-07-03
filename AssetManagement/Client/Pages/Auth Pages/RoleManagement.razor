@@ -4,15 +4,10 @@
 @attribute [Authorize(Roles = "SuperAdmin,Admin")]
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject PermissionService PermissionService
+@using AssetManagement.Client.Shared
 
 <!-- Breadcrumb Section -->
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item">Settings</li>
-        <li class="breadcrumb-item active" aria-current="page">Role Management</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 <div class="container mt-4">
     @if (roles != null)
@@ -92,6 +87,7 @@
     private string SelectedRoleName;
     private RoleViewModel SelectedRole;
     private List<RoleViewModel> roles = new();
+    private List<BreadcrumbItem> breadcrumbItems = new();
 
     private List<string> allPages = new() { 
         "Dashboard",
@@ -120,6 +116,12 @@
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "Settings" },
+            new BreadcrumbItem { Text = "Role Management", IsActive = true }
+        };
         alert ??= new();
         alert?.Clear();
         roles = await RoleService.GetRoles();

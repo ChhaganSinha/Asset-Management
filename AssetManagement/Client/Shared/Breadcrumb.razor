@@ -1,0 +1,26 @@
+@using AssetManagement.Client.Shared
+@using Microsoft.AspNetCore.Components
+
+@if (Items?.Any() == true)
+{
+    <nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
+        <ol class="breadcrumb">
+            @foreach (var item in Items)
+            {
+                if (item.IsActive || string.IsNullOrWhiteSpace(item.Url))
+                {
+                    <li class="breadcrumb-item active" aria-current="page">@item.Text</li>
+                }
+                else
+                {
+                    <li class="breadcrumb-item"><a href="@item.Url">@item.Text</a></li>
+                }
+            }
+        </ol>
+    </nav>
+}
+
+@code {
+    [Parameter]
+    public List<BreadcrumbItem> Items { get; set; } = new();
+}

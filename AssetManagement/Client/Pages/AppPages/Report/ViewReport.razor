@@ -4,6 +4,7 @@
 @using AssetManagement.Client.Client;
 @using AssetManagement.Client.Pages.GridComponent
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Models;
 @using System.Globalization;
 @using AssetManagement.Dto;
@@ -18,10 +19,7 @@
     <div class="card-header" style="padding: 8px !important; display: flex; align-items: center;">
         <h5>Reports</h5>
         <div style="margin-left: auto;">
-            <ol class="breadcrumb" style="display: flex; justify-content: flex-end; align-items: center; list-style: none; padding: 0; margin: 0;">
-                <li class="breadcrumb-item"><a href="/"><i class="fa fa-home" aria-hidden="true"></i></a></li>
-                <li class="breadcrumb-item active">Reports</li>
-            </ol>
+            <Breadcrumb Items="breadcrumbItems" />
         </div>
     </div>
 
@@ -435,6 +433,7 @@
     int totalItem = 0;
     Employee employeeModel = new();
     List<Company> company = new();
+    private List<BreadcrumbItem> breadcrumbItems = new();
     List<AssetType> assetType = new();
     List<Asset> asset = new();
     List<Employee> employee = new();
@@ -467,6 +466,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "Reports", IsActive = true }
+        };
         SelectedOption = "Employee";
 
         reportFilters = await client.GetEmployeeReportFileters();

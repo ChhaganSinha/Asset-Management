@@ -3,6 +3,7 @@
 @using AssetManagement.Client.Client
 @using AssetManagement.Client.Pages.AppPages.Company.Component
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Models
 @inject AppClient client
 @inject ILogger<CompanyDataConfig> logger
@@ -10,12 +11,7 @@
 @inject PermissionService PermissionService
 @attribute [Authorize]
 
-<nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">@Title</li>
-    </ol>
-</nav>
+<Breadcrumb Items="breadcrumbItems" />
 
 @if (canView)
 {
@@ -363,6 +359,7 @@ else
     private static bool canEdit = false;
     private static bool hasFullAccess = false;
     private bool AddZone = false;
+    private List<BreadcrumbItem> breadcrumbItems = new();
     
     public string Title => model?.Id > 0 ? "Modify Company" : "Add Company";
 
@@ -376,6 +373,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = Title, IsActive = true }
+        };
         var permissions = await PermissionService.HasPermission("Add Company");
         if (permissions != null)
         {

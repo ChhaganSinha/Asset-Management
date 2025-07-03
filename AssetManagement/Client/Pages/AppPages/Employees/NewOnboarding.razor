@@ -3,6 +3,7 @@
 @using AssetManagement.Client.Client;
 @using AssetManagement.Client.Pages.GridComponent
 @using AssetManagement.Client.Shared.Popup
+@using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Models;
 @using System.Globalization;
 @inject AppClient client
@@ -16,11 +17,7 @@
             <i class="fa fa-arrow-left" aria-hidden="true"></i> Back
         </a>
         <div style="margin-left: auto;">
-            <ol class="breadcrumb" style="display: flex; justify-content: flex-end; align-items: center; list-style: none; padding: 0; margin: 0;">
-                <li class="breadcrumb-item"><a href="/"><i class="fa fa-home" aria-hidden="true"></i></a></li>
-                <li class="breadcrumb-item"><a href="/employees">Employees</a></li>
-                <li class="breadcrumb-item active">Onboarding</li>
-            </ol>
+            <Breadcrumb Items="breadcrumbItems" />
         </div>
     </div>
 
@@ -28,3 +25,16 @@
         <EmployeeOnboardingGrid />
     </div>
 </div>
+@code {
+    private List<BreadcrumbItem> breadcrumbItems = new();
+
+    protected override void OnInitialized()
+    {
+        breadcrumbItems = new()
+        {
+            new BreadcrumbItem { Text = "Home", Url = "/" },
+            new BreadcrumbItem { Text = "Employees", Url = "/employees" },
+            new BreadcrumbItem { Text = "Onboarding", IsActive = true }
+        };
+    }
+}
