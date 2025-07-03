@@ -152,7 +152,7 @@ else
                         <div class="col-md-4">
                             <label class="col-form-label bold-font">CompanyOfEmployee</label>
                             <DropdownSelect @bind-Value="model.EmployeeCompanyCode"
-                                            DataSource="CompanyDropdown"
+                                            DataSource="EmployeeCompanyDropdown"
                                             EmptyText="-- Select Employee Company --"
                                             Css="form-select"
                                             Disabled="@(model.Id > 0)" />
@@ -423,6 +423,9 @@ else
 
     private List<KeyValuePair<string, string>> CompanyDropdown =>
         company.Select(c => new KeyValuePair<string, string>(c.Id.ToString(), $"{c.Name} ({c.CompanyCode})")).ToList();
+
+    private List<KeyValuePair<string, string>> EmployeeCompanyDropdown =>
+        company.Select(c => new KeyValuePair<string, string>(c.CompanyCode, $"{c.Name} ({c.CompanyCode})")).ToList();
 
     private List<KeyValuePair<string, string>> AssetTypeDropdown =>
         assetType.Select(a => new KeyValuePair<string, string>(a.Name, a.Name)).ToList();
