@@ -9,6 +9,7 @@
 @using AssetManagement.Dto;
 @using System.Text.Json;
 @using System.Text.RegularExpressions;
+@using System.Linq;
 @using Microsoft.AspNetCore.Components.Forms
 
 @inject AppClient client
@@ -168,7 +169,7 @@
                         <div class="col-md-3">
                             <button type="button"
                             style="width:100%"
-                            @onclick="() => EmailRequest = !EmailRequest"
+                            @onclick="() => { EmailRequest = !EmailRequest; }"
                             class="btn btn-primary @(EmailRequest ? "disabled" : "")">
                                 @(EmailRequest ? "Request Sent" : "Create Email Request")
                             </button>
@@ -243,7 +244,7 @@
                             <ValidationMessage For="() => model.Designation" />
                         </div>
                         <div class="col-md-3 d-flex align-items-end">
-                            <a type="button" class="btn btn-primary w-100" @onclick="(() => AddDesigntions = true)">Add</a>
+                            <a type="button" class="btn btn-primary w-100" @onclick="() => { AddDesigntions = true; }">Add</a>
                         </div>
                     </div>
 
@@ -314,7 +315,9 @@
                             AutoSort="false"
                             TValue="int"
                             Data="@SkillOptions"
-                            @bind-Value="@SelectedSkill"
+                            Value="@SelectedSkill"
+                            ValueChanged="OnSkillChanged"
+                            ValueExpression="@(() => SelectedSkill)"
                             TextSelector="@(p => p.Skill)"
                             ValueSelector="@(p => p.Id)"
                             EmptyText="- select -"
@@ -322,7 +325,7 @@
                         </div>
 
                         <div class="col-md-2 col-sm-12">
-                            <a class="btn btn-primary" style="width: 100%;" @onclick="(() => AddSkill = true)"><i class="fa fa-free-code-camp" aria-hidden="true"></i> Add Skills</a>
+                            <a class="btn btn-primary" style="width: 100%;" @onclick="() => { AddSkill = true; }"><i class="fa fa-free-code-camp" aria-hidden="true"></i> Add Skills</a>
                         </div>
                     </div>
 
@@ -1707,6 +1710,12 @@
             return employee;
         return employee
         .Where(x => x.EmployeeName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private Task OnSkillChanged(IEnumerable<int> values)
+    {
+        SelectedSkill = values.ToList();
+        return Task.CompletedTask;
     }
 
     private List<KeyValuePair<string, string>> EmployeeDropdown =>

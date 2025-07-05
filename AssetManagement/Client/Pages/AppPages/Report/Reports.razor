@@ -7,6 +7,7 @@
 @using AssetManagement.Client.Shared
 @using AssetManagement.Dto.Models;
 @using System.Globalization;
+@using System.Linq;
 @inject AppClient client
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
@@ -43,7 +44,9 @@
                                        AutoSort="false"
                                        TValue="string"
                                        Data="@company"
-                                       @bind-Value="@model.CompanyCodeSelected"
+                                       Value="@model.CompanyCodeSelected"
+                                       ValueChanged="OnCompanyCodesChanged"
+                                       ValueExpression="@(() => model.CompanyCodeSelected)"
                                        TextSelector="@(p => p.CompanyCode)"
                                        ValueSelector="@(p => p.CompanyCode)"
                                        EmptyText="- select -"
@@ -64,7 +67,9 @@
                                        AutoSort="false"
                                        TValue="string"
                                        Data="@assetType"
-                                       @bind-Value="@model.AssetTypeSelected"
+                                       Value="@model.AssetTypeSelected"
+                                       ValueChanged="OnAssetTypesChanged"
+                                       ValueExpression="@(() => model.AssetTypeSelected)"
                                        TextSelector="@(p => p.Name)"
                                        ValueSelector="@(p => p.Name)"
                                        EmptyText="- select -"
@@ -311,7 +316,7 @@
             </div>
             <div class="fixed-div" style="text-align:center;">
                 <i style="float:right">Total Items : @totalItem</i>
-                <button type="button" @onclick="()=>columnSelection = false" class="btn btn-secondary col-md-2 mb-1 mr-1"><i class="fa fa-long-arrow-left" aria-hidden="true"></i> Back</button>
+                <button type="button" @onclick="() => { columnSelection = false; }" class="btn btn-secondary col-md-2 mb-1 mr-1"><i class="fa fa-long-arrow-left" aria-hidden="true"></i> Back</button>
                 <button type="button" @onclick="ExportExcelReport" class="btn btn-primary col-md-2 mb-1 mr-1"><i class="fa fa-table" aria-hidden="true"></i> Export</button>
                 <button type="button" @onclick="PrintPDF" class="btn btn-warning col-md-2 mb-1 mr-1"><i class="fa fa-print" aria-hidden="true"></i> Print PDF</button>
             </div>
@@ -497,6 +502,18 @@
     public void CopyAddress()
     {
 
+    }
+
+    private Task OnCompanyCodesChanged(IEnumerable<string> values)
+    {
+        model.CompanyCodeSelected = values.ToList();
+        return Task.CompletedTask;
+    }
+
+    private Task OnAssetTypesChanged(IEnumerable<string> values)
+    {
+        model.AssetTypeSelected = values.ToList();
+        return Task.CompletedTask;
     }
     public void CallIssueDate()
     {

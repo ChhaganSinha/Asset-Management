@@ -100,7 +100,12 @@
                         </div>
                         <div class="form-group row" style="padding:4px">
                             <div class="col-md-4">
-                                <HxMultiSelect TItem="string" TValue="string" Data="SkillOptions" @bind-Value="selectedSkills" TextSelector="@(s => s)" ValueSelector="@(s => s)" EmptyText="- select -" NullDataText="Loading..." />
+                                <HxMultiSelect TItem="string" TValue="string" Data="SkillOptions"
+                                               Value="selectedSkills"
+                                               ValueChanged="OnSkillsChanged"
+                                               ValueExpression="@(() => selectedSkills)"
+                                               TextSelector="@(s => s)" ValueSelector="@(s => s)"
+                                               EmptyText="- select -" NullDataText="Loading..." />
                                 <div class="form-check form-switch mt-2">
                                     <InputCheckbox class="form-check-input" id="multiTextChoice" @bind-Value="multiselectionTextChoice" />
                                     <label class="form-check-label" for="multiTextChoice">MultiSelection Text choice</label>
@@ -581,7 +586,7 @@
 
 
     private bool multiselectionTextChoice;
-    private IEnumerable<string> selectedSkills { get; set; } = new HashSet<string>() { };
+    private List<string> selectedSkills { get; set; } = new();
 
     EmployeeFilterModel employeeFilterModel = new();
     AssetFilterModel assetFilterModel = new();
@@ -764,5 +769,11 @@
     {
         resignDateStart = null;
         resignDateEnd = null;
+    }
+
+    private Task OnSkillsChanged(IEnumerable<string> values)
+    {
+        selectedSkills = values.ToList();
+        return Task.CompletedTask;
     }
 }

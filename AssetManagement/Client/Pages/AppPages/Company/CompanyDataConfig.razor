@@ -216,7 +216,7 @@
                             </h2>
                             <div id="collapseZonal" class="accordion-collapse collapse" aria-labelledby="headingZonal" data-bs-parent="#companyAccordion">
                                 <div class="accordion-body">
-                                    <a class="btn btn-dark mb-3" @onclick="@(() => AddZone = true)">
+                                    <a class="btn btn-dark mb-3" @onclick="() => { AddZone = true; }">
                                         <i class="fa fa-thumb-tack" aria-hidden="true"></i> Add Zone
                                     </a>
                                     <div class="table-responsive">

@@ -6,6 +6,7 @@
 @using AssetManagement.Dto.Models
 @using System.Text.Json;
 @using AssetManagement.Dto;
+@using System.Linq;
 @using Microsoft.AspNetCore.Authorization
 @inject AppClient client
 @inject HttpClient httpClient
@@ -199,7 +200,9 @@
                                            AutoSort="false"
                                            TValue="int"
                                            Data="@SkillOptions"
-                            @bind-Value="@SelectedSkill"
+                                           Value="@SelectedSkill"
+                                           ValueChanged="OnSkillChanged"
+                                           ValueExpression="@(() => SelectedSkill)"
                                            TextSelector="@(p => p.Skill)"
                                            ValueSelector="@(p => p.Id)"
                                            EmptyText="- select -"
@@ -1081,7 +1084,13 @@
     {
         EmployeeInsurance.Remove(e);
     }
-    
+
+    private Task OnSkillChanged(IEnumerable<int> values)
+    {
+        SelectedSkill = values.ToList();
+        return Task.CompletedTask;
+    }
+
     private bool IsImageFile(string filePath)
     {
         string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" }; // Add more extensions if needed

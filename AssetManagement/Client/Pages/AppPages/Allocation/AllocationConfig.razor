@@ -211,7 +211,7 @@ else
 
                     @if (model.Id > 0)
                     {
-                        <button type="button" class="btn btn-danger col-md-2" @onclick="() => unallocate = true">
+                        <button type="button" class="btn btn-danger col-md-2" @onclick="() => { unallocate = true; }">
                             <i class="fa fa-trash-alt"></i> UnAllocate
                         </button>
                     }
@@ -251,7 +251,7 @@ else
                             </div>
 
                             <button class="btn btn-danger" @onclick="UnAllocate">Yes</button>
-                            <button class="btn btn-primary" @onclick="() => unallocate = false">No</button>
+                            <button class="btn btn-primary" @onclick="() => { unallocate = false; }">No</button>
                         </div>
                     }
                     else if (TaskCompleted && !process)

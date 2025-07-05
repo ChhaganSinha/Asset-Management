@@ -38,7 +38,7 @@
                 }
                 @if (canViewCompanies || canViewAddCompany)
                 {
-                    <a class="borderd has-submenu @(_company ? "active" : "")" @onclick="()=>_company =!_company"><i class="fa fa-building" style="color:dodgerblue;"></i> <span>Companies</span> <i class="fa fa-chevron-right arrow"></i></a>
+                    <a class="borderd has-submenu @(_company ? "active" : "")" @onclick="() => { _company = !_company; }"><i class="fa fa-building" style="color:dodgerblue;"></i> <span>Companies</span> <i class="fa fa-chevron-right arrow"></i></a>
                     <ul class="submenu">
                         @if (canViewCompanies)
                         {
@@ -52,7 +52,7 @@
                 }
                 @if (canViewEmployees || canViewAddEmployee || canViewOnboardings)
                 {
-                    <a class="borderd has-submenu @(_employee ? "active" : "")" @onclick="()=>_employee =!_employee"><i class="fa fa-users" style="color:#40e0d0;"></i> <span>Employees</span> <i class="fa fa-chevron-right arrow"></i></a>
+                    <a class="borderd has-submenu @(_employee ? "active" : "")" @onclick="() => { _employee = !_employee; }"><i class="fa fa-users" style="color:#40e0d0;"></i> <span>Employees</span> <i class="fa fa-chevron-right arrow"></i></a>
                     <ul class="submenu">
                         @if (canViewEmployees)
                         {
@@ -71,7 +71,7 @@
 
                 @if (canViewAssets || canViewAddAsset || canViewAssetTransfer)
                 {
-                    <a class="borderd has-submenu @(_assetStore ? "active" : "")" @onclick="()=>_assetStore =!_assetStore"><i class="fa fa-laptop" style="color:silver;"></i> <span>Asset Store</span> <i class="fa fa-chevron-right arrow"></i></a>
+                    <a class="borderd has-submenu @(_assetStore ? "active" : "")" @onclick="() => { _assetStore = !_assetStore; }"><i class="fa fa-laptop" style="color:silver;"></i> <span>Asset Store</span> <i class="fa fa-chevron-right arrow"></i></a>
                     <ul class="submenu">
                         @if (canViewAssets)
                         {
@@ -89,7 +89,7 @@
                 }
                 @if (canViewAllocations || canViewNewAlloction)
                 {
-                    <a class="borderd has-submenu @(_allocationCenter ? "active" : "")" @onclick="()=>_allocationCenter =!_allocationCenter"><i class="fa fa-pencil-square-o" style="color:cornflowerblue;"></i> <span>Allocation Center</span> <i class="fa fa-chevron-right arrow"></i></a>
+                    <a class="borderd has-submenu @(_allocationCenter ? "active" : "")" @onclick="() => { _allocationCenter = !_allocationCenter; }"><i class="fa fa-pencil-square-o" style="color:cornflowerblue;"></i> <span>Allocation Center</span> <i class="fa fa-chevron-right arrow"></i></a>
                     <ul class="submenu">
                         @if (canViewAllocations)
                         {
@@ -117,7 +117,7 @@
 
                 @if (canViewAddUsers || canViewUserManagement || canViewPagePermission || IsSuperAdmin)
                 {
-                    <a class="borderd has-submenu @(_users ? "active" : "")" @onclick="() => _users = !_users"><i class="fa fa-universal-access" style="color:cornflowerblue"></i> <span>Users Management</span> <i class="fa fa-chevron-right arrow"></i></a>
+                    <a class="borderd has-submenu @(_users ? "active" : "")" @onclick="() => { _users = !_users; }"><i class="fa fa-universal-access" style="color:cornflowerblue"></i> <span>Users Management</span> <i class="fa fa-chevron-right arrow"></i></a>
                     <ul class="submenu">
                         @if (canViewAddUsers || IsSuperAdmin)
                         {

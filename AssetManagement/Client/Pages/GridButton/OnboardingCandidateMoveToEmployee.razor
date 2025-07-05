@@ -8,7 +8,7 @@
 @implements ICustomGridComponent<EmployeeOnboardingDto>
 @inject NavigationManager NavigationManager
 
-<button class='btn btn-sm btn-primary' style="border-radius:15px" @onclick="()=>show=true" title="Add as Employee"><i class="fa fa-rocket"></i></button>
+<button class='btn btn-sm btn-primary' style="border-radius:15px" @onclick="() => { show = true; }" title="Add as Employee"><i class="fa fa-rocket"></i></button>
 <BorderlessDialog  Show="@show" OnCloseDialog="ResetForm">
     @if (show)
     {
