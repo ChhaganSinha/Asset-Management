@@ -46,62 +46,34 @@
                     <EditForm Model="employeeModel">
                         <div class="form-group row" style="padding:4px">
                             <div class="col-md-3">
-                                <MudGrid>
-                                    <MudItem xs="12" sm="12" md="12">
-                                        <MudAutocomplete T="Company" Label="Company" @bind-Value="selectedSourceCompany" SearchFunc="@SourceCompanySearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                         ToStringFunc="@(e => e == null ? null : $"{e.Name} ({e.CompanyCode})")"
-                                                         Required="false"
-                                                         ResetValueOnEmptyText="true"
-                                                         CoerceText="true"
-                                                         CoerceValue="true"
-                                                         MaxItems="null">
-                                        </MudAutocomplete>
-                                    </MudItem>
-                                </MudGrid>
+                                <label class="form-label bold-font">Company</label>
+                                <DropdownSelect T="string" @bind-Value="selectedSourceCompanyCode"
+                                               DataSource="CompanyDropdown"
+                                               EmptyText="-- Select Company --"
+                                               Css="form-select" />
                             </div>
 
                             <div class="col-md-3">
-                                <MudGrid>
-                                    <MudItem xs="12" sm="12" md="12">
-                                        <MudAutocomplete T="string" Label="Job Profile" @bind-Value="selectedJobProfile" SearchFunc="@JobProfileSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
-                                                         Required="false"
-                                                         ResetValueOnEmptyText="true"
-                                                         CoerceText="true"
-                                                         CoerceValue="true"
-                                                         MaxItems="null">
-                                        </MudAutocomplete>
-                                    </MudItem>
-                                </MudGrid>
+                                <label class="form-label bold-font">Job Profile</label>
+                                <DropdownSelect T="string" @bind-Value="selectedJobProfile"
+                                               DataSource="JobProfileDropdown"
+                                               EmptyText="-- Select --"
+                                               Css="form-select" />
                             </div>
 
                             <div class="col-md-3">
-                                <MudGrid>
-                                    <MudItem xs="12" sm="12" md="12">
-                                        <MudAutocomplete T="string" Label="Manager" @bind-Value="selectedManager" SearchFunc="@ManagerSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
-                                                         Required="false"
-                                                         ResetValueOnEmptyText="true"
-                                                         CoerceText="true"
-                                                         CoerceValue="true"
-                                                         MaxItems="null">
-                                        </MudAutocomplete>
-                                    </MudItem>
-                                </MudGrid>
+                                <label class="form-label bold-font">Manager</label>
+                                <DropdownSelect T="string" @bind-Value="selectedManager"
+                                               DataSource="ManagerDropdown"
+                                               EmptyText="-- Select --"
+                                               Css="form-select" />
                             </div>
                             <div class="col-md-3">
-                                <MudGrid>
-                                    <MudItem xs="12" sm="12" md="12">
-                                        <MudAutocomplete T="string" Label="Office Branch" @bind-Value="selectedBranch" SearchFunc="@BranchSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
-                                                         Required="false"
-                                                         ResetValueOnEmptyText="true"
-                                                         CoerceText="true"
-                                                         CoerceValue="true"
-                                                         MaxItems="null">
-                                        </MudAutocomplete>
-                                    </MudItem>
-                                </MudGrid>
+                                <label class="form-label bold-font">Office Branch</label>
+                                <DropdownSelect T="string" @bind-Value="selectedBranch"
+                                               DataSource="BranchDropdown"
+                                               EmptyText="-- Select --"
+                                               Css="form-select" />
                             </div>
                         </div>
                         <div class="form-group row" style="padding:4px">
@@ -166,8 +138,8 @@
                           
                         </div>
 
-                        <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="ViewReportData" EndIcon="@Icons.Material.Filled.BarChart" Color="Color.Primary">View</MudButton>
-                        <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="ClearFilter" EndIcon="@Icons.Material.Filled.Close" Color="Color.Error">Clear</MudButton>
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="ViewReportData">View</button>
+                        <button type="button" class="btn btn-danger btn-sm" @onclick="ClearFilter">Clear</button>
                     </EditForm>
                 </div>
             }
@@ -179,62 +151,34 @@
                     <EditForm Model="employeeModel">
                         <div class="form-group row" style="padding:4px">
                             <div class="col-md-3">
-                                <MudGrid>
-                                    <MudItem xs="12" sm="12" md="12">
-                                        <MudAutocomplete T="Company" Label="Company" @bind-Value="selectedSourceCompanyForAsset" SearchFunc="@AssetSourceCompanySearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                         ToStringFunc="@(e => e == null ? null : $"{e.Name} ({e.CompanyCode})")"
-                                                         Required="false"
-                                                         ResetValueOnEmptyText="true"
-                                                         CoerceText="true"
-                                                         CoerceValue="true"
-                                                         MaxItems="null">
-                                        </MudAutocomplete>
-                                    </MudItem>
-                                </MudGrid>
+                                <label class="form-label bold-font">Company</label>
+                                <DropdownSelect T="string" @bind-Value="selectedSourceCompanyForAssetCode"
+                                               DataSource="CompanyDropdown"
+                                               EmptyText="-- Select Company --"
+                                               Css="form-select" />
                             </div>
 
                             <div class="col-md-3">
-                                <MudGrid>
-                                    <MudItem xs="12" sm="12" md="12">
-                                        <MudAutocomplete T="string" Label="Asset Type" @bind-Value="selectedAssetType" SearchFunc="@AssetTypeSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
-                                                         Required="false"
-                                                         ResetValueOnEmptyText="true"
-                                                         CoerceText="true"
-                                                         CoerceValue="true"
-                                                         MaxItems="null">
-                                        </MudAutocomplete>
-                                    </MudItem>
-                                </MudGrid>
+                                <label class="form-label bold-font">Asset Type</label>
+                                <DropdownSelect T="string" @bind-Value="selectedAssetType"
+                                               DataSource="AssetTypeDropdown"
+                                               EmptyText="-- Select --"
+                                               Css="form-select" />
                             </div>
 
                             <div class="col-md-3">
-                                <MudGrid>
-                                    <MudItem xs="12" sm="12" md="12">
-                                        <MudAutocomplete T="string" Label="Brand" @bind-Value="selectedAssetBrand" SearchFunc="@AssetBrandSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
-                                                         Required="false"
-                                                         ResetValueOnEmptyText="true"
-                                                         CoerceText="true"
-                                                         CoerceValue="true"
-                                                         MaxItems="null">
-                                        </MudAutocomplete>
-                                    </MudItem>
-                                </MudGrid>
+                                <label class="form-label bold-font">Brand</label>
+                                <DropdownSelect T="string" @bind-Value="selectedAssetBrand"
+                                               DataSource="AssetBrandDropdown"
+                                               EmptyText="-- Select --"
+                                               Css="form-select" />
                             </div>
                             <div class="col-md-3">
-                                <MudGrid>
-                                    <MudItem xs="12" sm="12" md="12">
-                                        <MudAutocomplete T="string" Label="Model" @bind-Value="selectedAssetModel" SearchFunc="@AssetModelSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                         ToStringFunc="@(e => e == null ? null : $"{e}")"
-                                                         Required="false"
-                                                         ResetValueOnEmptyText="true"
-                                                         CoerceText="true"
-                                                         CoerceValue="true"
-                                                         MaxItems="null">
-                                        </MudAutocomplete>
-                                    </MudItem>
-                                </MudGrid>
+                                <label class="form-label bold-font">Model</label>
+                                <DropdownSelect T="string" @bind-Value="selectedAssetModel"
+                                               DataSource="AssetModelDropdown"
+                                               EmptyText="-- Select --"
+                                               Css="form-select" />
                             </div>
                         </div>
 
@@ -265,8 +209,8 @@
 
                         </div>
 
-                        <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="ViewReportData" EndIcon="@Icons.Material.Filled.BarChart" Color="Color.Primary">View</MudButton>
-                        <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="ClearAssetFilter" EndIcon="@Icons.Material.Filled.Close" Color="Color.Error">Clear</MudButton>
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="ViewReportData">View</button>
+                        <button type="button" class="btn btn-danger btn-sm" @onclick="ClearAssetFilter">Clear</button>
                     </EditForm>
                 </div>
             }
@@ -344,8 +288,8 @@
 
                 <div class="fixed-div" style="text-align:center;">
                     <i style="float:right">Total Items : @totalItem</i>
-                    <MudButton @onclick="OpenExportDialog" Size="Size.Small" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Print" Color="Color.Primary">Export</MudButton>
-                    <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="CloseReport" EndIcon="@Icons.Material.Filled.Close" Color="Color.Error">Close</MudButton>
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="OpenExportDialog">Export</button>
+                    <button type="button" class="btn btn-danger btn-sm" @onclick="CloseReport">Close</button>
                 </div>
             </div>
 
@@ -410,8 +354,8 @@
 
                 <div class="fixed-div" style="text-align:center;">
                     <i style="float:right">Total Items : @totalItem</i>
-                    <MudButton @onclick="OpenExportDialog" Size="Size.Small" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Print" Color="Color.Primary">Export</MudButton>
-                    <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="CloseReport" EndIcon="@Icons.Material.Filled.Close" Color="Color.Error">Close</MudButton>
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="OpenExportDialog">Export</button>
+                    <button type="button" class="btn btn-danger btn-sm" @onclick="CloseReport">Close</button>
                 </div>
             </div>
         }
@@ -487,17 +431,47 @@
     }
 
     //employee
-    private Company? selectedSourceCompany { get; set; }
+    private string? selectedSourceCompanyCode { get; set; }
     private string? selectedJobProfile { get; set; }
     private string? selectedManager { get; set; }
     private string? selectedBranch { get; set; }
     private string? selectedLocation { get; set; }
 
     //asset
-    private Company? selectedSourceCompanyForAsset { get; set; }
+    private string? selectedSourceCompanyForAssetCode { get; set; }
     private string? selectedAssetType { get; set; }
     private string? selectedAssetBrand { get; set; }
     private string? selectedAssetModel { get; set; }
+
+    private List<KeyValuePair<string, string>> CompanyDropdown =>
+        company.Select(c => new KeyValuePair<string, string>(c.CompanyCode, $"{c.Name} ({c.CompanyCode})")).ToList();
+
+    private List<KeyValuePair<string, string>> JobProfileDropdown =>
+        reportFilters?.Designations?.Select(d => new KeyValuePair<string, string>(d, d)).ToList() ?? new();
+
+    private List<KeyValuePair<string, string>> ManagerDropdown =>
+        reportFilters?.Managers?.Select(m => new KeyValuePair<string, string>(m, m)).ToList() ?? new();
+
+    private List<KeyValuePair<string, string>> BranchDropdown =>
+        reportFilters?.Branches?.Select(b => new KeyValuePair<string, string>(b, b)).ToList() ?? new();
+
+    private List<KeyValuePair<string, string>> AssetTypeDropdown =>
+        string.IsNullOrEmpty(selectedSourceCompanyForAssetCode)
+            ? new()
+            : assetReportFilters.AssetType.Where(o => o.CompanyCode == selectedSourceCompanyForAssetCode)
+                .Select(a => new KeyValuePair<string, string>(a.AssetTypeName, a.AssetTypeName)).ToList();
+
+    private List<KeyValuePair<string, string>> AssetBrandDropdown =>
+        string.IsNullOrEmpty(selectedAssetType)
+            ? new()
+            : assetReportFilters.Brand.Where(o => o.AssetType == selectedAssetType)
+                .Select(b => new KeyValuePair<string, string>(b.BrandName, b.BrandName)).ToList();
+
+    private List<KeyValuePair<string, string>> AssetModelDropdown =>
+        string.IsNullOrEmpty(selectedAssetBrand)
+            ? new()
+            : assetReportFilters.Model.Where(o => o.Brand == selectedAssetBrand)
+                .Select(m => new KeyValuePair<string, string>(m.ModelName, m.ModelName)).ToList();
 
     private async Task<IEnumerable<Company>> SourceCompanySearch(string value)
     {
@@ -562,14 +536,14 @@
         await Task.Delay(5);
         selectedAssetBrand = null;
         selectedAssetModel = null;
-        if (selectedSourceCompanyForAsset == null)
+        if (string.IsNullOrEmpty(selectedSourceCompanyForAssetCode))
         {
             return null;
         }
         if (string.IsNullOrEmpty(value))
-            return assetReportFilters.AssetType.Where(o => o.CompanyCode == selectedSourceCompanyForAsset.CompanyCode).Select(x => x.AssetTypeName);
+            return assetReportFilters.AssetType.Where(o => o.CompanyCode == selectedSourceCompanyForAssetCode).Select(x => x.AssetTypeName);
 
-        return assetReportFilters.AssetType.Where(o => o.CompanyCode == selectedSourceCompanyForAsset.CompanyCode)
+        return assetReportFilters.AssetType.Where(o => o.CompanyCode == selectedSourceCompanyForAssetCode)
             .Where(x => x.AssetTypeName.Contains(value, StringComparison.InvariantCultureIgnoreCase))
             .Select(x => x.AssetTypeName);
     }
@@ -633,7 +607,7 @@
         showReport = true;
         if (SelectedOption == "Employee")
         {
-            employeeFilterModel.Company = selectedSourceCompany?.CompanyCode;
+            employeeFilterModel.Company = selectedSourceCompanyCode;
             employeeFilterModel.Designation = selectedJobProfile;
             employeeFilterModel.ManagerName = selectedManager;
             employeeFilterModel.BranchOffice = selectedBranch;
@@ -675,7 +649,7 @@
         else
         {
             assetFilterModel.Status = null;
-            assetFilterModel.Company = selectedSourceCompanyForAsset?.CompanyCode;
+            assetFilterModel.Company = selectedSourceCompanyForAssetCode;
             assetFilterModel.AssetType = selectedAssetType;
             assetFilterModel.Brand = selectedAssetBrand;
             assetFilterModel.Model = selectedAssetModel;
@@ -726,7 +700,7 @@
     public void ClearFilter()
     {
         showReport = false;
-        selectedSourceCompany = null;
+        selectedSourceCompanyCode = null;
         selectedJobProfile = null;
         selectedManager = null;
         selectedBranch = null;
@@ -740,8 +714,8 @@
 
     public void ClearAssetFilter()
     {
-        showReport = false;       
-        selectedSourceCompanyForAsset = null;
+        showReport = false;
+        selectedSourceCompanyForAssetCode = null;
         selectedAssetType = null;
         selectedAssetBrand = null;
         selectedAssetModel = null;
