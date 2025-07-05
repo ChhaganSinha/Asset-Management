@@ -1,4 +1,4 @@
-﻿@page "/reports"
+@page "/reports"
 @page "/report/{Id:int}"
 
 @using AssetManagement.Client.Client;
@@ -254,14 +254,14 @@
                         </thead>
                         <tbody>
 
-                            @if (responceDataOfEmployee?.Count == 0)
+                            @if (responseDataOfEmployee?.Count == 0)
                             {
                                 <tr><td colspan="3">No data found</td></tr>
                             }
                             else
                             {
                                 int counter = 0;
-                                foreach (var r in responceDataOfEmployee)
+                                foreach (var r in responseDataOfEmployee)
                                 {
                                     counter++;
                                     <tr>
@@ -317,23 +317,23 @@
                                 <td>SerialNumber</td>
                                 <td>Status</td>
                                 @* <td>EmployeeId</td> *@
-                                <td>Emoloyee Name</td>
-                                <td>Emoloyee Email</td>
-                                <td>Aquire Date</td>
+                                <td>Employee Name</td>
+                                <td>Employee Email</td>
+                                <td>Acquire Date</td>
                                 <td>Discard Date</td>
                   
                             </tr>
                         </thead>
                         <tbody>
 
-                            @if (responceDataOfAsset?.Count == 0)
+                            @if (responseDataOfAsset?.Count == 0)
                             {
                                 <tr><td colspan="3">No data found</td></tr>
                             }
                             else
                             {
                                 int counter = 0;
-                                foreach (var r in responceDataOfAsset)
+                                foreach (var r in responseDataOfAsset)
                                 {
                                     counter++;
                                     <tr>
@@ -390,8 +390,8 @@
     List<Asset> asset = new();
     List<Employee> employee = new();
     AllocationlogReportGenerate model = new();
-    List<Employee> responceDataOfEmployee = new();
-    List<Asset> responceDataOfAsset = new();
+    List<Employee> responseDataOfEmployee = new();
+    List<Asset> responseDataOfAsset = new();
 
     bool columnSelection = false;
     //private DateRange _issueDate = new DateRange(DateTime.Now.Date, DateTime.Now.AddDays(5).Date);
@@ -630,7 +630,7 @@
                 employeeFilterModel.ResignDateEnd = new DateTime();
             }
 
-            responceDataOfEmployee = await client.GetFilteredEmployeeReport(employeeFilterModel);
+            responseDataOfEmployee = await client.GetFilteredEmployeeReport(employeeFilterModel);
         }
         else
         {
@@ -665,7 +665,7 @@
                 assetFilterModel.DiscardDateEnd = new DateTime();
             }
 
-            responceDataOfAsset = await client.GetFilteredAssetReport(assetFilterModel);
+            responseDataOfAsset = await client.GetFilteredAssetReport(assetFilterModel);
         }
 
     }
@@ -709,21 +709,21 @@
     {
         if(SelectedOption == "Employee")
         {
-            var responceData = await client.EmployeeExportToExcel(employeeFilterModel);
+            var responseData = await client.EmployeeExportToExcel(employeeFilterModel);
             var fileName = $"EmployeeReport {DateTime.Now.ToString()}.xlsx";
             var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            await using (var memoryStream = new MemoryStream(responceData))
+            await using (var memoryStream = new MemoryStream(responseData))
             {
                 await JSRuntime.InvokeVoidAsync("downloadFile", fileName, mimeType, memoryStream.ToArray());
             }
         }
         if (SelectedOption == "Asset")
         {
-            var responceData = await client.AssetExportToExcel(assetFilterModel);
+            var responseData = await client.AssetExportToExcel(assetFilterModel);
             var fileName = $"AssetReport {DateTime.Now.ToString()}.xlsx";
             var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-            await using (var memoryStream = new MemoryStream(responceData))
+            await using (var memoryStream = new MemoryStream(responseData))
             {
                 await JSRuntime.InvokeVoidAsync("downloadFile", fileName, mimeType, memoryStream.ToArray());
             }
