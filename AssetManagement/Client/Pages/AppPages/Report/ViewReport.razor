@@ -26,17 +26,21 @@
 
     <div class="card-body">
 
-        <MudForm>
-            <div class="form-group row m-0">
-                <label class="col-form-label col-md-2 bold-font" style="line-height: 34px;">Report Type</label>
-                <div class="col-md-10">
-                    <MudRadioGroup @bind-SelectedOption="@SelectedOption" Orientation="Orientation.Horizontal" @oninput = "OnRadioChange">
-                        <MudRadio Option=@("Employee") Color="Color.Primary" Style="margin-right:65px">Employee</MudRadio>
-                        <MudRadio Option=@("Asset") Color="Color.Secondary">Asset</MudRadio>
-                    </MudRadioGroup>
-                </div>
+        <div class="form-group row m-0">
+            <label class="col-form-label col-md-2 bold-font" style="line-height: 34px;">Report Type</label>
+            <div class="col-md-10">
+                <InputRadioGroup @bind-Value="SelectedOption" class="d-flex" @oninput="OnRadioChange">
+                    <div class="form-check me-3">
+                        <InputRadio class="form-check-input" Value="Employee" id="optEmployee" />
+                        <label class="form-check-label" for="optEmployee">Employee</label>
+                    </div>
+                    <div class="form-check">
+                        <InputRadio class="form-check-input" Value="Asset" id="optAsset" />
+                        <label class="form-check-label" for="optAsset">Asset</label>
+                    </div>
+                </InputRadioGroup>
             </div>
-        </MudForm>
+        </div>
 
         <div style="background: whitesmoke;border-radius: 5px;">
             @if (SelectedOption == "Employee")
@@ -78,46 +82,44 @@
                         </div>
                         <div class="form-group row" style="padding:4px">
                             <div class="col-md-10">
-                                <MudRadioGroup @bind-SelectedOption="selectedEmployeeStatus">
-                                    <MudRadioGroup @bind-SelectedOption="@selectedEmployeeStatus" Orientation="Orientation.Horizontal" @oninput="OnStatusChange">
-                                        <MudRadio Option=@("All") Color="Color.Dark" Style="margin-right:65px">All Employee</MudRadio>
-                                        <MudRadio Option=@("Active") Color="Color.Info" Style="margin-right:65px">Active Employee</MudRadio>
-                                        <MudRadio Option=@("Resigned") Color="Color.Tertiary">Resigned Employee</MudRadio>
-                                    </MudRadioGroup>
-                                </MudRadioGroup>
+                                <InputRadioGroup @bind-Value="selectedEmployeeStatus" class="d-flex" @oninput="OnStatusChange">
+                                    <div class="form-check me-3">
+                                        <InputRadio class="form-check-input" Value="All" id="statusAll" />
+                                        <label class="form-check-label" for="statusAll">All Employee</label>
+                                    </div>
+                                    <div class="form-check me-3">
+                                        <InputRadio class="form-check-input" Value="Active" id="statusActive" />
+                                        <label class="form-check-label" for="statusActive">Active Employee</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <InputRadio class="form-check-input" Value="Resigned" id="statusResigned" />
+                                        <label class="form-check-label" for="statusResigned">Resigned Employee</label>
+                                    </div>
+                                </InputRadioGroup>
                             </div>
                         </div>
                         <div class="form-group row" style="padding:4px">
                             <div class="col-md-4">
-                                <MudSelect MultiSelectionTextFunc="@(new Func<List<string>, string>(GetMultiSelectionText))" MultiSelection="true" @bind-Value="value" @bind-SelectedValues="selectedSkills" T="string" Label="Skills" AdornmentIcon="@Icons.Material.Filled.Search" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined" Margin="Margin.Dense">
-                                    @foreach (var skill in SkillOptions)
-                                    {
-                                        <MudSelectItem T="string" Value="@skill">@skill</MudSelectItem>
-                                    }
-                                </MudSelect>
-
-                                <MudSwitch @bind-Checked="multiselectionTextChoice" Class="mud-width-full" Color="Color.Primary">MultiSelection Text choice</MudSwitch>
+                                <HxMultiSelect TItem="string" TValue="string" Data="SkillOptions" @bind-Value="selectedSkills" TextSelector="@(s => s)" ValueSelector="@(s => s)" EmptyText="- select -" NullDataText="Loading..." />
+                                <div class="form-check form-switch mt-2">
+                                    <InputCheckbox class="form-check-input" id="multiTextChoice" @bind-Value="multiselectionTextChoice" />
+                                    <label class="form-check-label" for="multiTextChoice">MultiSelection Text choice</label>
+                                </div>
                             </div>
 
                             <div class="col-md-4">
-                                <MudDateRangePicker Label="Join Date" @ref="_dateOfJoinPicker" @bind-DateRange="_joinDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
-                                    @*  <PickerActions Context="pickerActionsContext">
-                                <MudButton Class="mr-auto align-self-start" OnClick="@(() => _dateOfJoinPicker.Clear())">Clear</MudButton>
-                                <MudButton OnClick="@(() => _dateOfJoinPicker.Close(false))">Cancel</MudButton>
-                                <MudButton Color="Color.Primary" OnClick="@(() => _dateOfJoinPicker.Close())">Ok</MudButton>
-                                </PickerActions> *@
-                                </MudDateRangePicker>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" @bind="joinDateStart" />
+                                    <input type="date" class="form-control" @bind="joinDateEnd" />
+                                </div>
                             </div>
                             @if(selectedEmployeeStatus == "Resigned")
                             {
                                 <div class="col-md-4">
-                                    <MudDateRangePicker Label="Resign Date" @ref="_resignDatePicker" @bind-DateRange="_resignDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
-                                        @*  <PickerActions Context="pickerActionsContext">
-                                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _resignDatePicker.Clear())">Clear</MudButton>
-                                    <MudButton OnClick="@(() => _resignDatePicker.Close(false))">Cancel</MudButton>
-                                    <MudButton Color="Color.Primary" OnClick="@(() => _resignDatePicker.Close())">Ok</MudButton>
-                                    </PickerActions> *@
-                                    </MudDateRangePicker>
+                                    <div class="input-group">
+                                        <input type="date" class="form-control" @bind="resignDateStart" />
+                                        <input type="date" class="form-control" @bind="resignDateEnd" />
+                                    </div>
                                 </div>
                             }
 
@@ -184,24 +186,25 @@
 
                         <div class="form-group row" style="padding:4px">
                             <div class="col-md-4">
-                                <MudSelect Margin="Margin.Dense" T="string" @bind-Value="allocationStatus" Label="Allocation Status" Variant="Variant.Outlined">
-                                    <MudSelectItem Value="@("All")" />
-                                    <MudSelectItem Value="@("Free")" />
-                                    <MudSelectItem Value="@("Allocated")" />
-                             
-                                </MudSelect>
+                                <InputSelect @bind-Value="allocationStatus" class="form-select">
+                                    <option value="All">All</option>
+                                    <option value="Free">Free</option>
+                                    <option value="Allocated">Allocated</option>
+                                </InputSelect>
                             </div>
 
                             <div class="col-md-4">
-                                <MudDateRangePicker Label="Aquire Date" @ref="_aquireDatePicker" @bind-DateRange="_aquireDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
-
-                                </MudDateRangePicker>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" @bind="aquireDateStart" />
+                                    <input type="date" class="form-control" @bind="aquireDateEnd" />
+                                </div>
                             </div>
 
                             <div class="col-md-4">
-                                <MudDateRangePicker Label="Discard Date" @ref="_discardDatePicker" @bind-DateRange="_discardDate" HelperText="" DateFormat="dd/MMM/yyyy" TitleDateFormat="dddd, dd. MMMM" Variant="Variant.Outlined" Margin="Margin.Dense">
-  
-                                </MudDateRangePicker>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" @bind="discardDateStart" />
+                                    <input type="date" class="form-control" @bind="discardDateEnd" />
+                                </div>
                             </div>
 
                            
@@ -387,24 +390,21 @@
 
     bool columnSelection = false;
     //private DateRange _issueDate = new DateRange(DateTime.Now.Date, DateTime.Now.AddDays(5).Date);
-    private MudDateRangePicker _dateOfJoinPicker;
-    private MudDateRangePicker _resignDatePicker;
-    private MudDateRangePicker _returnDatePicker;
-    private DateRange _joinDate = new DateRange();
-    private DateRange _resignDate = new DateRange();
-    private DateRange _returnDate = new DateRange();
+    private DateTime? joinDateStart;
+    private DateTime? joinDateEnd;
+    private DateTime? resignDateStart;
+    private DateTime? resignDateEnd;
     public string selectedEmployeeStatus { get; set; }
 
-    private MudDateRangePicker _aquireDatePicker;
-    private MudDateRangePicker _discardDatePicker;
-    private DateRange _aquireDate = new DateRange();
-    private DateRange _discardDate = new DateRange();
+    private DateTime? aquireDateStart;
+    private DateTime? aquireDateEnd;
+    private DateTime? discardDateStart;
+    private DateTime? discardDateEnd;
     private string allocationStatus;
     DateTime dateTime;
 
     public string SelectedOption { get; set; }
     public string[] SkillOptions = { };
-    private List<int> SelectedSkill { get; set; } = new();
     ReportFilters reportFilters;
     AssetReportFilters assetReportFilters;
 
@@ -581,23 +581,12 @@
 
 
     private bool multiselectionTextChoice;
-    private string value { get; set; } = "Nothing selected";
     private IEnumerable<string> selectedSkills { get; set; } = new HashSet<string>() { };
 
     EmployeeFilterModel employeeFilterModel = new();
     AssetFilterModel assetFilterModel = new();
 
-    private string GetMultiSelectionText(List<string> selectedValues)
-    {
-        if (multiselectionTextChoice)
-        {
-            return $"Selected skills{(selectedValues.Count > 1 ? "s" : "")}: {string.Join(", ", selectedValues.Select(x => x))}";
-        }
-        else
-        {
-            return $"{selectedValues.Count} skill{(selectedValues.Count > 1 ? "s have" : " has")} been selected";
-        }
-    }
+
 
 
 
@@ -615,28 +604,20 @@
             employeeFilterModel.Skills = selectedSkills;
             employeeFilterModel.EmployeeStatus = selectedEmployeeStatus;
 
-            if (_joinDate != null)
+            if (joinDateStart.HasValue && joinDateEnd.HasValue)
             {
-                if (_joinDate.Start != null && _joinDate.End != null)
-                {
-                    CultureInfo culture = new CultureInfo("en-US");
-                    employeeFilterModel.JoinDateStart = Convert.ToDateTime(_joinDate.Start, culture);
-                    employeeFilterModel.JoinDateEnd = Convert.ToDateTime(_joinDate.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-                }
+                employeeFilterModel.JoinDateStart = joinDateStart.Value;
+                employeeFilterModel.JoinDateEnd = joinDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
             }
             else
             {
                 employeeFilterModel.JoinDateStart = new DateTime();
                 employeeFilterModel.JoinDateEnd = new DateTime();
             }
-            if (_resignDate != null)
+            if (resignDateStart.HasValue && resignDateEnd.HasValue)
             {
-                if (_resignDate.Start != null && _resignDate.End != null)
-                {
-                    CultureInfo culture = new CultureInfo("en-US");
-                    employeeFilterModel.ResignDateStart = Convert.ToDateTime(_resignDate.Start, culture);
-                    employeeFilterModel.ResignDateEnd = Convert.ToDateTime(_resignDate.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-                }
+                employeeFilterModel.ResignDateStart = resignDateStart.Value;
+                employeeFilterModel.ResignDateEnd = resignDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
             }
             else
             {
@@ -658,28 +639,20 @@
             if (allocationStatus == "Allocated")
                 assetFilterModel.Status = AllocationStatus.Allocated;
 
-            if (_aquireDate != null)
+            if (aquireDateStart.HasValue && aquireDateEnd.HasValue)
             {
-                if (_aquireDate.Start != null && _aquireDate.End != null)
-                {
-                    CultureInfo culture = new CultureInfo("en-US");
-                    assetFilterModel.AquireDateStart = Convert.ToDateTime(_aquireDate.Start, culture);
-                    assetFilterModel.AquireDateEnd = Convert.ToDateTime(_aquireDate.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-                }
+                assetFilterModel.AquireDateStart = aquireDateStart.Value;
+                assetFilterModel.AquireDateEnd = aquireDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
             }
             else
             {
                 assetFilterModel.AquireDateStart = new DateTime();
                 assetFilterModel.AquireDateEnd = new DateTime();
             }
-            if (_discardDate != null)
+            if (discardDateStart.HasValue && discardDateEnd.HasValue)
             {
-                if (_discardDate.Start != null && _discardDate.End != null)
-                {
-                    CultureInfo culture = new CultureInfo("en-US");
-                    assetFilterModel.DiscardDateStart = Convert.ToDateTime(_discardDate.Start, culture);
-                    assetFilterModel.DiscardDateEnd = Convert.ToDateTime(_discardDate.End, culture).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-                }
+                assetFilterModel.DiscardDateStart = discardDateStart.Value;
+                assetFilterModel.DiscardDateEnd = discardDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
             }
             else
             {
@@ -707,8 +680,10 @@
         selectedLocation = null;
         selectedSkills = null;
         selectedEmployeeStatus = "All";
-        _dateOfJoinPicker = new();
-        _resignDatePicker = new();
+        joinDateStart = null;
+        joinDateEnd = null;
+        resignDateStart = null;
+        resignDateEnd = null;
 
     }
 
@@ -720,8 +695,10 @@
         selectedAssetBrand = null;
         selectedAssetModel = null;
         selectedEmployeeStatus = null;
-        _aquireDatePicker.Clear();
-        _discardDatePicker.Clear();
+        aquireDateStart = null;
+        aquireDateEnd = null;
+        discardDateStart = null;
+        discardDateEnd = null;
     }
     protected async Task ExportExcelReport()
     {
@@ -785,7 +762,7 @@
     }
     private void OnStatusChange()
     {
-        if(_resignDatePicker != null)
-            _resignDatePicker.Clear();
+        resignDateStart = null;
+        resignDateEnd = null;
     }
 }
