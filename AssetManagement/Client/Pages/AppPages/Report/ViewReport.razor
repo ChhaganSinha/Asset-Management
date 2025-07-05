@@ -29,13 +29,13 @@
         <div class="form-group row m-0">
             <label class="col-form-label col-md-2 bold-font" style="line-height: 34px;">Report Type</label>
             <div class="col-md-10">
-                <InputRadioGroup @bind-Value="SelectedOption" class="d-flex" @oninput="OnRadioChange">
+                <InputRadioGroup TValue="string" @bind-Value="SelectedOption" class="d-flex" @oninput="OnRadioChange">
                     <div class="form-check me-3">
-                        <InputRadio class="form-check-input" Value="Employee" id="optEmployee" />
+                        <InputRadio TValue="string" class="form-check-input" Value="Employee" id="optEmployee" />
                         <label class="form-check-label" for="optEmployee">Employee</label>
                     </div>
                     <div class="form-check">
-                        <InputRadio class="form-check-input" Value="Asset" id="optAsset" />
+                        <InputRadio TValue="string" class="form-check-input" Value="Asset" id="optAsset" />
                         <label class="form-check-label" for="optAsset">Asset</label>
                     </div>
                 </InputRadioGroup>
@@ -82,17 +82,17 @@
                         </div>
                         <div class="form-group row" style="padding:4px">
                             <div class="col-md-10">
-                                <InputRadioGroup @bind-Value="selectedEmployeeStatus" class="d-flex" @oninput="OnStatusChange">
+                                <InputRadioGroup TValue="string" @bind-Value="selectedEmployeeStatus" class="d-flex" @oninput="OnStatusChange">
                                     <div class="form-check me-3">
-                                        <InputRadio class="form-check-input" Value="All" id="statusAll" />
+                                        <InputRadio TValue="string" class="form-check-input" Value="All" id="statusAll" />
                                         <label class="form-check-label" for="statusAll">All Employee</label>
                                     </div>
                                     <div class="form-check me-3">
-                                        <InputRadio class="form-check-input" Value="Active" id="statusActive" />
+                                        <InputRadio TValue="string" class="form-check-input" Value="Active" id="statusActive" />
                                         <label class="form-check-label" for="statusActive">Active Employee</label>
                                     </div>
                                     <div class="form-check">
-                                        <InputRadio class="form-check-input" Value="Resigned" id="statusResigned" />
+                                        <InputRadio TValue="string" class="form-check-input" Value="Resigned" id="statusResigned" />
                                         <label class="form-check-label" for="statusResigned">Resigned Employee</label>
                                     </div>
                                 </InputRadioGroup>
