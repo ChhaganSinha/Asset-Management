@@ -30,9 +30,9 @@ else
 {
     <div class="bt-wizard">
         <ul class="nav nav-pills">
-            <li class="nav-item"><a @onclick="()=>SwitchTab(1)" style="cursor:pointer" class="nav-link rounded-0 @(Tab == 1 ? "active" : "")" data-toggle="tab">Roles</a></li>
-            <li class="nav-item"><a @onclick="()=>SwitchTab(2)" style="cursor:pointer" class="nav-link rounded-0 @(Tab == 2 ? "active" : "")" data-toggle="tab">Users</a></li>
-            <li class="nav-item"><a @onclick="()=>SwitchTab(3)" style="cursor:pointer" class="nav-link rounded-0 @(Tab == 3 ? "active" : "")" data-toggle="tab">Manage Password</a></li>
+            <li class="nav-item"><a @onclick="() => { SwitchTab(1); }" style="cursor:pointer" class="nav-link rounded-0 @(Tab == 1 ? "active" : "")" data-toggle="tab">Roles</a></li>
+            <li class="nav-item"><a @onclick="() => { SwitchTab(2); }" style="cursor:pointer" class="nav-link rounded-0 @(Tab == 2 ? "active" : "")" data-toggle="tab">Users</a></li>
+            <li class="nav-item"><a @onclick="() => { SwitchTab(3); }" style="cursor:pointer" class="nav-link rounded-0 @(Tab == 3 ? "active" : "")" data-toggle="tab">Manage Password</a></li>
         </ul>
         <div class="tab-content card borderd">
             <div class="pt-1 bg-primary"></div>
