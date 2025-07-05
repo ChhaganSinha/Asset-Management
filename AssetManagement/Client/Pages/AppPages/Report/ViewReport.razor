@@ -1,4 +1,4 @@
-@page "/reports"
+﻿@page "/reports"
 @page "/report/{Id:int}"
 
 @using AssetManagement.Client.Client;
@@ -15,120 +15,113 @@
 @attribute [Authorize]
 @inject IDialogService DialogService
 
-<div class="card">
-    <div class="card-header" style="padding: 8px !important; display: flex; align-items: center;">
-        <h5>Reports</h5>
-        <div style="margin-left: auto;">
-            <Breadcrumb Items="breadcrumbItems" />
+<Breadcrumb Items="breadcrumbItems" />
+
+<div class="card-body">
+
+    <div class="form-group row m-0">
+        <label class="col-form-label col-md-2 bold-font" style="line-height: 34px;">Report Type</label>
+        <div class="col-md-10">
+            <InputRadioGroup @bind-Value="SelectedOption" class="d-flex" @oninput="OnRadioChange">
+                <div class="form-check me-3">
+                    <InputRadio class="form-check-input" Value="Employees" id="optEmployee" />
+                    <label class="form-check-label" for="optEmployee">Employee</label>
+                </div>
+                <div class="form-check">
+                    <InputRadio class="form-check-input" Value="Assets" id="optAsset" />
+                    <label class="form-check-label" for="optAsset">Asset</label>
+                </div>
+            </InputRadioGroup>
         </div>
     </div>
 
+    <div style="background: whitesmoke;border-radius: 5px;">
+        @if (SelectedOption == "Employee")
+        {
+            <div class="form-group row mb-2 p-2 mt-1" style="margin:0">
 
-    <div class="card-body">
-
-        <div class="form-group row m-0">
-            <label class="col-form-label col-md-2 bold-font" style="line-height: 34px;">Report Type</label>
-            <div class="col-md-10">
-                <InputRadioGroup TValue="string" @bind-Value="SelectedOption" class="d-flex" @oninput="OnRadioChange">
-                    <div class="form-check me-3">
-                        <InputRadio TValue="string" class="form-check-input" Value="Employee" id="optEmployee" />
-                        <label class="form-check-label" for="optEmployee">Employee</label>
-                    </div>
-                    <div class="form-check">
-                        <InputRadio TValue="string" class="form-check-input" Value="Asset" id="optAsset" />
-                        <label class="form-check-label" for="optAsset">Asset</label>
-                    </div>
-                </InputRadioGroup>
-            </div>
-        </div>
-
-        <div style="background: whitesmoke;border-radius: 5px;">
-            @if (SelectedOption == "Employee")
-            {              
-                <div class="form-group row mb-2 p-2 mt-1" style="margin:0">
-
-                    <EditForm Model="employeeModel">
-                        <div class="form-group row" style="padding:4px">
-                            <div class="col-md-3">
-                                <label class="form-label bold-font">Company</label>
-                                <DropdownSelect T="string" @bind-Value="selectedSourceCompanyCode"
-                                               DataSource="CompanyDropdown"
-                                               EmptyText="-- Select Company --"
-                                               Css="form-select" />
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label bold-font">Job Profile</label>
-                                <DropdownSelect T="string" @bind-Value="selectedJobProfile"
-                                               DataSource="JobProfileDropdown"
-                                               EmptyText="-- Select --"
-                                               Css="form-select" />
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label bold-font">Manager</label>
-                                <DropdownSelect T="string" @bind-Value="selectedManager"
-                                               DataSource="ManagerDropdown"
-                                               EmptyText="-- Select --"
-                                               Css="form-select" />
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label bold-font">Office Branch</label>
-                                <DropdownSelect T="string" @bind-Value="selectedBranch"
-                                               DataSource="BranchDropdown"
-                                               EmptyText="-- Select --"
-                                               Css="form-select" />
-                            </div>
+                <EditForm Model="employeeModel">
+                    <div class="form-group row" style="padding:4px">
+                        <div class="col-md-3">
+                            <label class="form-label bold-font">Company</label>
+                            <DropdownSelect T="string" @bind-Value="selectedSourceCompanyCode"
+                                            DataSource="CompanyDropdown"
+                                            EmptyText="-- Select Company --"
+                                            Css="form-select" />
                         </div>
-                        <div class="form-group row" style="padding:4px">
-                            <div class="col-md-10">
-                                <InputRadioGroup TValue="string" @bind-Value="selectedEmployeeStatus" class="d-flex" @oninput="OnStatusChange">
-                                    <div class="form-check me-3">
-                                        <InputRadio TValue="string" class="form-check-input" Value="All" id="statusAll" />
-                                        <label class="form-check-label" for="statusAll">All Employee</label>
-                                    </div>
-                                    <div class="form-check me-3">
-                                        <InputRadio TValue="string" class="form-check-input" Value="Active" id="statusActive" />
-                                        <label class="form-check-label" for="statusActive">Active Employee</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <InputRadio TValue="string" class="form-check-input" Value="Resigned" id="statusResigned" />
-                                        <label class="form-check-label" for="statusResigned">Resigned Employee</label>
-                                    </div>
-                                </InputRadioGroup>
-                            </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label bold-font">Job Profile</label>
+                            <DropdownSelect T="string" @bind-Value="selectedJobProfile"
+                                            DataSource="JobProfileDropdown"
+                                            EmptyText="-- Select --"
+                                            Css="form-select" />
                         </div>
-                        <div class="form-group row" style="padding:4px">
-                            <div class="col-md-4">
-                                <HxMultiSelect TItem="string" TValue="string" Data="SkillOptions"
-                                               Value="@selectedSkills"
-                                               ValueChanged="OnSkillsChanged"
-                                               ValueExpression="@(() => selectedSkills)"
-                                               TextSelector="@(s => s)" ValueSelector="@(s => s)"
-                                               EmptyText="- select -" NullDataText="Loading..." />
-                                <div class="form-check form-switch mt-2">
-                                    <InputCheckbox class="form-check-input" id="multiTextChoice" @bind-Value="multiselectionTextChoice" />
-                                    <label class="form-check-label" for="multiTextChoice">MultiSelection Text choice</label>
+
+                        <div class="col-md-3">
+                            <label class="form-label bold-font">Manager</label>
+                            <DropdownSelect T="string" @bind-Value="selectedManager"
+                                            DataSource="ManagerDropdown"
+                                            EmptyText="-- Select --"
+                                            Css="form-select" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label bold-font">Office Branch</label>
+                            <DropdownSelect T="string" @bind-Value="selectedBranch"
+                                            DataSource="BranchDropdown"
+                                            EmptyText="-- Select --"
+                                            Css="form-select" />
+                        </div>
+                    </div>
+                    <div class="form-group row" style="padding:4px">
+                        <div class="col-md-10">
+                            <InputRadioGroup @bind-Value="selectedEmployeeStatus" class="d-flex" @oninput="OnStatusChange">
+                                <div class="form-check me-3">
+                                    <InputRadio class="form-check-input" Value="All" id="statusAll" />
+                                    <label class="form-check-label" for="statusAll">All Employee</label>
                                 </div>
+                                <div class="form-check me-3">
+                                    <InputRadio class="form-check-input" Value="Active" id="statusActive" />
+                                    <label class="form-check-label" for="statusActive">Active Employee</label>
+                                </div>
+                                <div class="form-check">
+                                    <InputRadio class="form-check-input" Value="Resigned" id="statusResigned" />
+                                    <label class="form-check-label" for="statusResigned">Resigned Employee</label>
+                                </div>
+                            </InputRadioGroup>
+                        </div>
+                    </div>
+                    <div class="form-group row" style="padding:4px">
+                        <div class="col-md-4">
+                            <HxMultiSelect TItem="string" TValue="string" Data="SkillOptions"
+                                           Value="@selectedSkills"
+                                           ValueChanged="OnSkillsChanged"
+                                           ValueExpression="@(() => selectedSkills)"
+                                           TextSelector="@(s => s)" ValueSelector="@(s => s)"
+                                           EmptyText="- select -" NullDataText="Loading..." />
+                            <div class="form-check form-switch mt-2">
+                                <InputCheckbox class="form-check-input" id="multiTextChoice" @bind-Value="multiselectionTextChoice" />
+                                <label class="form-check-label" for="multiTextChoice">MultiSelection Text choice</label>
                             </div>
+                        </div>
 
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="date" class="form-control" @bind="joinDateStart" />
+                                <input type="date" class="form-control" @bind="joinDateEnd" />
+                            </div>
+                        </div>
+                        @if (selectedEmployeeStatus == "Resigned")
+                        {
                             <div class="col-md-4">
                                 <div class="input-group">
-                                    <input type="date" class="form-control" @bind="joinDateStart" />
-                                    <input type="date" class="form-control" @bind="joinDateEnd" />
+                                    <input type="date" class="form-control" @bind="resignDateStart" />
+                                    <input type="date" class="form-control" @bind="resignDateEnd" />
                                 </div>
                             </div>
-                            @if(selectedEmployeeStatus == "Resigned")
-                            {
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <input type="date" class="form-control" @bind="resignDateStart" />
-                                        <input type="date" class="form-control" @bind="resignDateEnd" />
-                                    </div>
-                                </div>
-                            }
+                        }
 
-                            @* <div class="col-md-4">
+                        @* <div class="col-md-4">
                         <MudGrid>
                         <MudItem xs="12" sm="12" md="12">
                         <MudAutocomplete T="string" Label="Location" @bind-Value="selectedLocation" SearchFunc="@LocationSearch" Variant="Variant.Outlined" Margin="Margin.Dense"
@@ -142,234 +135,233 @@
                         </MudItem>
                         </MudGrid>
                         </div> *@
-                          
-                        </div>
 
-                        <button type="button" class="btn btn-primary btn-sm" @onclick="ViewReportData">View</button>
-                        <button type="button" class="btn btn-danger btn-sm" @onclick="ClearFilter">Clear</button>
-                    </EditForm>
-                </div>
-            }
-            else
-            {
-             
-                <div class="form-group row mb-2 p-2 mt-1" style="margin:0">
+                    </div>
 
-                    <EditForm Model="employeeModel">
-                        <div class="form-group row" style="padding:4px">
-                            <div class="col-md-3">
-                                <label class="form-label bold-font">Company</label>
-                                <DropdownSelect T="string" @bind-Value="selectedSourceCompanyForAssetCode"
-                                               DataSource="CompanyDropdown"
-                                               EmptyText="-- Select Company --"
-                                               Css="form-select" />
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label bold-font">Asset Type</label>
-                                <DropdownSelect T="string" @bind-Value="selectedAssetType"
-                                               DataSource="AssetTypeDropdown"
-                                               EmptyText="-- Select --"
-                                               Css="form-select" />
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label bold-font">Brand</label>
-                                <DropdownSelect T="string" @bind-Value="selectedAssetBrand"
-                                               DataSource="AssetBrandDropdown"
-                                               EmptyText="-- Select --"
-                                               Css="form-select" />
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label bold-font">Model</label>
-                                <DropdownSelect T="string" @bind-Value="selectedAssetModel"
-                                               DataSource="AssetModelDropdown"
-                                               EmptyText="-- Select --"
-                                               Css="form-select" />
-                            </div>
-                        </div>
-
-                        <div class="form-group row" style="padding:4px">
-                            <div class="col-md-4">
-                                <InputSelect @bind-Value="allocationStatus" class="form-select">
-                                    <option value="All">All</option>
-                                    <option value="Free">Free</option>
-                                    <option value="Allocated">Allocated</option>
-                                </InputSelect>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="input-group">
-                                    <input type="date" class="form-control" @bind="aquireDateStart" />
-                                    <input type="date" class="form-control" @bind="aquireDateEnd" />
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="input-group">
-                                    <input type="date" class="form-control" @bind="discardDateStart" />
-                                    <input type="date" class="form-control" @bind="discardDateEnd" />
-                                </div>
-                            </div>
-
-                           
-
-
-                        </div>
-
-                        <button type="button" class="btn btn-primary btn-sm" @onclick="ViewReportData">View</button>
-                        <button type="button" class="btn btn-danger btn-sm" @onclick="ClearAssetFilter">Clear</button>
-                    </EditForm>
-                </div>
-            }
-        </div>
-
-        @if (showReport && SelectedOption == "Employee")
-        {
-            <div style="background: whitesmoke;border-radius: 5px;">
-                <div class="table-container table-responsive" style="overflow: auto; max-height:300px">
-                    <table id="printContent" class="table table-striped table-hover print-table">
-                        <thead class="bg-secondary text-light fixed-div">
-                            <tr style="text-align:center">
-                                <td>SN.</td>
-                                <td>Company</td>
-                                <td>EmployeeID</td>
-                                <td>Status</td>
-                                <td>Name</td>
-                                <td>Father</td>
-                                <td>Email</td>
-                                <td>Mobile</td>
-                                <td>Aadhaar</td>
-                                <td>PAN</td>
-                                <td>UAN</td>
-                                <td>Education</td>
-                                <td>Skills</td>
-                                <td>Designation</td>
-                                <td>DOB</td>
-                                <td>Manager</td>
-                                <td>JoinDate</td>
-                                <td>ResignDate</td>
-
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            @if (responseDataOfEmployee?.Count == 0)
-                            {
-                                <tr><td colspan="3">No data found</td></tr>
-                            }
-                            else
-                            {
-                                int counter = 0;
-                                foreach (var r in responseDataOfEmployee)
-                                {
-                                    counter++;
-                                    <tr>
-                                        <td>@counter</td>
-                                        <td>@r.CompanyCode</td>
-                                        <td>@r.EmployeeId</td>
-                                        <td>@r.Status</td>
-                                        <td>@r.EmployeeName</td>
-                                        <td>@r.fatherName</td>
-                                        <td>@r.EmailId</td>
-                                        <td>@r.MobileNumber</td>
-                                        <td>@r.AadhaarNumber</td>
-                                        <td>@r.PANNumber</td>
-                                        <td>@r.UANNo</td>
-                                        <td>@r.EmployeeEducation</td>
-                                        <td>@r.Skills</td>
-                                        <td>@r.Designation</td>
-                                        <td>@r.DateOfBirth.ToString("dd/MMM/yyyy")</td>
-                                        <td>@r.ReportingTo</td>
-                                        <td>@r.DateOfJoin.ToString("dd/MMM/yyyy")</td>
-                                        <td>@r.DateOfLeaving.ToString("dd/MMM/yyyy")</td>
-
-                                    </tr>
-
-                                }
-                                totalItem = counter;
-                            }
-
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="fixed-div" style="text-align:center;">
-                    <i style="float:right">Total Items : @totalItem</i>
-                    <button type="button" class="btn btn-primary btn-sm" @onclick="OpenExportDialog">Export</button>
-                    <button type="button" class="btn btn-danger btn-sm" @onclick="CloseReport">Close</button>
-                </div>
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="ViewReportData">View</button>
+                    <button type="button" class="btn btn-danger btn-sm" @onclick="ClearFilter">Clear</button>
+                </EditForm>
             </div>
-
         }
-        @if (showReport && SelectedOption == "Asset")
+        else
         {
-            <div style="background: whitesmoke;border-radius: 5px;">
-                <div class="table-container table-responsive" style="overflow: auto; max-height:300px">
-                    <table id="printAssetContent" class="table table-striped table-hover print-table">
-                        <thead class="bg-secondary text-light fixed-div">
-                            <tr style="text-align:center">
-                                <td>SN.</td>
-                                <td>Company</td>
-                                <td>Asset Type</td>
-                                <td>Brand</td>
-                                <td>Model</td>
-                                <td>SerialNumber</td>
-                                <td>Status</td>
-                                @* <td>EmployeeId</td> *@
-                                <td>Employee Name</td>
-                                <td>Employee Email</td>
-                                <td>Acquire Date</td>
-                                <td>Discard Date</td>
-                  
-                            </tr>
-                        </thead>
-                        <tbody>
 
-                            @if (responseDataOfAsset?.Count == 0)
-                            {
-                                <tr><td colspan="3">No data found</td></tr>
-                            }
-                            else
-                            {
-                                int counter = 0;
-                                foreach (var r in responseDataOfAsset)
-                                {
-                                    counter++;
-                                    <tr>
-                                        <td>@counter</td>
-                                        <td>@r.CompanyCode</td>
-                                        <td>@r.AssetType</td>
-                                        <td>@r.Brand</td>
-                                        <td>@r.Model</td>
-                                        <td>@r.SerialNumber</td>
-                                        <td>@r.Status</td>
-                                        @* <td>@r.EmployeeId</td> *@
-                                        <td>@r.EmployeeName</td>
-                                        <td>@r.EmployeeEmail</td>
-                                        <td>@r.AcquireDate.ToString("dd/MMM/yyyy")</td>
-                                        <td>@r.DiscardDate?.ToString("dd/MMM/yyyy")</td>
-                                        
-                                    </tr>
+            <div class="form-group row mb-2 p-2 mt-1" style="margin:0">
 
-                                }
-                                totalItem = counter;
-                            }
+                <EditForm Model="employeeModel">
+                    <div class="form-group row" style="padding:4px">
+                        <div class="col-md-3">
+                            <label class="form-label bold-font">Company</label>
+                            <DropdownSelect T="string" @bind-Value="selectedSourceCompanyForAssetCode"
+                                            DataSource="CompanyDropdown"
+                                            EmptyText="-- Select Company --"
+                                            Css="form-select" />
+                        </div>
 
-                        </tbody>
-                    </table>
-                </div>
+                        <div class="col-md-3">
+                            <label class="form-label bold-font">Asset Type</label>
+                            <DropdownSelect T="string" @bind-Value="selectedAssetType"
+                                            DataSource="AssetTypeDropdown"
+                                            EmptyText="-- Select --"
+                                            Css="form-select" />
+                        </div>
 
-                <div class="fixed-div" style="text-align:center;">
-                    <i style="float:right">Total Items : @totalItem</i>
-                    <button type="button" class="btn btn-primary btn-sm" @onclick="OpenExportDialog">Export</button>
-                    <button type="button" class="btn btn-danger btn-sm" @onclick="CloseReport">Close</button>
-                </div>
+                        <div class="col-md-3">
+                            <label class="form-label bold-font">Brand</label>
+                            <DropdownSelect T="string" @bind-Value="selectedAssetBrand"
+                                            DataSource="AssetBrandDropdown"
+                                            EmptyText="-- Select --"
+                                            Css="form-select" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label bold-font">Model</label>
+                            <DropdownSelect T="string" @bind-Value="selectedAssetModel"
+                                            DataSource="AssetModelDropdown"
+                                            EmptyText="-- Select --"
+                                            Css="form-select" />
+                        </div>
+                    </div>
+
+                    <div class="form-group row" style="padding:4px">
+                        <div class="col-md-4">
+                            <InputSelect @bind-Value="allocationStatus" class="form-select">
+                                <option value="All">All</option>
+                                <option value="Free">Free</option>
+                                <option value="Allocated">Allocated</option>
+                            </InputSelect>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="date" class="form-control" @bind="aquireDateStart" />
+                                <input type="date" class="form-control" @bind="aquireDateEnd" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="date" class="form-control" @bind="discardDateStart" />
+                                <input type="date" class="form-control" @bind="discardDateEnd" />
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="ViewReportData">View</button>
+                    <button type="button" class="btn btn-danger btn-sm" @onclick="ClearAssetFilter">Clear</button>
+                </EditForm>
             </div>
         }
     </div>
 
+    @if (showReport && SelectedOption == "Employee")
+    {
+        <div style="background: whitesmoke;border-radius: 5px;">
+            <div class="table-container table-responsive" style="overflow: auto; max-height:300px">
+                <table id="printContent" class="table table-striped table-hover print-table">
+                    <thead class="bg-secondary text-light fixed-div">
+                        <tr style="text-align:center">
+                            <td>SN.</td>
+                            <td>Company</td>
+                            <td>EmployeeID</td>
+                            <td>Status</td>
+                            <td>Name</td>
+                            <td>Father</td>
+                            <td>Email</td>
+                            <td>Mobile</td>
+                            <td>Aadhaar</td>
+                            <td>PAN</td>
+                            <td>UAN</td>
+                            <td>Education</td>
+                            <td>Skills</td>
+                            <td>Designation</td>
+                            <td>DOB</td>
+                            <td>Manager</td>
+                            <td>JoinDate</td>
+                            <td>ResignDate</td>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @if (responceDataOfEmployee?.Count == 0)
+                        {
+                            <tr><td colspan="3">No data found</td></tr>
+                        }
+                        else
+                        {
+                            int counter = 0;
+                            foreach (var r in responceDataOfEmployee)
+                            {
+                                counter++;
+                                <tr>
+                                    <td>@counter</td>
+                                    <td>@r.CompanyCode</td>
+                                    <td>@r.EmployeeId</td>
+                                    <td>@r.Status</td>
+                                    <td>@r.EmployeeName</td>
+                                    <td>@r.fatherName</td>
+                                    <td>@r.EmailId</td>
+                                    <td>@r.MobileNumber</td>
+                                    <td>@r.AadhaarNumber</td>
+                                    <td>@r.PANNumber</td>
+                                    <td>@r.UANNo</td>
+                                    <td>@r.EmployeeEducation</td>
+                                    <td>@r.Skills</td>
+                                    <td>@r.Designation</td>
+                                    <td>@r.DateOfBirth.ToString("dd/MMM/yyyy")</td>
+                                    <td>@r.ReportingTo</td>
+                                    <td>@r.DateOfJoin.ToString("dd/MMM/yyyy")</td>
+                                    <td>@r.DateOfLeaving.ToString("dd/MMM/yyyy")</td>
+
+                                </tr>
+
+                            }
+                            totalItem = counter;
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="fixed-div" style="text-align:center;">
+                <i style="float:right">Total Items : @totalItem</i>
+                <button type="button" class="btn btn-primary btn-sm" @onclick="OpenExportDialog">Export</button>
+                <button type="button" class="btn btn-danger btn-sm" @onclick="CloseReport">Close</button>
+            </div>
+        </div>
+
+    }
+    @if (showReport && SelectedOption == "Asset")
+    {
+        <div style="background: whitesmoke;border-radius: 5px;">
+            <div class="table-container table-responsive" style="overflow: auto; max-height:300px">
+                <table id="printAssetContent" class="table table-striped table-hover print-table">
+                    <thead class="bg-secondary text-light fixed-div">
+                        <tr style="text-align:center">
+                            <td>SN.</td>
+                            <td>Company</td>
+                            <td>Asset Type</td>
+                            <td>Brand</td>
+                            <td>Model</td>
+                            <td>SerialNumber</td>
+                            <td>Status</td>
+                            @* <td>EmployeeId</td> *@
+                            <td>Emoloyee Name</td>
+                            <td>Emoloyee Email</td>
+                            <td>Aquire Date</td>
+                            <td>Discard Date</td>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @if (responceDataOfAsset?.Count == 0)
+                        {
+                            <tr><td colspan="3">No data found</td></tr>
+                        }
+                        else
+                        {
+                            int counter = 0;
+                            foreach (var r in responceDataOfAsset)
+                            {
+                                counter++;
+                                <tr>
+                                    <td>@counter</td>
+                                    <td>@r.CompanyCode</td>
+                                    <td>@r.AssetType</td>
+                                    <td>@r.Brand</td>
+                                    <td>@r.Model</td>
+                                    <td>@r.SerialNumber</td>
+                                    <td>@r.Status</td>
+                                    @* <td>@r.EmployeeId</td> *@
+                                    <td>@r.EmployeeName</td>
+                                    <td>@r.EmployeeEmail</td>
+                                    <td>@r.AcquireDate.ToString("dd/MMM/yyyy")</td>
+                                    <td>@r.DiscardDate?.ToString("dd/MMM/yyyy")</td>
+
+                                </tr>
+
+                            }
+                            totalItem = counter;
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="fixed-div" style="text-align:center;">
+                <i style="float:right">Total Items : @totalItem</i>
+                <button type="button" class="btn btn-primary btn-sm" @onclick="OpenExportDialog">Export</button>
+                <button type="button" class="btn btn-danger btn-sm" @onclick="CloseReport">Close</button>
+            </div>
+        </div>
+    }
 </div>
+
 
 @code {
     [Parameter]
@@ -390,8 +382,8 @@
     List<Asset> asset = new();
     List<Employee> employee = new();
     AllocationlogReportGenerate model = new();
-    List<Employee> responseDataOfEmployee = new();
-    List<Asset> responseDataOfAsset = new();
+    List<Employee> responceDataOfEmployee = new();
+    List<Asset> responceDataOfAsset = new();
 
     bool columnSelection = false;
     //private DateRange _issueDate = new DateRange(DateTime.Now.Date, DateTime.Now.AddDays(5).Date);
@@ -407,6 +399,11 @@
     private DateTime? discardDateEnd;
     private string allocationStatus;
     DateTime dateTime;
+
+    string Resigned { get; set; }
+    string Active { get; set; }
+    string All { get; set; }
+    string Employees { get; set; }
 
     public string SelectedOption { get; set; }
     public string[] SkillOptions = { };
@@ -599,7 +596,7 @@
     {
         totalItem = 0;
         showReport = true;
-        if (SelectedOption == "Employee")
+        if (SelectedOption == "Employees")
         {
             employeeFilterModel.Company = selectedSourceCompanyCode;
             employeeFilterModel.Designation = selectedJobProfile;
@@ -630,7 +627,7 @@
                 employeeFilterModel.ResignDateEnd = new DateTime();
             }
 
-            responseDataOfEmployee = await client.GetFilteredEmployeeReport(employeeFilterModel);
+            responceDataOfEmployee = await client.GetFilteredEmployeeReport(employeeFilterModel);
         }
         else
         {
@@ -665,7 +662,7 @@
                 assetFilterModel.DiscardDateEnd = new DateTime();
             }
 
-            responseDataOfAsset = await client.GetFilteredAssetReport(assetFilterModel);
+            responceDataOfAsset = await client.GetFilteredAssetReport(assetFilterModel);
         }
 
     }
@@ -707,32 +704,32 @@
     }
     protected async Task ExportExcelReport()
     {
-        if(SelectedOption == "Employee")
+        if (SelectedOption == "Employee")
         {
-            var responseData = await client.EmployeeExportToExcel(employeeFilterModel);
+            var responceData = await client.EmployeeExportToExcel(employeeFilterModel);
             var fileName = $"EmployeeReport {DateTime.Now.ToString()}.xlsx";
             var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            await using (var memoryStream = new MemoryStream(responseData))
+            await using (var memoryStream = new MemoryStream(responceData))
             {
                 await JSRuntime.InvokeVoidAsync("downloadFile", fileName, mimeType, memoryStream.ToArray());
             }
         }
         if (SelectedOption == "Asset")
         {
-            var responseData = await client.AssetExportToExcel(assetFilterModel);
+            var responceData = await client.AssetExportToExcel(assetFilterModel);
             var fileName = $"AssetReport {DateTime.Now.ToString()}.xlsx";
             var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-            await using (var memoryStream = new MemoryStream(responseData))
+            await using (var memoryStream = new MemoryStream(responceData))
             {
                 await JSRuntime.InvokeVoidAsync("downloadFile", fileName, mimeType, memoryStream.ToArray());
             }
         }
     }
-   
+
     private async Task PrintPDF()
     {
-        if(SelectedOption == "Employee")
+        if (SelectedOption == "Employee")
             await JSRuntime.InvokeVoidAsync("printDiv", "printContent");
         // await JSRuntime.InvokeVoidAsync("printInterop.printDiv", "printContent");
 
@@ -763,7 +760,7 @@
 
     private void OnRadioChange()
     {
-        showReport = false; 
+        showReport = false;
     }
     private void OnStatusChange()
     {
@@ -776,4 +773,6 @@
         selectedSkills = values.ToList();
         return Task.CompletedTask;
     }
+
+
 }
