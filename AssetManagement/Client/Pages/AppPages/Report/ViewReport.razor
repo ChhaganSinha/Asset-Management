@@ -101,7 +101,7 @@
                         <div class="form-group row" style="padding:4px">
                             <div class="col-md-4">
                                 <HxMultiSelect TItem="string" TValue="string" Data="SkillOptions"
-                                               Value="selectedSkills"
+                                               Value="@selectedSkills"
                                                ValueChanged="OnSkillsChanged"
                                                ValueExpression="@(() => selectedSkills)"
                                                TextSelector="@(s => s)" ValueSelector="@(s => s)"
