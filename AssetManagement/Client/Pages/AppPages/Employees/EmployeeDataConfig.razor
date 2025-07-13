@@ -1068,12 +1068,22 @@
         };
         Onload = true;
         BaseUri = NavigationManager.BaseUri;
-        SkillOptions = new List<EmployeeSkills>(await client.GetAllSkill());
-        company = new List<Company>(await client.GetAllCompany());
-        employee = new List<Employee>(await client.GetAllEmployee());
-        designation = new List<DesignationDTO>(await client.GetAllDesignations());
+
+        var skillTask = client.GetAllSkill();
+        var companyTask = client.GetAllCompany();
+        var employeeTask = client.GetAllEmployee();
+        var designationTask = client.GetAllDesignations();
+        var vendorTask = client.getAllVendordetail();
+
+        await Task.WhenAll(skillTask, companyTask, employeeTask, designationTask, vendorTask);
+
+        SkillOptions = new List<EmployeeSkills>(skillTask.Result);
+        company = new List<Company>(companyTask.Result);
+        employee = new List<Employee>(employeeTask.Result);
+        designation = new List<DesignationDTO>(designationTask.Result);
+        vendordata = vendorTask.Result;
+
         EmployeeInsurance.Add(new EmployeeInsurance());
-        vendordata = await client.getAllVendordetail();
         if (Key != null)
         {
             var responce = await client.GetOnboardingDataById(Key);
@@ -1171,16 +1181,16 @@
                 if (employeeFiles.ResumeFile != "")
                     ResumeView = $"{BaseUri}EmployeesZone/{employeeFiles.ResumeFile}";
             }
-            if (model.AadhaarNumber != null)
+            if (model.SharepointSync && !string.IsNullOrWhiteSpace(model.AadhaarNumber))
             {
                 var listData = await client.GetListItemByEmail(model.AadhaarNumber);
                 model.SharepointPortal = listData.Portal;
                 model.LM = listData.LM;
                 model.EMS = listData.EMS;
                 model.CMS = listData.CMS;
-                selectedLM = employee.Where(x => x.EmailId == listData.LMManagerEmail).FirstOrDefault();
+                selectedLM = employee.FirstOrDefault(x => x.EmailId == listData.LMManagerEmail);
                 selectedLMId = selectedLM?.EmployeeId;
-                selectedEMS = employee.Where(x => x.EmailId == listData.EMSManagerEmail).FirstOrDefault();
+                selectedEMS = employee.FirstOrDefault(x => x.EmailId == listData.EMSManagerEmail);
                 selectedEmsId = selectedEMS?.EmployeeId;
             }
 
@@ -1626,49 +1636,51 @@
         var response = await client.CreateEmailRequest(createEmailRequest);
 
     }
-    SharepointListUpdate updateListItemRequest = new();
     private async Task AddItem()
     {
+        if (!model.SharepointSync)
+            return;
+
+        var updateListItemRequest = new SharepointListUpdate
+        {
+            EmployeeName = model.EmployeeName,
+            Gender = string.Empty,
+            AadharNumber = model.AadhaarNumber,
+            Designation = model.Designation,
+            EmployeeID = model.EmployeeId,
+            DOB = model.DateOfBirth,
+            DateOfJoining = model.DateOfJoin,
+            Status = model.Status != EmployeeStatus.Resigned ? "Active" : "InActive",
+            Department = model.Department,
+            Email = model.EmailId,
+            Portal = model.SharepointPortal,
+            LM = model.LM,
+            EMS = model.EMS,
+            CMS = model.CMS
+        };
+
+        if (selectedLM != null)
+        {
+            updateListItemRequest.LMManagerName = selectedLM.EmployeeName;
+            updateListItemRequest.LMManagerID = selectedLM.EmployeeId;
+            updateListItemRequest.LMManagerEmail = selectedLM.EmailId;
+        }
+
+        if (selectedEMS != null)
+        {
+            updateListItemRequest.EMSManagerName = selectedEMS.EmployeeName;
+            updateListItemRequest.EMSManagerID = selectedEMS.EmployeeId;
+            updateListItemRequest.EMSManagerEmail = selectedEMS.EmailId;
+        }
+
         try
         {
-
-            updateListItemRequest.EmployeeName = model.EmployeeName;
-            updateListItemRequest.Gender = "";
-            updateListItemRequest.AadharNumber = model.AadhaarNumber;
-            updateListItemRequest.Designation = model.Designation;
-            updateListItemRequest.EmployeeID = model.EmployeeId;
-            updateListItemRequest.DOB = model.DateOfBirth;
-            updateListItemRequest.DateOfJoining = model.DateOfJoin;
-            updateListItemRequest.Status = model.Status != EmployeeStatus.Resigned ? "Active" : "InActive";
-            updateListItemRequest.Department = model.Department;
-            updateListItemRequest.Email = model.EmailId;
-            updateListItemRequest.Portal = model.SharepointPortal;
-            updateListItemRequest.LM = model.LM;
-            updateListItemRequest.EMS = model.EMS;
-            updateListItemRequest.CMS = model.CMS;
-            if (selectedLM != null)
-            {
-                updateListItemRequest.LMManagerName = selectedLM.EmployeeName;
-                updateListItemRequest.LMManagerID = selectedLM.EmployeeId;
-                updateListItemRequest.LMManagerEmail = selectedLM.EmailId;
-            }
-            // updateListItemRequest.LMManagerID = selectedLM.Id.ToString();
-            // updateListItemRequest.ManagerID = selectedEMS.Id.ToString();
-            if (selectedEMS != null)
-            {
-                updateListItemRequest.EMSManagerName = selectedEMS.EmployeeName;
-                updateListItemRequest.EMSManagerID = selectedEMS.EmployeeId;
-                updateListItemRequest.EMSManagerEmail = selectedEMS.EmailId;
-            }
-
-            if (model.SharepointSync)
-                await client.InsertListItem(updateListItemRequest);
+            await client.InsertListItem(updateListItemRequest);
         }
         catch (Exception ex)
         {
-
+            logger.LogError(ex, "Failed to sync SharePoint data");
         }
-
     }
 
     private async Task<IEnumerable<DesignationDTO>> DesignationSearch(string value)
