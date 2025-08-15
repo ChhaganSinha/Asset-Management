@@ -3,9 +3,9 @@
 
 @if (Items?.Any() == true)
 {
-    <nav aria-label="Breadcrumb navigation" class="breadcrumb-nav">
-        <ol class="breadcrumb-list">
-            @foreach (var item in Items.Select((value, index) => new { value, index }))
+    <nav aria-label="breadcrumb" class="breadcrumb-container borderd shadow-sm">
+        <ol class="breadcrumb">
+            @foreach (var item in Items)
             {
                 var isLast = item.index == Items.Count - 1;
                 var isActive = item.value.IsActive || string.IsNullOrWhiteSpace(item.value.Url) || isLast;
