@@ -3,22 +3,226 @@
 
 @if (Items?.Any() == true)
 {
-    <nav aria-label="breadcrumb" class="breadcrumb-container borderd" style="background: #49474763;">
-        <ol class="breadcrumb">
-            @foreach (var item in Items)
+    <nav aria-label="Breadcrumb navigation" class="breadcrumb-nav">
+        <ol class="breadcrumb-list">
+            @foreach (var item in Items.Select((value, index) => new { value, index }))
             {
-                if (item.IsActive || string.IsNullOrWhiteSpace(item.Url))
-                {
-                    <li class="breadcrumb-item active" aria-current="page">@item.Text</li>
-                }
-                else
-                {
-                    <li class="breadcrumb-item"><a href="@item.Url">@item.Text</a></li>
-                }
+                var isLast = item.index == Items.Count - 1;
+                var isActive = item.value.IsActive || string.IsNullOrWhiteSpace(item.value.Url) || isLast;
+
+                <li class="breadcrumb-item @(isActive ? "active" : "")"
+                    aria-current="@(isActive ? "page" : null)">
+
+                    @if (!isActive && !string.IsNullOrWhiteSpace(item.value.Url))
+                    {
+                        <a href="@item.value.Url" class="breadcrumb-link">
+                            @item.value.Text
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="breadcrumb-text">@item.value.Text</span>
+                    }
+
+                    @if (!isLast)
+                    {
+                        <svg class="breadcrumb-separator" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9,18 15,12 9,6"></polyline>
+                        </svg>
+                    }
+                </li>
             }
         </ol>
     </nav>
 }
+
+<style>
+    .breadcrumb-nav {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 12px 20px;
+        margin: 0 0 24px 0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+    }
+
+        .breadcrumb-nav:hover {
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-1px);
+        }
+
+    .breadcrumb-list {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        gap: 8px;
+    }
+
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+
+    .breadcrumb-link {
+        color: #6366f1;
+        text-decoration: none;
+        padding: 6px 12px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .breadcrumb-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            border-radius: 8px;
+        }
+
+        .breadcrumb-link:hover {
+            color: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+            .breadcrumb-link:hover::before {
+                opacity: 1;
+            }
+
+        .breadcrumb-link:focus {
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
+        }
+
+    .breadcrumb-text {
+        color: #374151;
+        font-weight: 600;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border-radius: 8px;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .breadcrumb-item.active .breadcrumb-text {
+        color: #1f2937;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .breadcrumb-separator {
+        color: #9ca3af;
+        flex-shrink: 0;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumb-item:hover .breadcrumb-separator {
+        color: #6b7280;
+    }
+
+    /* Dark mode support */
+    @@media (prefers-color-scheme: dark) {
+        .breadcrumb-nav
+
+    {
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.8), rgba(31, 41, 55, 0.8));
+        border-color: rgba(75, 85, 99, 0.3);
+    }
+
+    .breadcrumb-link {
+        color: #a78bfa;
+    }
+
+        .breadcrumb-link:hover {
+            color: #c4b5fd;
+        }
+
+    .breadcrumb-text {
+        color: #e5e7eb;
+        background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(196, 181, 253, 0.1));
+        border-color: rgba(167, 139, 250, 0.2);
+    }
+
+    .breadcrumb-item.active .breadcrumb-text {
+        color: #f9fafb;
+        background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(196, 181, 253, 0.2));
+        border-color: rgba(167, 139, 250, 0.3);
+    }
+
+    .breadcrumb-separator {
+        color: #6b7280;
+    }
+
+    .breadcrumb-item:hover .breadcrumb-separator {
+        color: #9ca3af;
+    }
+
+    }
+
+    /* Responsive design */
+    @@media (max-width: 768px) {
+        .breadcrumb-nav
+
+    {
+        padding: 10px 16px;
+        margin: 0 0 16px 0;
+    }
+
+    .breadcrumb-list {
+        gap: 6px;
+    }
+
+    .breadcrumb-item {
+        font-size: 13px;
+        gap: 6px;
+    }
+
+    .breadcrumb-link,
+    .breadcrumb-text {
+        padding: 4px 8px;
+    }
+
+    .breadcrumb-separator {
+        width: 14px;
+        height: 14px;
+    }
+
+    }
+
+    /* Animation for dynamic content */
+    .breadcrumb-item {
+        animation: fadeInSlide 0.3s ease-out;
+    }
+
+    @@keyframes fadeInSlide {
+        from
+
+    {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    }
+</style>
 
 @code {
     [Parameter]
