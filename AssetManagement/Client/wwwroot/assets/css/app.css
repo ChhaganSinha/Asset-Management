@@ -150,7 +150,8 @@ main {
     height: 100%;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    /* Allow sticky elements like the header and breadcrumb to remain fixed */
+    overflow: visible;
 }
 
     .content.collapsed {
@@ -184,7 +185,8 @@ main {
 
 .breadcrumb-container {
     position: sticky;
-    top: 0;
+    /* Stick below the header */
+    top: 59px;
     z-index: 900;
     background-color: #ffffff;
 }
