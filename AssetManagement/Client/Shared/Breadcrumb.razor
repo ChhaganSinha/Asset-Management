@@ -5,23 +5,24 @@
 {
     <nav aria-label="breadcrumb" class="breadcrumb-container borderd shadow-sm">
         <ol class="breadcrumb">
-            @foreach (var item in Items)
+            @for (var index = 0; index < Items.Count; index++)
             {
-                var isLast = item.index == Items.Count - 1;
-                var isActive = item.value.IsActive || string.IsNullOrWhiteSpace(item.value.Url) || isLast;
+                var item = Items[index];
+                var isLast = index == Items.Count - 1;
+                var isActive = item.IsActive || string.IsNullOrWhiteSpace(item.Url) || isLast;
 
                 <li class="breadcrumb-item @(isActive ? "active" : "")"
                     aria-current="@(isActive ? "page" : null)">
 
-                    @if (!isActive && !string.IsNullOrWhiteSpace(item.value.Url))
+                    @if (!isActive && !string.IsNullOrWhiteSpace(item.Url))
                     {
-                        <a href="@item.value.Url" class="breadcrumb-link">
-                            @item.value.Text
+                        <a href="@item.Url" class="breadcrumb-link">
+                            @item.Text
                         </a>
                     }
                     else
                     {
-                        <span class="breadcrumb-text">@item.value.Text</span>
+                        <span class="breadcrumb-text">@item.Text</span>
                     }
 
                     @if (!isLast)
