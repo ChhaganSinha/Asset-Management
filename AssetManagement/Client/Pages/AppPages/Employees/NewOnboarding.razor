@@ -11,18 +11,20 @@
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 
-<div class="card">
-    <div class="card-header" style="padding: 8px !important; display: flex; align-items: center;">
-        <a href="employees" class="btn btn-outline-secondary btn-sm">
-            <i class="fa fa-arrow-left" aria-hidden="true"></i> Back
-        </a>
-        <div style="margin-left: auto;">
-            <Breadcrumb Items="breadcrumbItems" />
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center" style="padding: 8px !important;">
+            <a href="employees" class="btn btn-outline-light btn-sm">
+                <i class="fa fa-arrow-left" aria-hidden="true"></i> Back
+            </a>
+            <div class="ms-auto">
+                <Breadcrumb Items="breadcrumbItems" />
+            </div>
         </div>
-    </div>
 
-    <div class="card-body">
-        <EmployeeOnboardingGrid />
+        <div class="card-body">
+            <EmployeeOnboardingGrid />
+        </div>
     </div>
 </div>
 @code {
