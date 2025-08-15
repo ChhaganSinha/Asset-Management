@@ -47,11 +47,15 @@
     }
     else
     {
-        <div class="card" style="background: darkgrey">
-            <div class="card-body">
-                <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
+        <div class="container mt-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">@Title</h5>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="@model" OnValidSubmit="@OnValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label class="form-label bold-font required-field">Company Code</label>
@@ -837,6 +841,7 @@
             </FilePreviewDailog>
         </div>
     </div>
+</div>
     }
 </div>
 

@@ -15,7 +15,7 @@
 
 @if (canView)
 {
-    <div class="container mt-4 company-form">
+    <div class="container mt-4">
         <div class="card shadow-sm">
             <div class="card-body">
             @if (model == null && !TaskCompleted)
@@ -353,17 +353,7 @@ else
     </div>
 }
 
-<style>
-    @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-    .company-form {
-        font-family: 'Poppins', sans-serif;
-    }
-
-    .bold-font {
-        font-weight: 600;
-    }
-</style>
 
 
 @code {
