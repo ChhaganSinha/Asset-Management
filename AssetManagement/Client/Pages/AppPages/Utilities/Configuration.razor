@@ -12,13 +12,12 @@
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 
-<div>
-    <div class="card">
-        <div class="card-header bg-secondary text-center">
-            @Title
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">@Title</h5>
         </div>
         <div class="card-body">
-
             <button type="button" class="btn btn-primary" @onclick="OnEIFromSend">Send Insurance Form to All</button>
             <button type="button" class="btn btn-primary" @onclick="ChangeReturnUrl">ChangeReturnUrl</button>
             @if (show)
