@@ -36,6 +36,27 @@ namespace AssetManagement.DataContext.Migrations
                     b.ToTable("Details");
                 });
 
+            modelBuilder.Entity("AssetManagement.Dto.UserProfilePicUpld", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("BackgroundImage")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("ProfileImage")
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserProfilePicUpld");
+                });
+
             modelBuilder.Entity("AssetManagement.Dto.Models.Allocation", b =>
                 {
                     b.Property<int>("Id")
