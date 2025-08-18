@@ -11,10 +11,10 @@ namespace AssetManagement.DataContext
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options, bool ensureCreated = true) : base(options) 
+        public AppDbContext(DbContextOptions<AppDbContext> options, bool ensureCreated = true) : base(options)
         {
             if (ensureCreated)
-                Database.EnsureCreated();
+                Database.Migrate();
         }
         public DbSet<UserProfilePicUpld> UserProfilePicUpld { get; set; }
         public DbSet<Company> Company { get; set; }
