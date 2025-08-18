@@ -335,12 +335,12 @@
             }
             else
             {
-                BgimageDataUrl = "assets/img/cover.jpg";
+                BgimageDataUrl = "/assets/img/cover.jpg";
             }
         }
         else
         {
-            imageDataUrl = "/assets/ima/no-profile.png";
+            imageDataUrl = "/assets/img/no-profile.png";
             BgimageDataUrl = "/assets/img/cover.jpg";
         }
     }
@@ -459,7 +459,7 @@
         if (file != null)
         {
             var buffer = new byte[file.Size];
-            await file.OpenReadStream().ReadAsync(buffer);
+            await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).ReadAsync(buffer);
 
 
             // Store the image data in the model
@@ -493,12 +493,13 @@
         if (file != null)
         {
             var buffer = new byte[file.Size];
-            await file.OpenReadStream().ReadAsync(buffer);
+            await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).ReadAsync(buffer);
 
 
             // Convert the image to a data URL for preview
 
             profilePic.BackgroundImage = buffer;
+            profilePic.Email = userInfo.Email;
 
             // Convert the image to a data URL for preview
             BgimageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
@@ -527,6 +528,7 @@
         profilePic.removePp = true;
         profilePic.removebg = false;
         profilePic.ProfileImage = null;
+        profilePic.Email = userInfo.Email;
         var responce = await client.DeleteProfBgPic(profilePic);
 
 
@@ -535,10 +537,11 @@
 
     private async void RemoveBgImage()
     {
-        BgimageDataUrl = "assets/img/cover.jpg";
+        BgimageDataUrl = "/assets/img/cover.jpg";
         profilePic.removePp = false;
         profilePic.removebg = true;
         profilePic.BackgroundImage = null;
+        profilePic.Email = userInfo.Email;
 
         var responce = await client.DeleteProfBgPic(profilePic);
 
