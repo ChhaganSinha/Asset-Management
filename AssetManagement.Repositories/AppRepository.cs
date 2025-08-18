@@ -1,5 +1,4 @@
 ﻿using AssetManagement.DataContext;
-using AssetManagement.DataContext.Migrations;
 using AssetManagement.Dto;
 using AssetManagement.Dto.Dashboard;
 using AssetManagement.Dto.Models;
