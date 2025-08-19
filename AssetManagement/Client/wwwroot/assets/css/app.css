@@ -164,7 +164,8 @@ main {
 .main-body {
     flex: 1;
     overflow-y: auto;
-    padding: 1px;
+    overflow-x: hidden;
+    padding: 0;
 }
 
 .header {
@@ -340,7 +341,7 @@ main {
     padding: 4px 20px;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin: 4px 0px;
+    margin: 0 0 4px 0;
 }
 
 .dark-mode .breadcrumb-container {
