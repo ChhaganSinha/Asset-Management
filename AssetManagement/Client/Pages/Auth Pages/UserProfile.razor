@@ -42,7 +42,7 @@
     </div>
     <div class="card-body py-0">
         <div class="user-about-block">
-            <div class="row">
+            <div class="row mb-1">
                 <div class="col-md-4 text-center mt-n5">
                     <div class="change-profile text-center">
                         <div class="dropdown">
@@ -68,24 +68,25 @@
                     <h5 class="mb-1">@userInfo.UserName</h5>
                 </div>
                 <div class="col-md-8 mt-md-4">
-                    <div class="row">
+                    <div class="row mb-1">
                         <div class="col-md-6">
-                            <a class="mb-1 text-muted d-flex align-items-end text-h-primary">
-                                <i class="feather icon-globe mr-2 f-18"></i>@userInfo.Email
+                            <a class="mb-1 d-flex align-items-end text-h-primary">
+                                <i class="fa fa-globe mr-2 f-18"></i>@userInfo.Email
                             </a>
-                            <a class="mb-1 text-muted d-flex align-items-end text-h-primary">
-                                <i class="feather icon-phone mr-2 f-18"></i>@userInfo.MobileNo
+                            <a class="mb-1 d-flex align-items-end text-h-primary">
+                                <i class="fa fa-phone mr-2 f-18"></i>@userInfo.MobileNo
                             </a>
                         </div>
                         <div class="col-md-6">
                             <div class="media">
-                                <i class="feather icon-map-pin mr-2 mt-1 f-18"></i>
+                                <i class="fa fa-map-marker mr-2 mt-1 f-18"></i>
                                 <div class="media-body">
                                     @userInfo.Address
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <ul class="nav nav-tabs profile-tabs nav-fill" id="myTab" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">
@@ -104,7 +105,7 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row mb-1">
     <div class="col-md-12">
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
@@ -116,37 +117,37 @@
                         </button>
                     </div>
                     <div class="card-body border-top pro-det-edit collapse show">
-                        <div class="form-group row">
+                        <div class="form-group row mb-1">
                             <label class="col-sm-3 col-form-label font-weight-bolder">User Name</label>
                             <div class="col-sm-9">
                                 @userInfo.UserName
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row mb-1">
                             <label class="col-sm-3 col-form-label font-weight-bolder">Email</label>
                             <div class="col-sm-9">
                                 @userInfo.Email
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row mb-1">
                             <label class="col-sm-3 col-form-label font-weight-bolder">Mobile Number</label>
                             <div class="col-sm-9">
                                 @userInfo.MobileNo
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row mb-1">
                             <label class="col-sm-3 col-form-label font-weight-bolder">Gender</label>
                             <div class="col-sm-9">
                                 @userInfo.Gender
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row mb-1">
                             <label class="col-sm-3 col-form-label font-weight-bolder">Birth Date</label>
                             <div class="col-sm-9">
                                 @userInfo.Dob.ToString("dd/MMM/yyyy")
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row mb-1">
                             <label class="col-sm-3 col-form-label font-weight-bolder">Address</label>
                             <div class="col-sm-9">
                                 @userInfo.Address
@@ -156,28 +157,28 @@
                     <div class="card-body border-top pro-det-edit collapse">
                         <EditForm OnValidSubmit="OnSubmit" Model="userDetailsUpdateParameters">
                             <DataAnnotationsValidator />
-                            <div class="form-group row">
+                            <div class="form-group row mb-1">
                                 <label class="col-sm-3 col-form-label font-weight-bolder">User Name</label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" @bind="userDetailsUpdateParameters.NewUserName" placeholder="New Username" />
                                     <ValidationMessage For="@(() => userDetailsUpdateParameters.NewUserName)" />
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            <div class="form-group row mb-1">
                                 <label class="col-sm-3 col-form-label font-weight-bolder">User Email</label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" @bind="userDetailsUpdateParameters.NewEmail" placeholder="New Email" disabled />
                                     <ValidationMessage For="@(() => userDetailsUpdateParameters.NewEmail)" />
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            <div class="form-group row mb-1">
                                 <label class="col-sm-3 col-form-label font-weight-bolder">Mobile No.</label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" @bind="userDetailsUpdateParameters.NewMobileNo" placeholder="New Mobile No." />
                                     <ValidationMessage For="@(() => userDetailsUpdateParameters.NewMobileNo)" />
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            <div class="form-group row mb-1">
                                 <label class="col-sm-3 col-form-label font-weight-bolder">Gender</label>
                                 <div class="col-sm-9">
                                     <select class="form-control" @bind="userDetailsUpdateParameters.NewGender">
@@ -190,23 +191,23 @@
                                     <ValidationMessage style="margin-top:-12px" For="@(() => userDetailsUpdateParameters.NewGender)" />
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            <div class="form-group row mb-1">
                                 <label class="col-sm-3 col-form-label font-weight-bolder">Birth Date</label>
                                 <div class="col-sm-9">
                                     <InputDate @bind-Value="userDetailsUpdateParameters.NewDob" class="form-control" />
                                     <ValidationMessage style="margin-top:-12px" For="@(() => userDetailsUpdateParameters.NewDob)" />
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            <div class="form-group row mb-1">
                                 <label class="col-sm-3 col-form-label font-weight-bolder">Address</label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" @bind="userDetailsUpdateParameters.NewAddress" placeholder="New Address" />
                                     <ValidationMessage style="margin-top:-12px" For="@(() => userDetailsUpdateParameters.NewAddress)" />
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            <div class="form-group row mb-1">
                                 <div class="col-sm-12 text-center">
-                                    <button class="btn btn-primary btn-sm" type="submit">
+                                    <button class="btn btn-primary btn-sm w-100" type="submit">
                                         Save
                                     </button>
                                 </div>
@@ -226,30 +227,30 @@
                     <div class="card-body border-top pro-pwd-edit collapse show">
                         <EditForm OnValidSubmit="OnPasswordSubmit" Model="changePassword">
                             <DataAnnotationsValidator />
-                            <div class="form-group row">
-                                <label class="col-sm-3 col-form-label font-weight-bolder">Old Password</label>
+                            <div class="form-group row mb-1">
+                                <label class="col-sm-3 col-form-label font-weight-bolder">Current Password</label>
                                 <div class="col-sm-9">
-                                    @* <input type="password" class="form-control" @bind="changePassword." placeholder="Enter old password" /> *@
-                                    @* <ValidationMessage For="@(() => changePassword.OldPassword)" /> *@
+                                    <input type="password" class="form-control" @bind="changePassword.CurrentPassword" placeholder="Enter Current password" />
+                                    <ValidationMessage For="@(() => changePassword.CurrentPassword)" />
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            <div class="form-group row mb-1">
                                 <label class="col-sm-3 col-form-label font-weight-bolder">New Password</label>
                                 <div class="col-sm-9">
                                     <input type="password" class="form-control" @bind="changePassword.NewPassword" placeholder="Enter new password" />
                                     <ValidationMessage For="@(() => changePassword.NewPassword)" />
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            <div class="form-group row mb-1">
                                 <label class="col-sm-3 col-form-label font-weight-bolder">Confirm New Password</label>
                                 <div class="col-sm-9">
                                     <input type="password" class="form-control" @bind="changePassword.ConfirmPassword" placeholder="Confirm new password" />
                                     <ValidationMessage For="@(() => changePassword.ConfirmPassword)" />
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            <div class="form-group row mb-1">
                                 <div class="col-sm-12 text-center">
-                                    <button class="btn btn-primary btn-sm" type="submit">
+                                    <button class="btn btn-primary btn-sm w-100" type="submit">
                                         Change Password
                                     </button>
                                 </div>
