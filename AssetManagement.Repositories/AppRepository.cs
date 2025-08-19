@@ -445,24 +445,6 @@ namespace AssetManagement.Repositories
                 return null;
             }
         } 
-        public async Task<EmployeeOnboardingDto> GetEmployeeOnboardingById(int id)
-        {
-            try
-            {
-                EmployeeOnboardingDto result = null;
-
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                result = await AppDbCxt.EmployeeOnboarding
-                        .FirstOrDefaultAsync(o => o.Id == id);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
         public async Task<EmployeeOnboardingDto> UpsertConfirmOnboardingAsync(OnBoardingConfirmationDto data)
         {
             try
@@ -621,28 +603,6 @@ namespace AssetManagement.Repositories
             return result;
         }
 
-
-
-       public async Task<EmployeeOnboardingDto> GetEmployeeonboardingById(int id)
-                   
-        {
-            try
-            {
-                EmployeeOnboardingDto result = null;
-
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                result = await AppDbCxt.EmployeeOnboarding
-                        .FirstOrDefaultAsync(o => o.Id == id);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
         public async Task<ApiResponse<EmployeeOnboardingDto>> UpsertEmployeeOnboarding(EmployeeOnboardingDto data)
         {
             var result = new ApiResponse<EmployeeOnboardingDto>();
@@ -657,27 +617,26 @@ namespace AssetManagement.Repositories
                 }
                 else
                 {
-                    var Check = AppDbCxt.EmployeeOnboarding.FirstOrDefault(o => o.ExternalEmailId == data.ExternalEmailId);
-                    if (Check != null)
+                    var check = await AppDbCxt.EmployeeOnboarding
+                        .FirstOrDefaultAsync(o => o.ExternalEmailId.ToLower() == data.ExternalEmailId.ToLower());
+                    if (check != null)
                     {
                         result.IsSuccess = false;
                         result.Message = "Email already exist!";
                         return result;
                     }
-                    else
-                    {
-                        var timestamp = DateTime.Now;
-                        var key = $"{data.Id}-{data.ExternalEmailId}-{timestamp}".ComputeMd5Hash().ToLower();
-                        var returnUrl = $"{data.BaseUrl}/EmployeeOnBoarding/{key}";
-                        data.ReturnUrl = returnUrl;
-                        data.SecurityStamp = key;
-                        data.Date = DateTime.Now;
-                        AppDbCxt.EmployeeOnboarding.Add(data);
-                        await AppDbCxt.SaveChangesAsync();
-                        data.ManagerMobile = AppDbCxt.Employee.Where(o => o.EmailId == data.ReportingTo).Select(o => o.MobileNumber).FirstOrDefault();
-                        data.CompanyName = AppDbCxt.Company.Where(o => o.CompanyCode == data.CompanyCode).Select(o => o.Name).FirstOrDefault();
-                        result.Result = data;
-                    }
+
+                    var timestamp = DateTime.Now;
+                    var key = $"{data.Id}-{data.ExternalEmailId}-{timestamp}".ComputeMd5Hash().ToLower();
+                    var returnUrl = $"{data.BaseUrl}/EmployeeOnBoarding/{key}";
+                    data.ReturnUrl = returnUrl;
+                    data.SecurityStamp = key;
+                    data.Date = DateTime.Now;
+                    AppDbCxt.EmployeeOnboarding.Add(data);
+                    await AppDbCxt.SaveChangesAsync();
+                    data.ManagerMobile = AppDbCxt.Employee.Where(o => o.EmailId == data.ReportingTo).Select(o => o.MobileNumber).FirstOrDefault();
+                    data.CompanyName = AppDbCxt.Company.Where(o => o.CompanyCode == data.CompanyCode).Select(o => o.Name).FirstOrDefault();
+                    result.Result = data;
                 }
 
             }
@@ -698,7 +657,7 @@ namespace AssetManagement.Repositories
             var result = new ApiResponse<EmployeeOnboardingDto>();
             try
             {
-                var data = AppDbCxt.EmployeeOnboarding.FirstOrDefault(o => o.SecurityStamp == key);
+                var data = await AppDbCxt.EmployeeOnboarding.FirstOrDefaultAsync(o => o.SecurityStamp == key);
                 //var data = AppDbCxt.EmployeeOnboarding.FirstOrDefault(o => o.SecurityStamp == key && o.IsReplied == false);
                 if (data == null)
                 {
@@ -719,7 +678,7 @@ namespace AssetManagement.Repositories
             var result = new ApiResponse<EmployeeOnboardingDto>();
             try
             {
-                var data = AppDbCxt.EmployeeOnboarding.FirstOrDefault(o => o.SecurityStamp == key);
+                var data = await AppDbCxt.EmployeeOnboarding.FirstOrDefaultAsync(o => o.SecurityStamp == key);
                 if (data == null)
                 {
                     result.Message = "No Data Found in Database!";

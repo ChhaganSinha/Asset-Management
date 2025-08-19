@@ -1,4 +1,4 @@
-﻿@page "/EmployeeOnBoarding/{param}/{key}"
+﻿@page "/EmployeeOnBoarding/{param}/{Id:int}"
 @page "/EmployeeOnBoarding/{key}"
 
 @using AssetManagement.Client.Client;
@@ -742,7 +742,7 @@
         }
 
 
-        var responce = param == null ? await client.GetOnboardingDataByKey(key) : await client.GetOnboardingDataById(key);
+        var responce = param == null ? await client.GetOnboardingDataByKey(key) : await client.GetOnboardingDataById(Id);
         SkillOptions = new List<EmployeeSkills>(await client.GetAllSkill());
 
         if (responce.IsSuccess)
@@ -933,7 +933,7 @@
             }
 
 
-            var responce = param == null ? await client.GetOnboardingDataByKey(key) : await client.GetOnboardingDataById(key);
+            var responce = param == null ? await client.GetOnboardingDataByKey(key) : await client.GetOnboardingDataById(Id);
             SkillOptions = new List<EmployeeSkills>(await client.GetAllSkill());
 
             if (responce.IsSuccess)

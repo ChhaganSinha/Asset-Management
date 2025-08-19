@@ -1,4 +1,4 @@
-﻿@page "/OnBoardingConfirmationDetails/{Id:int}"
+﻿@page "/OnBoardingConfirmationDetails/{Key}"
 @using AssetManagement.Client.Client
 @using AssetManagement.Dto.Models
 @using Microsoft.AspNetCore.Components.Forms
@@ -89,7 +89,7 @@
 
 @code {
     [Parameter]
-    public int Id { get; set; }
+    public string Key { get; set; }
 
     private bool Onload = true;
     private string JoinStatus;
@@ -111,7 +111,7 @@
             Onload = true;
 
 
-            EmployeeOnboarding = await client.GetEmployeeOnboardingById(Id);
+            EmployeeOnboarding = await client.GetEmployeeOnboardingByKey(Key);
             if (EmployeeOnboarding != null)
             {
                 model.Name = EmployeeOnboarding.Name;
@@ -189,7 +189,7 @@
 
 
 
-@* @page "/OnBoardingConfirmationDetails/{Id:int}" *@
+@* @page "/OnBoardingConfirmationDetails/{Key}" *@
 @* @using AssetManagement.Client.Client; *@
 @* @using AssetManagement.Client.Pages.AppPages.Employees.Component *@
 @* @using AssetManagement.Client.Shared.Popup *@
@@ -247,7 +247,7 @@
 
 @* @code { *@
 @*     [Parameter] *@
-@*     public int Id { get; set; } *@
+@*     public string Key { get; set; } *@
 @*     bool Onload = false; *@
 @*     private string JoinStatus { get; set; } = ""; *@
 @*     private DateTime? NextDateOfJoining { get; set; } *@

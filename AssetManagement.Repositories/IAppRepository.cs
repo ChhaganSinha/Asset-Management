@@ -41,8 +41,6 @@ namespace AssetManagement.Repositories
         Task<Employee> GetEmployeeById(int id);
         Task<EmployeeFilesMapping> GetEmployeeFilesById(int id);
         Task<IEnumerable<EmployeeInsurance>> GetEmployeeInsuranceById(int id);
-        Task<EmployeeOnboardingDto> GetEmployeeOnboardingById(int id);
-        Task<EmployeeOnboardingDto> GetEmployeeonboardingById(int id);
         Task<ReportFilters> GetEmployeeReportFileters();
         Task<EmployeeSkills> GetEmployeeSkillsById(int id);
         Task<List<EmployeeSkillMapping>> GetEmployeeSkillsIDs(int employeeId);

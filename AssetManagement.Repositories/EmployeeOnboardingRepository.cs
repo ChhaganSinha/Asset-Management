@@ -19,23 +19,11 @@ namespace AssetManagement.Repositories
             AppDbCxt = appContext;
         }
 
-        public async Task<EmployeeOnboardingDto> GetEmployeeOnboardingById(int id)
+        public async Task<EmployeeOnboardingDto> GetEmployeeOnboardingByKey(string key)
         {
             try
             {
-                return await AppDbCxt.EmployeeOnboarding.FirstOrDefaultAsync(o => o.Id == id);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        public async Task<EmployeeOnboardingDto> GetEmployeeonboardingById(int id)
-        {
-            try
-            {
-                return await AppDbCxt.EmployeeOnboarding.FirstOrDefaultAsync(o => o.Id == id);
+                return await AppDbCxt.EmployeeOnboarding.FirstOrDefaultAsync(o => o.SecurityStamp == key);
             }
             catch (Exception)
             {
@@ -81,27 +69,26 @@ namespace AssetManagement.Repositories
                 }
                 else
                 {
-                    var check = AppDbCxt.EmployeeOnboarding.FirstOrDefault(o => o.ExternalEmailId == data.ExternalEmailId);
+                    var check = await AppDbCxt.EmployeeOnboarding
+                        .FirstOrDefaultAsync(o => o.ExternalEmailId.ToLower() == data.ExternalEmailId.ToLower());
                     if (check != null)
                     {
                         result.IsSuccess = false;
                         result.Message = "Email already exist!";
                         return result;
                     }
-                    else
-                    {
-                        var timestamp = DateTime.Now;
-                        var key = $"{data.Id}-{data.ExternalEmailId}-{timestamp}".ComputeMd5Hash().ToLower();
-                        var returnUrl = $"{data.BaseUrl}/EmployeeOnBoarding/{key}";
-                        data.ReturnUrl = returnUrl;
-                        data.SecurityStamp = key;
-                        data.Date = DateTime.Now;
-                        AppDbCxt.EmployeeOnboarding.Add(data);
-                        await AppDbCxt.SaveChangesAsync();
-                        data.ManagerMobile = AppDbCxt.Employee.Where(o => o.EmailId == data.ReportingTo).Select(o => o.MobileNumber).FirstOrDefault();
-                        data.CompanyName = AppDbCxt.Company.Where(o => o.CompanyCode == data.CompanyCode).Select(o => o.Name).FirstOrDefault();
-                        result.Result = data;
-                    }
+
+                    var timestamp = DateTime.Now;
+                    var key = $"{data.Id}-{data.ExternalEmailId}-{timestamp}".ComputeMd5Hash().ToLower();
+                    var returnUrl = $"{data.BaseUrl}/EmployeeOnBoarding/{key}";
+                    data.ReturnUrl = returnUrl;
+                    data.SecurityStamp = key;
+                    data.Date = DateTime.Now;
+                    AppDbCxt.EmployeeOnboarding.Add(data);
+                    await AppDbCxt.SaveChangesAsync();
+                    data.ManagerMobile = AppDbCxt.Employee.Where(o => o.EmailId == data.ReportingTo).Select(o => o.MobileNumber).FirstOrDefault();
+                    data.CompanyName = AppDbCxt.Company.Where(o => o.CompanyCode == data.CompanyCode).Select(o => o.Name).FirstOrDefault();
+                    result.Result = data;
                 }
             }
             catch (Exception ex)
@@ -121,7 +108,7 @@ namespace AssetManagement.Repositories
             var result = new ApiResponse<EmployeeOnboardingDto>();
             try
             {
-                var data = AppDbCxt.EmployeeOnboarding.FirstOrDefault(o => o.SecurityStamp == key);
+                var data = await AppDbCxt.EmployeeOnboarding.FirstOrDefaultAsync(o => o.SecurityStamp == key);
                 if (data == null)
                 {
                     result.Message = "You have already Updated your details";
@@ -137,12 +124,12 @@ namespace AssetManagement.Repositories
             return result;
         }
 
-        public async Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataByID(string key)
+        public async Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataById(int id)
         {
             var result = new ApiResponse<EmployeeOnboardingDto>();
             try
             {
-                var data = AppDbCxt.EmployeeOnboarding.FirstOrDefault(o => o.SecurityStamp == key);
+                var data = await AppDbCxt.EmployeeOnboarding.FirstOrDefaultAsync(o => o.Id == id);
                 if (data == null)
                 {
                     result.Message = "No Data Found in Database!";

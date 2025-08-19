@@ -31,7 +31,7 @@ namespace AssetManagement.Server.Service
 
                     if (employee.Reference != "NA")
                     {
-                        var url = $"https://localhost:7053/OnBoardingConfirmationDetails/{employee.Id}";
+                        var url = $"https://localhost:7053/OnBoardingConfirmationDetails/{employee.SecurityStamp}";
                         var referName = employees.Where(o=>o.EmailId.ToLower() == employee.Reference.ToLower()).Select(o=>o.EmployeeName).FirstOrDefault();
                         string body = $"Hi {referName} ,<br/><br/>" +
                                       $"This is to kindly request your confirmation regarding the candidate <b>{employee.Name}</b>, whom you had referred for employment.<br/>" +
