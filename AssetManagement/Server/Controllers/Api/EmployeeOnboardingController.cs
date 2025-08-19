@@ -23,9 +23,9 @@ namespace AssetManagement.Server.Controllers.Api
             _env = env;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{key}")]
         [AllowAnonymous]
-        public async Task<EmployeeOnboardingDto> GetEmployeeOnboardingById(int id) => await _repository.GetEmployeeOnboardingById(id);
+        public async Task<EmployeeOnboardingDto> GetEmployeeOnboardingByKey(string key) => await _repository.GetEmployeeOnboardingByKey(key);
 
         [HttpPost("Confirm")]
         [AllowAnonymous]
@@ -68,10 +68,7 @@ namespace AssetManagement.Server.Controllers.Api
         public async Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataByKey(GenericApiRequest<string> request) => await _repository.GetOnboardingDataByKey(request.Param);
 
         [HttpPost("ById")]
-        public async Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataById(GenericApiRequest<string> request) => await _repository.GetOnboardingDataByID(request.Param);
-
-        [HttpGet("form/{id}")]
-        public async Task<EmployeeOnboardingDto> GetEmployeeonboardingById(int id) => await _repository.GetEmployeeonboardingById(id);
+        public async Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataById(GenericApiRequest<int> request) => await _repository.GetOnboardingDataById(request.Param);
 
         [HttpPost("Files")]
         [AllowAnonymous]

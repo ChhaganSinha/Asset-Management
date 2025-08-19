@@ -393,12 +393,12 @@ namespace AssetManagement.Client.Client
 
             return result;
         }  
-        public async Task<EmployeeOnboardingDto> GetEmployeeOnboardingById(int id)
+        public async Task<EmployeeOnboardingDto> GetEmployeeOnboardingByKey(string key)
         {
             EmployeeOnboardingDto result = null;
             try
             {
-                var res = await HttpClient.GetAsync($"api/EmployeeOnboarding/{id}");
+                var res = await HttpClient.GetAsync($"api/EmployeeOnboarding/{key}");
 
                 res.EnsureSuccessStatusCode();
 
@@ -546,13 +546,13 @@ namespace AssetManagement.Client.Client
             }
             return result;
         }
-        public async Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataById(string Key)
+        public async Task<ApiResponse<EmployeeOnboardingDto>> GetOnboardingDataById(int id)
         {
             var result = new ApiResponse<EmployeeOnboardingDto>();
             try
             {
-                var payload = new GenericApiRequest<string>() { Param = Key };
-                var responce = await HttpClient.PostAsJsonAsync<GenericApiRequest<string>>($"api/EmployeeOnboarding/ById", payload);
+                var payload = new GenericApiRequest<int>() { Param = id };
+                var responce = await HttpClient.PostAsJsonAsync<GenericApiRequest<int>>($"api/EmployeeOnboarding/ById", payload);
                 responce.EnsureSuccessStatusCode();
 
                 if (responce.IsSuccessStatusCode)
