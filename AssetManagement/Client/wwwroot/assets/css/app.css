@@ -188,10 +188,10 @@ main {
     }
 
 .breadcrumb-container {
-    position: sticky;
+/*    position: sticky;*/
     /* Stick below the header */
-    top: 59px;
-    z-index: 900;
+/*    top: 59px;
+    z-index: 900;*/
     background-color: #ffffff;
 }
 
