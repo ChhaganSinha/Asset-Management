@@ -1,5 +1,0 @@
-﻿ALTER TABLE EmployeeFilesMapping
-ADD COLUMN ResumeFile TEXT NOT NULL DEFAULT '';
-
-ALTER TABLE EmployeeOnboarding
-ADD COLUMN ResumeFile TEXT NOT NULL DEFAULT '';
