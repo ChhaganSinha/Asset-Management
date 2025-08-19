@@ -6,7 +6,7 @@
 
     @if (EmptyText == "true")
     {
-        <option @key="@string.Empty" value="@string.Empty">-NOT SET-</option>
+        <option value="@string.Empty">-NOT SET-</option>
     }
     else
     {
@@ -16,7 +16,7 @@
         }
         else
         {
-            <option @key="@string.Empty" value="@string.Empty">-@EmptyText-</option>
+            <option value="@string.Empty">-@EmptyText-</option>
         }
 
     }
@@ -27,14 +27,14 @@
         {
             if (item.Key == Value?.ToString())
             {
-                <option @key="@item" value="@item.Key" selected="selected">
+                <option value="@item.Key" selected="selected">
                     @((MarkupString)item.Value)
                 </option>
 
             }
             else
             {
-                <option @key="@item" value="@item.Key">
+                <option value="@item.Key">
                     @((MarkupString)item.Value)
                 </option>
             }
