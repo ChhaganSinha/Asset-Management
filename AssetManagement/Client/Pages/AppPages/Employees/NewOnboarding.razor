@@ -11,17 +11,9 @@
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 
+<Breadcrumb Items="breadcrumbItems" />
 <div class="container mt-4">
     <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white d-flex align-items-center" style="padding: 8px !important;">
-            <a href="employees" class="btn btn-outline-light btn-sm">
-                <i class="fa fa-arrow-left" aria-hidden="true"></i> Back
-            </a>
-            <div class="ms-auto">
-                <Breadcrumb Items="breadcrumbItems" />
-            </div>
-        </div>
-
         <div class="card-body">
             <EmployeeOnboardingGrid />
         </div>
