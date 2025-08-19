@@ -13,126 +13,9 @@
 @inject HttpClient HttpClient
 @inject AppClient clients
 
-<EditForm Model="model" OnValidSubmit="@OnValidSubmit">
-    <DataAnnotationsValidator />
-    <div class="card p-2">
-        <div class="form-group row">
-            <label class="col-form-label col-md-2 bold-font required-field">Company Code</label>
-            <div class="col-md-4 mb-1">
-                <DropdownSelect @bind-Value="model.CompanyCode"
-                               DataSource="CompanyDropdown"
-                               EmptyText="-- Select Company --"
-                               Css="form-select" />
-                <ValidationMessage For="() => model.CompanyCode" />
-            </div>
-
-            <label class="col-form-label col-md-2 bold-font required-field">Name</label>
-            <div class="col-md-4 mb-1">
-                <InputText id="Name" @bind-Value="model.Name" class="form-control" />
-                <ValidationMessage For="() => model.Name" />
-            </div>
-
-            <label class="col-form-label col-md-2 bold-font">Candidate Mobile</label>
-            <div class="col-md-4 mb-1">
-                <InputText id="mobile" @bind-Value="model.MobileNumber" class="form-control" />
-                <ValidationMessage For="() => model.MobileNumber" />
-            </div>
-            @* <label class="col-form-label col-md-2 bold-font required-field">Reporting HR</label> *@
-            @* <div class="col-md-4 mb-1"> *@
-            @*     <MudGrid> *@
-            @*         <MudItem xs="12" sm="12" md="12"> *@
-            @*             <MudAutocomplete Label="Select" T="Employee" @bind-Value="selectedHR" SearchFunc="@ManagerSearch" Variant="Variant.Outlined" Margin="Margin.Dense" *@
-            @*             ToStringFunc="@(e => e == null ? null : $"{e.EmployeeName} ({e.EmailId})")" *@
-            @*             Required="false" *@
-            @*             ResetValueOnEmptyText="true" *@
-            @*             CoerceText="true" *@
-            @*             CoerceValue="true" *@
-            @*             MaxItems="null"> *@
-            @*             </MudAutocomplete> *@
-            @*         </MudItem> *@
-            @*     </MudGrid> *@
-            @*     @if (selectedManager != null) { model.ReportingTo = selectedManager.ReportingTo; model.ManagerEmail = selectedManager.EmailId; } *@
-            @*     <ValidationMessage For="() => model.ReportingTo" /> *@
-
-            @* </div> *@
-            <label class="col-form-label col-md-2 bold-font required-field">Reference From</label>
-            <div class="col-md-4 mb-1">
-                <DropdownSelect @bind-Value="model.Reference"
-                               DataSource="EmployeeEmailDropdown"
-                               EmptyText="-- Select --"
-                               Css="form-select" />
-                <ValidationMessage For="() => model.ReportingTo" />
-
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label class="col-form-label col-md-2 bold-font required-field">Reporting To</label>
-            <div class="col-md-4 mb-1">
-                <DropdownSelect @bind-Value="model.ReportingTo"
-                               EventDropdown="OnManagerChanged"
-                               DataSource="EmployeeDropdown"
-                               EmptyText="-- Select --"
-                               Css="form-select" />
-                <ValidationMessage For="() => model.ReportingTo" />
-
-            </div>
-
-            <label class="col-form-label col-md-2 bold-font required-field">Designation</label>
-            <div class="col-md-4 mb-1">
-                <DropdownSelect @bind-Value="model.Designation"
-                               DataSource="DesignationDropdown"
-                               EmptyText="-- Select --"
-                               Css="form-select" />
-                <ValidationMessage For="() => model.Designation" />
-            </div>
-        </div>
-        <div class="form-group row">
-            <label class="col-form-label col-md-2 bold-font required-field">External Email</label>
-            <div class="col-md-4 mb-1">
-                <InputText id="ExternalEmailId" @bind-Value="model.ExternalEmailId" class="form-control" />
-                <ValidationMessage For="() => model.ExternalEmailId" />
-            </div>
-
-            <label class="col-form-label col-md-2 bold-font required-field">Temp. DateOfJoin</label>
-            <div class="col-md-4 mb-1">
-                <InputDate @bind-Value="model.TempDateOfJoin" class="form-control" />
-                <ValidationMessage For="() => model.TempDateOfJoin" />
-            </div>
-        </div>  <div class="form-group row">
-            <label class="col-form-label col-md-2 bold-font required-field">Role</label>
-
-
-            <div class="col-md-4">
-                <InputSelect id="Status" @bind-Value="model.employeetype" class="form-control">
-                    @foreach (var s in Enum.GetValues(typeof(employeeType)))
-                    {
-                        <option value="@s">@s</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="() => model.employeetype" />
-            </div>
-
-            @* <label class="col-form-label col-md-2 bold-font required-field">Join status</label> *@
-
-
-            @* <div class="col-md-4"> *@
-            @*     <InputSelect id="Status" @bind-Value="model.Joinstatus" class="form-control"> *@
-            @*         @foreach (var s in Enum.GetValues(typeof(joinStatus))) *@
-            @*         { *@
-            @*             <option value="@s">@s</option> *@
-            @*         } *@
-            @*     </InputSelect> *@
-            @*     <ValidationMessage For="() => model.Joinstatus" /> *@
-            @* </div> *@
-
-        </div>
-
-        <div class="col-md-2" style="text-align:left">
-            <button type="submit" class="btn btn-primary">Send</button>
-        </div>
-    </div>
-</EditForm>
+<div class="mb-2 text-end">
+    <button class="btn btn-primary" @onclick="OpenOnboardForm">New Onboard</button>
+</div>
 @if (_task.IsCompleted)
 {
     <div class="row">
@@ -148,8 +31,98 @@ else
          <div class="loader-progress"></div>
     </div>
 }
-<Dailog Title="@Message" Show="@show" OnCloseDialog="ResetForm">
-    @if (show)
+<PageDialog Title="New Onboarding" Show="@openOnboardForm" OnCloseDialog="CloseOnboardForm">
+    <EditForm Model="model" OnValidSubmit="@OnValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="card p-2">
+            <div class="form-group row">
+                <label class="col-form-label col-md-2 bold-font required-field">Company Code</label>
+                <div class="col-md-4 mb-1">
+                    <DropdownSelect @bind-Value="model.CompanyCode"
+                                   DataSource="CompanyDropdown"
+                                   EmptyText="-- Select Company --"
+                                   Css="form-select" />
+                    <ValidationMessage For="() => model.CompanyCode" />
+                </div>
+
+                <label class="col-form-label col-md-2 bold-font required-field">Name</label>
+                <div class="col-md-4 mb-1">
+                    <InputText id="Name" @bind-Value="model.Name" class="form-control" />
+                    <ValidationMessage For="() => model.Name" />
+                </div>
+
+                <label class="col-form-label col-md-2 bold-font">Candidate Mobile</label>
+                <div class="col-md-4 mb-1">
+                    <InputText id="mobile" @bind-Value="model.MobileNumber" class="form-control" />
+                    <ValidationMessage For="() => model.MobileNumber" />
+                </div>
+
+                <label class="col-form-label col-md-2 bold-font required-field">Reference From</label>
+                <div class="col-md-4 mb-1">
+                    <DropdownSelect @bind-Value="model.Reference"
+                                   DataSource="EmployeeEmailDropdown"
+                                   EmptyText="-- Select --"
+                                   Css="form-select" />
+                    <ValidationMessage For="() => model.ReportingTo" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-form-label col-md-2 bold-font required-field">Reporting To</label>
+                <div class="col-md-4 mb-1">
+                    <DropdownSelect @bind-Value="model.ReportingTo"
+                                   EventDropdown="OnManagerChanged"
+                                   DataSource="EmployeeDropdown"
+                                   EmptyText="-- Select --"
+                                   Css="form-select" />
+                    <ValidationMessage For="() => model.ReportingTo" />
+                </div>
+
+                <label class="col-form-label col-md-2 bold-font required-field">Designation</label>
+                <div class="col-md-4 mb-1">
+                    <DropdownSelect @bind-Value="model.Designation"
+                                   DataSource="DesignationDropdown"
+                                   EmptyText="-- Select --"
+                                   Css="form-select" />
+                    <ValidationMessage For="() => model.Designation" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-form-label col-md-2 bold-font required-field">External Email</label>
+                <div class="col-md-4 mb-1">
+                    <InputText id="ExternalEmailId" @bind-Value="model.ExternalEmailId" class="form-control" />
+                    <ValidationMessage For="() => model.ExternalEmailId" />
+                </div>
+
+                <label class="col-form-label col-md-2 bold-font required-field">Temp. DateOfJoin</label>
+                <div class="col-md-4 mb-1">
+                    <InputDate @bind-Value="model.TempDateOfJoin" class="form-control" />
+                    <ValidationMessage For="() => model.TempDateOfJoin" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-form-label col-md-2 bold-font required-field">Role</label>
+                <div class="col-md-4">
+                    <InputSelect id="Status" @bind-Value="model.employeetype" class="form-control">
+                        @foreach (var s in Enum.GetValues(typeof(employeeType)))
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => model.employeetype" />
+                </div>
+            </div>
+
+            <div class="col-md-2" style="text-align:left">
+                <button type="submit" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+    </EditForm>
+</PageDialog>
+<Dailog Title="@Message" Show="@showMessage" OnCloseDialog="ResetForm">
+    @if (showMessage)
     {
         @if (TaskCompleted)
         {
@@ -247,14 +220,16 @@ else
     bool IsError = false;
     bool IsSuccess = false;
     bool TaskCompleted = false;
-    private bool show = false;
+    private bool showMessage = false;
+    private bool openOnboardForm = false;
     protected async Task OnValidSubmit()
     {
         Message = string.Empty;
         MessageBody = "Thank you!";
         IsError = false;
         IsSuccess = false;
-        show = true;
+        showMessage = true;
+        openOnboardForm = false;
         TaskCompleted = false;
         // model.HR = selectedHR.Id.ToString();
         try
@@ -288,7 +263,8 @@ else
 
     private async void ResetForm()
     {
-        show = false;
+        showMessage = false;
+        openOnboardForm = false;
         if (Message.Contains("Successfully Added"))
         {
             model = new();
@@ -304,5 +280,15 @@ else
             model.ManagerEmail = selected.EmailId;
         }
         return Task.CompletedTask;
+    }
+
+    private void OpenOnboardForm()
+    {
+        openOnboardForm = true;
+    }
+
+    private void CloseOnboardForm(bool value)
+    {
+        openOnboardForm = value;
     }
 }
