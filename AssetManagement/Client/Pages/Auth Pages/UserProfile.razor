@@ -15,25 +15,114 @@
 @inject NavigationManager Navigation
 @attribute [Authorize]
 
+<style>
+    .cover-img-container {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .change-cover {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .cover-img-container:hover .change-cover {
+        opacity: 1;
+    }
+
+    .change-cover .dropdown-toggle {
+        background: rgba(0, 0, 0, 0.6);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+    }
+
+        .change-cover .dropdown-toggle:hover {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-decoration: none;
+        }
+
+    .change-profile {
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-dp {
+        position: relative;
+        display: inline-block;
+    }
+
+        .profile-dp .profile-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+
+        .profile-dp:hover .profile-overlay {
+            opacity: 1;
+        }
+
+        .profile-dp .profile-overlay span {
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .dropdown-item {
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+    }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+</style>
+
 <!-- Breadcrumb Section -->
 <Breadcrumb Items="breadcrumbItems" />
 
 <div class="">
     <div class="card-header border-0 p-0">
-        <div class="cover-img-block">
-            <img src="@BgimageDataUrl" alt="User Background Image" class="img-fluid" style="height: 46vh; object-fit: cover;">
+        <div class="cover-img-container">
+            <img src="@BgimageDataUrl" alt="User Background Image" class="img-fluid" style="height: 46vh; width: 100%; object-fit: cover;">
             <div class="change-cover">
                 <div class="dropdown">
-                    <a class="drp-icon dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#" role="button">
                         <i class="icon feather icon-camera"></i>
                     </a>
-                    <div class="dropdown-menu">
-                        <label class="dropdown-item" style="cursor: pointer;">
-                            <i class="feather icon-upload-cloud mr-2"></i>Upload new
-                            <InputFile OnChange="BgHandleFileSelected" class="d-none" />
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <label class="dropdown-item" style="cursor: pointer; margin-bottom: 0;">
+                            <i class="feather icon-upload-cloud me-2"></i>Upload new
+                            <InputFile OnChange="BgHandleFileSelected" class="d-none" accept="image/*" />
                         </label>
-                        <a class="dropdown-item" @onclick="RemoveBgImage">
-                            <i class="feather icon-trash-2 mr-2"></i>Remove
+                        <a class="dropdown-item" @onclick="RemoveBgImage" href="#" @onclick:preventDefault="true">
+                            <i class="feather icon-trash-2 me-2"></i>Remove
                         </a>
                     </div>
                 </div>
@@ -44,42 +133,41 @@
         <div class="user-about-block">
             <div class="row mb-1">
                 <div class="col-md-4 text-center mt-n5">
-                    <div class="change-profile text-center">
+                    <div class="change-profile">
                         <div class="dropdown">
-                            <a class="dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <div class="profile-dp">
-                                    <img id="imgPreview" class="img-radius img-fluid" src="@imageDataUrl" alt="User image" style="height: 15vh; width: 15vh; object-fit: cover;" />
-                                    <div class="">
-                                        <span>Change</span>
-                                    </div>
+                            <div class="profile-dp" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img id="imgPreview" class="img-radius img-fluid" src="@imageDataUrl" alt="User image"
+                                     style="height: 15vh; width: 15vh; object-fit: cover; border-radius: 50%; border: 4px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);" />
+                                <div class="profile-overlay">
+                                    <span>Change</span>
                                 </div>
-                            </a>
+                            </div>
                             <div class="dropdown-menu">
-                                <label class="dropdown-item" style="cursor: pointer;">
-                                    <i class="feather icon-upload-cloud mr-2"></i>Upload new
-                                    <InputFile OnChange="HandleFileSelected" class="d-none" />
+                                <label class="dropdown-item" style="cursor: pointer; margin-bottom: 0;">
+                                    <i class="feather icon-upload-cloud me-2"></i>Upload new
+                                    <InputFile OnChange="HandleFileSelected" class="d-none" accept="image/*" />
                                 </label>
-                                <a class="dropdown-item" @onclick="RemoveImage">
-                                    <i class="feather icon-trash-2 mr-2"></i>Remove
+                                <a class="dropdown-item" @onclick="RemoveImage" href="#" @onclick:preventDefault="true">
+                                    <i class="feather icon-trash-2 me-2"></i>Remove
                                 </a>
                             </div>
                         </div>
                     </div>
-                    <h5 class="mb-1">@userInfo.UserName</h5>
+                    <h5 class="mb-1 mt-3">@userInfo.UserName</h5>
                 </div>
                 <div class="col-md-8 mt-md-4">
                     <div class="row mb-1">
                         <div class="col-md-6">
                             <a class="mb-1 d-flex align-items-end text-h-primary">
-                                <i class="fa fa-globe mr-2 f-18"></i>@userInfo.Email
+                                <i class="fa fa-globe me-2 f-18"></i>@userInfo.Email
                             </a>
                             <a class="mb-1 d-flex align-items-end text-h-primary">
-                                <i class="fa fa-phone mr-2 f-18"></i>@userInfo.MobileNo
+                                <i class="fa fa-phone me-2 f-18"></i>@userInfo.MobileNo
                             </a>
                         </div>
                         <div class="col-md-6">
                             <div class="media">
-                                <i class="fa fa-map-marker mr-2 mt-1 f-18"></i>
+                                <i class="fa fa-map-marker me-2 mt-1 f-18"></i>
                                 <div class="media-body">
                                     @userInfo.Address
                                 </div>
@@ -89,13 +177,13 @@
 
                     <ul class="nav nav-tabs profile-tabs nav-fill" id="myTab" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">
-                                <i class="feather icon-user mr-2"></i>Profile
+                            <a class="nav-link active" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">
+                                <i class="feather icon-user me-2"></i>Profile
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" id="contact-tab" data-bs-toggle="tab" href="#chnagepwd" role="tab" aria-controls="contact" aria-selected="false">
-                                <i class="feather icon-phone mr-2"></i>Change Password
+                                <i class="feather icon-phone me-2"></i>Change Password
                             </a>
                         </li>
                     </ul>
@@ -263,21 +351,16 @@
     </div>
 </div>
 
-
-
 @code {
-
     UserInfo userInfo = new();
-
     string userRoles = string.Empty;
-
     ResetPassword changePassword = new();
-
     UserDetailsUpdateParameters userDetailsUpdateParameters = new();
+
     [CascadingParameter]
     protected AlertModel? alert { get; set; }
-    private List<ClientBreadcrumbItem> breadcrumbItems = new();
 
+    private List<ClientBreadcrumbItem> breadcrumbItems = new();
     private string imageDataUrl;
     private string BgimageDataUrl;
     private UserProfilePicUpld profilePic { get; set; } = new UserProfilePicUpld();
@@ -287,7 +370,6 @@
     bool IsSuccess = false;
     bool TaskCompleted = false;
     bool Loading = false;
-
     bool showPasswordChange = false;
     bool showProfileChange = false;
 
@@ -316,12 +398,9 @@
         userDetailsUpdateParameters.NewDob = userInfo.Dob;
         userDetailsUpdateParameters.NewAddress = userInfo.Address;
 
-
-
         profilePic = await client.GetProfilePicByEmail(userInfo.Email);
         if (profilePic != null)
         {
-
             if (profilePic.ProfileImage != null && profilePic.ProfileImage.Length > 0)
             {
                 imageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(profilePic.ProfileImage)}";
@@ -363,6 +442,7 @@
         Title = "Change Password";
         StateHasChanged();
     }
+
     public void OnProfileEditClick()
     {
         show = true;
@@ -385,54 +465,44 @@
                 userInfo.UserName = userDetailsUpdateParameters.NewUserName;
                 alert?.SetSuccess(MessageBody);
             }
-
             else
                 alert?.SetError(res.Item2);
             process = false;
 
             StateHasChanged();
             _timer = new Timer(TimerCallback, null, _delay, Timeout.Infinite);
-
-
-
         }
-
         catch (Exception ex)
         {
             alert?.SetError(ex.Message);
         }
-
     }
 
     async Task OnPasswordSubmit()
     {
-
-        //process = true;
         alert?.Clear();
         alert?.SetSuccess("Please wait...");
         try
         {
             var changeedPass = await authStateProvider.ChangePassword(changePassword);
             if (changeedPass.Item1 == true)
-            { alert?.SetSuccess(MessageBody); }
+            {
+                alert?.SetSuccess(MessageBody);
+            }
             else
                 alert?.SetError(changeedPass.Item2);
-            // process = false;
+
             changePassword = new();
             StateHasChanged();
 
             _timer = new Timer(TimerCallback, null, _delay, Timeout.Infinite);
             await BeginSignOut();
-
         }
-
         catch (Exception ex)
         {
             alert?.SetError(ex.Message);
         }
     }
-
-
 
     private void TimerCallback(Object o)
     {
@@ -453,7 +523,6 @@
         Navigation.NavigateTo("/");
     }
 
-
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
         var file = e.File;
@@ -462,29 +531,12 @@
             var buffer = new byte[file.Size];
             await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).ReadAsync(buffer);
 
-
-            // Store the image data in the model
             profilePic.ProfileImage = buffer;
-
-
-
-            // Convert the image to a data URL for preview
             imageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
-
             profilePic.Email = userInfo.Email;
+
             var response = await client.UpsertProfilePicAsync(profilePic);
-
-            // if (response.IsSuccess)
-            // {
-            //     alerts.SetSuccess("Profile Pic Updated Successfully");
-            // }
-            // else
-            // {
-            //     // Handle error, e.g., show an alert to the user
-            //    // alerts.SetError("Failed to update profile image.");
-            // }
-
-            StateHasChanged(); // Ensure the UI is updated
+            StateHasChanged();
         }
     }
 
@@ -496,31 +548,13 @@
             var buffer = new byte[file.Size];
             await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).ReadAsync(buffer);
 
-
-            // Convert the image to a data URL for preview
-
             profilePic.BackgroundImage = buffer;
             profilePic.Email = userInfo.Email;
-
-            // Convert the image to a data URL for preview
             BgimageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
 
-
             var response = await client.UpsertProfilePicAsync(profilePic);
-
-            // if (response.IsSuccess)
-            // {
-            //     alerts.SetSuccess("Background Pic Updated Successfully");
-            // }
-            // else
-            // {
-            //     // Handle error, e.g., show an alert to the user
-            //     //alerts.SetError("Failed to update Background image.");
-            // }
-
-            StateHasChanged(); // Ensure the UI is updated
+            StateHasChanged();
         }
-
     }
 
     private async void RemoveImage()
@@ -530,9 +564,8 @@
         profilePic.removebg = false;
         profilePic.ProfileImage = null;
         profilePic.Email = userInfo.Email;
+
         var responce = await client.DeleteProfBgPic(profilePic);
-
-
         StateHasChanged();
     }
 
@@ -545,8 +578,6 @@
         profilePic.Email = userInfo.Email;
 
         var responce = await client.DeleteProfBgPic(profilePic);
-
-
         StateHasChanged();
     }
 }
