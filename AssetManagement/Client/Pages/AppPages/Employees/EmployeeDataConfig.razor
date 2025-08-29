@@ -1187,13 +1187,16 @@ protected override async Task OnInitializedAsync()
     // ===== ID-DRIVEN PATH =====
     else if (Id > 0)
     {
-        // fetch core model first (unlocks dependent calls)
-        model = await client.GetEmployeeById(Id);
+        // start all independent calls immediately
+        var modelTask      = client.GetEmployeeById(Id);
+        var insuranceTask  = client.GetEmployeeInsuranceById(Id);
+        var skillIdsTask   = client.GetEmployeeSkillsIDs(Id);
+        var filesTask      = GetEmployeeFiles(Id);
 
-        // launch dependent calls in parallel
-        var insuranceTask   = client.GetEmployeeInsuranceById(Id);
-        var skillIdsTask    = client.GetEmployeeSkillsIDs(Id);
-        var filesTask       = GetEmployeeFiles(Id);
+        // fetch core model first (unlocks dependent calls)
+        model = await modelTask;
+
+        // dependent calls
         var searchPinTask   = SeachPin(); // uses model.VendorPincode
 
         Task sharepointTask = Task.CompletedTask;
