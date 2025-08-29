@@ -1061,148 +1061,220 @@
     string ProfilePicView = string.Empty;
     string ResumeView = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        breadcrumbItems = new()
-        {
-            new ClientBreadcrumbItem { Text = "Home", Url = "/" },
-            new ClientBreadcrumbItem { Text = Title, IsActive = true }
-        };
-        Onload = true;
-        BaseUri = NavigationManager.BaseUri;
+// --- paste into your @code block ---
 
-        var skillTask = client.GetAllSkill();
-        var companyTask = client.GetAllCompany();
-        var employeeTask = client.GetAllEmployee();
-        var designationTask = client.GetAllDesignations();
-        var vendorTask = client.getAllVendordetail();
+protected override async Task OnInitializedAsync()
+{
+    Onload = true;
+    BaseUri = NavigationManager.BaseUri;
 
-        await Task.WhenAll(skillTask, companyTask, employeeTask, designationTask, vendorTask);
+    // Kick off independent bootstraps in parallel
+    var skillTask       = client.GetAllSkill();
+    var companyTask     = client.GetAllCompany();
+    var employeeTask    = client.GetAllEmployee();
+    var designationTask = client.GetAllDesignations();
+    var vendorTask      = client.getAllVendordetail();
 
-        SkillOptions = new List<EmployeeSkills>(skillTask.Result);
-        company = new List<Company>(companyTask.Result);
-        employee = new List<Employee>(employeeTask.Result);
-        designation = new List<DesignationDTO>(designationTask.Result);
-        vendordata = vendorTask.Result;
+    await Task.WhenAll(skillTask, companyTask, employeeTask, designationTask, vendorTask);
 
+    // Materialize once
+    SkillOptions = (skillTask.Result ?? Enumerable.Empty<EmployeeSkills>()).ToList();
+    company      = (companyTask.Result ?? Enumerable.Empty<Company>()).ToList();
+    employee     = (employeeTask.Result ?? Enumerable.Empty<Employee>()).ToList();
+    designation  = (designationTask.Result ?? Enumerable.Empty<DesignationDTO>()).ToList();
+    vendordata   = vendorTask.Result ?? new List<EntityVendorDto>();
+
+    // Fast lookups for later
+    var employeeById    = employee
+        .Where(e => !string.IsNullOrWhiteSpace(e.EmployeeId))
+        .GroupBy(e => e.EmployeeId)
+        .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+
+    var employeeByEmail = employee
+        .Where(e => !string.IsNullOrWhiteSpace(e.EmailId))
+        .GroupBy(e => e.EmailId)
+        .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+    var designationByName = designation
+        .Where(d => !string.IsNullOrWhiteSpace(d.Designation))
+        .GroupBy(d => d.Designation)
+        .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+    if (EmployeeInsurance.Count == 0)
         EmployeeInsurance.Add(new EmployeeInsurance());
-        if (Key != null)
+
+    // ===== KEY-DRIVEN PATH =====
+    if (!string.IsNullOrWhiteSpace(Key))
+    {
+        var response = await client.GetOnboardingDataByKey(Key);
+        if (response?.IsSuccess == true && response.Result is { } data)
         {
-            var responce = await client.GetOnboardingDataByKey(Key);
-            if (responce.IsSuccess)
-            {
-                var data = responce.Result;
-                if (data != null)
-                {
-                    employeeOnboardingDto = data;
-                    model.CompanyCode = data.CompanyCode;
-                    model.EmployeeName = data.Name;
-                    model.fatherName = data.fatherName;
-                    model.EmergencyContactNumber = data.EmergencyContactNumber;
-                    model.MobileNumber = data.MobileNumber;
-                    model.DateOfBirth = data.DateOfBirth;
-                    model.AadhaarNumber = data.AadhaarNumber;
-                    model.PANNumber = data.PANNumber;
-                    model.UANNo = data.UANNo;
-                    model.EmployeeEducation = data.EmployeeGraduation;
-                    model.EmployeeEducationDetails = data.EmployeeEducationDetails;
-                    model.PermanentAddress = data.PermanentAddress;
-                    model.PCountry = data.PCountry;
-                    model.PState = data.PState;
-                    // model.DeputationCompanyStatus = data.DeputationCompanyStatus;
-                    // model.vendorName = data.vendorName;
-                    // model.vendorLocation = data.vendorLocation;
-                    model.PPin = data.PPin;
-                    model.checkbox = data.checkbox;
-                    model.CurrentAddress = data.CurrentAddress;
-                    model.CCountry = data.CCountry;
-                    model.CState = data.CState;
-                    model.CPin = data.CPin;
-                    model.EmpBankName = data.EmpBankName;
-                    model.EmpAccountName = data.EmpAccountName;
-                    model.EmpBankAccNumber = data.EmpBankAccNumber;
-                    model.EmpBankIfsc = data.EmpBankIfsc;
-                    model.Designation = data.Designation;
-                    model.ReportingTo = data.ReportingTo;
-                    model.Reference = data.Reference;
-                    selectedManager = employee.FirstOrDefault(x => x.EmployeeId == data.ReportingTo);
-                    selectedReference = employee.FirstOrDefault(x => x.EmployeeId == data.Reference);
-                    selectedDesigantion = designation.FirstOrDefault(x => x.Designation == data.Designation);
-                    model.EmailId = data.ExternalEmailId;
-                    model.ExternalEmailId = data.ExternalEmailId;
-                    model.EmployeeEducation = data.EmployeeGraduation;
-                    model.OtherSkills = data.OtherSkills;
-                    model.DateOfJoin = date != DateTime.MinValue ? date : DateTime.Now;
+            employeeOnboardingDto               = data;
+            model.CompanyCode                   = data.CompanyCode;
+            model.EmployeeName                  = data.Name;
+            model.fatherName                    = data.fatherName;
+            model.EmergencyContactNumber        = data.EmergencyContactNumber;
+            model.MobileNumber                  = data.MobileNumber;
+            model.DateOfBirth                   = data.DateOfBirth;
+            model.AadhaarNumber                 = data.AadhaarNumber;
+            model.PANNumber                     = data.PANNumber;
+            model.UANNo                         = data.UANNo;
+            model.EmployeeEducation             = data.EmployeeGraduation;
+            model.EmployeeEducationDetails      = data.EmployeeEducationDetails;
+            model.PermanentAddress              = data.PermanentAddress;
+            model.PCountry                      = data.PCountry;
+            model.PState                        = data.PState;
+            model.PPin                          = data.PPin;
+            model.checkbox                      = data.checkbox;
+            model.CurrentAddress                = data.CurrentAddress;
+            model.CCountry                      = data.CCountry;
+            model.CState                        = data.CState;
+            model.CPin                          = data.CPin;
+            model.EmpBankName                   = data.EmpBankName;
+            model.EmpAccountName                = data.EmpAccountName;
+            model.EmpBankAccNumber              = data.EmpBankAccNumber;
+            model.EmpBankIfsc                   = data.EmpBankIfsc;
+            model.Designation                   = data.Designation;
+            model.ReportingTo                   = data.ReportingTo;   // string id (consistent with dropdown)
+            model.Reference                     = data.Reference;     // string id
+            model.EmailId                       = data.ExternalEmailId;
+            model.ExternalEmailId               = data.ExternalEmailId;
+            model.OtherSkills                   = data.OtherSkills;
+            model.DateOfJoin                    = (date != DateTime.MinValue ? date : DateTime.Now);
 
-                    if (data.SkillIDs != "")
-                        SelectedSkill = new List<int>(Array.ConvertAll(data.SkillIDs.Split(','), int.Parse));
-                    if (data.AadhaarFile != "")
-                        AdharView = $"{BaseUri}EmployeesZone/{data.AadhaarFile}";
-                    if (data.PanFile != "")
-                        PanView = $"{BaseUri}EmployeesZone/{data.PanFile}";
-                    if (data.BankPassbookFile != "")
-                        BankPassView = $"{BaseUri}EmployeesZone/{data.BankPassbookFile}";
-                    if (data.CertificateFile != "")
-                        CertificateView = $"{BaseUri}EmployeesZone/{data.CertificateFile}";
-                    if (data.ProfilePhotoFile != "")
-                        ProfilePicView = $"{BaseUri}EmployeesZone/{data.ProfilePhotoFile}";
-                    if (data.ResumeFile != "")
-                        ResumeView = $"{BaseUri}EmployeesZone/{data.ResumeFile}";
+            // Selections with O(1) lookups
+            selectedManager     = TryGet(employeeById, data.ReportingTo);
+            selectedReference   = TryGet(employeeById, data.Reference);
+            selectedDesigantion = TryGet(designationByName, data.Designation);
 
-                    if (data.CompanyCode != null)
-                        GetEmployeeId();
-                }
+            // Skills + file previews
+            SelectedSkill = ParseSkillIds(data.SkillIDs);
+            SetViewUrlsFromFiles(BaseUri,
+                aadhaar:  data.AadhaarFile,
+                pan:      data.PanFile,
+                bank:     data.BankPassbookFile,
+                cert:     data.CertificateFile,
+                photo:    data.ProfilePhotoFile,
+                resume:   data.ResumeFile);
 
-            }
+            if (!string.IsNullOrWhiteSpace(data.CompanyCode))
+                GetEmployeeId();
         }
-        if (Id > 0)
+    }
+    // ===== ID-DRIVEN PATH =====
+    else if (Id > 0)
+    {
+        // fetch core model first (unlocks dependent calls)
+        model = await client.GetEmployeeById(Id);
+
+        // launch dependent calls in parallel
+        var insuranceTask   = client.GetEmployeeInsuranceById(Id);
+        var skillIdsTask    = client.GetEmployeeSkillsIDs(Id);
+        var filesTask       = GetEmployeeFiles(Id);
+        var searchPinTask   = SeachPin(); // uses model.VendorPincode
+
+        Task sharepointTask = Task.CompletedTask;
+        if (model.SharepointSync && !string.IsNullOrWhiteSpace(model.AadhaarNumber))
         {
-            model = await client.GetEmployeeById(Id);
-            await SeachPin();
-            var EI = new List<EmployeeInsurance>(await client.GetEmployeeInsuranceById(Id));
-            EmployeeInsurance = EI;
-            employee = employee.Where(x => x.EmailId != model.EmailId).ToList();
-            selectedManager = employee.FirstOrDefault(x => x.EmployeeId == model.ReportingTo);
-            selectedReference = employee.FirstOrDefault(x => x.EmployeeId == model.Reference);
-            selectedDesigantion = designation.FirstOrDefault(x=>x.Designation == model.Designation);
-            var skillOption = await client.GetEmployeeSkillsIDs(Id);
-            SelectedSkill.AddRange(skillOption.Select(tc => tc.EmployeeSkillId));
-            employeeFiles = await GetEmployeeFiles(Id);
-            if (employeeFiles != null)
-            {
-                if (employeeFiles.AadhaarFile != "")
-                    AdharView = $"{BaseUri}EmployeesZone/{employeeFiles.AadhaarFile}";
-                if (employeeFiles.PanFile != "")
-                    PanView = $"{BaseUri}EmployeesZone/{employeeFiles.PanFile}";
-                if (employeeFiles.BankPassbookFile != "")
-                    BankPassView = $"{BaseUri}EmployeesZone/{employeeFiles.BankPassbookFile}";
-                if (employeeFiles.CertificateFile != "")
-                    CertificateView = $"{BaseUri}EmployeesZone/{employeeFiles.CertificateFile}";
-                if (employeeFiles.ProfilePhotoFile != "")
-                    ProfilePicView = $"{BaseUri}EmployeesZone/{employeeFiles.ProfilePhotoFile}";
-                if (employeeFiles.ResumeFile != "")
-                    ResumeView = $"{BaseUri}EmployeesZone/{employeeFiles.ResumeFile}";
-            }
-            if (model.SharepointSync && !string.IsNullOrWhiteSpace(model.AadhaarNumber))
+            sharepointTask = Task.Run(async () =>
             {
                 var listData = await client.GetListItemByEmail(model.AadhaarNumber);
                 model.SharepointPortal = listData.Portal;
-                model.LM = listData.LM;
+                model.LM  = listData.LM;
                 model.EMS = listData.EMS;
                 model.CMS = listData.CMS;
-                selectedLM = employee.FirstOrDefault(x => x.EmailId == listData.LMManagerEmail);
-                selectedLMId = selectedLM?.EmployeeId;
-                selectedEMS = employee.FirstOrDefault(x => x.EmailId == listData.EMSManagerEmail);
-                selectedEmsId = selectedEMS?.EmployeeId;
-            }
 
+                selectedLM  = TryGet(employeeByEmail, listData.LMManagerEmail);
+                selectedLMId = selectedLM?.EmployeeId;
+
+                selectedEMS = TryGet(employeeByEmail, listData.EMSManagerEmail);
+                selectedEmsId = selectedEMS?.EmployeeId;
+            });
         }
-        else
+
+        await Task.WhenAll(insuranceTask, skillIdsTask, filesTask, searchPinTask, sharepointTask);
+
+        EmployeeInsurance = (await insuranceTask)!.ToList();
+
+        // optional filter: drop current user from pickers
+        if (!string.IsNullOrWhiteSpace(model.EmailId))
+            employee = employee.Where(x => !string.Equals(x.EmailId, model.EmailId, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        // Selections via dictionaries
+        selectedManager     = TryGet(employeeById, model.ReportingTo);
+        selectedReference   = TryGet(employeeById, model.Reference);
+        selectedDesigantion = TryGet(designationByName, model.Designation);
+
+        // Skills
+        var skillIds = await skillIdsTask;
+        SelectedSkill = (skillIds ?? Enumerable.Empty<EmployeeSkillMapping>())
+                        .Select(s => s.EmployeeSkillId)
+                        .Distinct()
+                        .ToList();
+
+        // Files
+        employeeFiles = await filesTask;
+        if (employeeFiles is not null)
         {
-            Init();
+            SetViewUrlsFromFiles(BaseUri,
+                aadhaar: employeeFiles.AadhaarFile,
+                pan:     employeeFiles.PanFile,
+                bank:    employeeFiles.BankPassbookFile,
+                cert:    employeeFiles.CertificateFile,
+                photo:   employeeFiles.ProfilePhotoFile,
+                resume:  employeeFiles.ResumeFile);
         }
-        Onload = false;
     }
+    else
+    {
+        Init();
+    }
+
+    // Breadcrumbs (cheap) — set at the end
+    breadcrumbItems = new()
+    {
+        new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+        new ClientBreadcrumbItem { Text = Title, IsActive = true }
+    };
+
+    Onload = false;
+    StateHasChanged();
+}
+
+// ---------- helpers (paste below in the same @code block) ----------
+
+private static List<int> ParseSkillIds(string? csv)
+{
+    if (string.IsNullOrWhiteSpace(csv)) return new List<int>();
+    return csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+              .Select(s => int.TryParse(s, out var id) ? id : (int?)null)
+              .Where(id => id.HasValue)
+              .Select(id => id!.Value)
+              .Distinct()
+              .ToList();
+}
+
+private void SetViewUrlsFromFiles(
+    string baseUri,
+    string? aadhaar = null, string? pan = null, string? bank = null,
+    string? cert = null, string? photo = null, string? resume = null)
+{
+    static string? UrlOrNull(string b, string? f) => string.IsNullOrWhiteSpace(f) ? null : $"{b}EmployeesZone/{f}";
+    AdharView      = UrlOrNull(baseUri, aadhaar)      ?? string.Empty;
+    PanView        = UrlOrNull(baseUri, pan)          ?? string.Empty;
+    BankPassView   = UrlOrNull(baseUri, bank)         ?? string.Empty;
+    CertificateView= UrlOrNull(baseUri, cert)         ?? string.Empty;
+    ProfilePicView = UrlOrNull(baseUri, photo)        ?? string.Empty;
+    ResumeView     = UrlOrNull(baseUri, resume)       ?? string.Empty;
+}
+
+// typed TryGets for different dictionaries
+private static Employee? TryGet(IDictionary<string, Employee> map, string? key)
+    => (!string.IsNullOrWhiteSpace(key) && map.TryGetValue(key, out var v)) ? v : null;
+
+private static DesignationDTO? TryGet(IDictionary<string, DesignationDTO> map, string? key)
+    => (!string.IsNullOrWhiteSpace(key) && map.TryGetValue(key, out var v)) ? v : null;
+
 
     public async Task<EmployeeFilesMapping> GetEmployeeFiles(int id)
     {
