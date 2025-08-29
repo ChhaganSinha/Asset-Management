@@ -152,44 +152,36 @@
                             <InputText id="fatherName" @bind-Value="model.fatherName" class="form-control" />
                             <ValidationMessage For="() => model.fatherName" />
                         </div>
+        
                         <div class="col-md-4">
-                            <label class="form-label bold-font">UAN No</label>
-                            <InputText id="UANNo" @bind-Value="model.UANNo" class="form-control" />
-                            <ValidationMessage For="() => model.UANNo" />
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label bold-font required-field">Email</label>
-                            <InputText id="EmailId" @bind-Value="model.EmailId" class="form-control" />
-                            <ValidationMessage For="() => model.EmailId" />
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button type="button"
-                                    style="width:100%"
-                                    @onclick="() => { EmailRequest = !EmailRequest; }"
-                                    class="btn btn-primary @(EmailRequest ? "disabled" : "")">
-                                @(EmailRequest ? "Request Sent" : "Create Email Request")
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-3">
-                            <label class="form-label bold-font">Emergency Number</label>
-                            <InputText id="EmergencyContactNumber" @bind-Value="model.EmergencyContactNumber" class="form-control" />
-                            <ValidationMessage For="() => model.EmergencyContactNumber" />
-                        </div>
-                        <div class="col-md-3">
                             <label class="form-label bold-font required-field">Date of join</label>
                             <InputDate id="DateOfJoin" @bind-Value="model.DateOfJoin" class="form-control" />
                             <ValidationMessage For="() => model.DateOfJoin" />
                         </div>
-                        <div class="col-md-3">
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label bold-font required-field">Email</label>
+                            <div class="input-group">
+                                <InputText id="EmailId" @bind-Value="model.EmailId" class="form-control" />
+                                <button type="button"
+                                        @onclick="() => { EmailRequest = !EmailRequest; }"
+                                        class="btn btn-primary @(EmailRequest ? "disabled" : "")">
+                                    @(EmailRequest ? "Request Sent" : "Create Email Request")
+                                </button>
+                            </div>
+                            <ValidationMessage For="() => model.EmailId" />
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label bold-font required-field">Mobile</label>
                             <InputText id="MobileNumber" @bind-Value="model.MobileNumber" class="form-control" />
                             <ValidationMessage For="() => model.MobileNumber" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label bold-font">Emergency Number</label>
+                            <InputText id="EmergencyContactNumber" @bind-Value="model.EmergencyContactNumber" class="form-control" />
+                            <ValidationMessage For="() => model.EmergencyContactNumber" />
                         </div>
                     </div>
 
@@ -208,6 +200,11 @@
                             <label class="form-label bold-font">PAN No</label>
                             <InputText id="PANNumber" @bind-Value="model.PANNumber" class="form-control" />
                             <ValidationMessage For="() => model.PANNumber" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label bold-font">UAN No</label>
+                            <InputText id="UANNo" @bind-Value="model.UANNo" class="form-control" />
+                            <ValidationMessage For="() => model.UANNo" />
                         </div>
                     </div>
 
@@ -811,9 +808,11 @@
                     </div>
 
 
-                    <div style="text-align:center;" class="mt-4">
-                        <button type="submit" class="btn btn-success col-md-2">Submit</button>
-                        <button type="button" class="btn btn-danger col-md-2" @onclick="OnClose">Close</button>
+                    <div class="row mt-4">
+                        <div class="col-12 d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn btn-success">Submit</button>
+                            <button type="button" class="btn btn-danger" @onclick="OnClose">Close</button>
+                        </div>
                     </div>
                 </EditForm>
            
