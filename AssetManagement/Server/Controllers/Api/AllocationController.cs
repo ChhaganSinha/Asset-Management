@@ -1,6 +1,7 @@
 using AssetManagement.Dto;
 using AssetManagement.Dto.Models;
 using AssetManagement.Repositories;
+using AssetManagement.Server.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -14,9 +15,11 @@ namespace AssetManagement.Server.Controllers.Api
     public class AllocationController : ControllerBase
     {
         private readonly IAllocationRepository _allocationRepository;
-        public AllocationController(IAllocationRepository allocationRepository)
+        private readonly NotificationService _notificationService;
+        public AllocationController(IAllocationRepository allocationRepository, NotificationService notificationService)
         {
             _allocationRepository = allocationRepository;
+            _notificationService = notificationService;
         }
 
         [HttpGet("{id}")]
@@ -40,7 +43,21 @@ namespace AssetManagement.Server.Controllers.Api
 
         [HttpPost("EmployeeAllocationResponce")]
         [AllowAnonymous]
-        public async Task<ApiResponse<Allocation>> EmployeeAllocationResponce(Allocation data) => await _allocationRepository.EmployeeAllocationResponce(data);
+        public async Task<ApiResponse<Allocation>> EmployeeAllocationResponce(Allocation data)
+        {
+            var result = await _allocationRepository.EmployeeAllocationResponce(data);
+            if (result.IsSuccess)
+            {
+                var status = data.Responce switch
+                {
+                    Responce.Approved => "approved",
+                    Responce.Reject => "rejected",
+                    _ => "updated"
+                };
+                await _notificationService.AddNotification($"Allocation {status} for {data.EmployeeName}");
+            }
+            return result;
+        }
 
         [HttpGet("ShareAllocationDetailsToEmployeeViaEmail/{id}")]
         public async Task<Allocation> ShareAllocationDetailsToEmployeeViaEmail(int id) => await _allocationRepository.ShareAllocationDetailsToEmployeeViaEmail(id);

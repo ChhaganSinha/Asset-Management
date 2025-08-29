@@ -1,6 +1,10 @@
-﻿@inject IJSRuntime JSRuntime
+@inject IJSRuntime JSRuntime
 @inject IdentityAuthenticationStateProvider authStateProvider
 @inject NavigationManager Navigation
+@inject HttpClient HttpClient
+@using Microsoft.AspNetCore.SignalR.Client
+@using AssetManagement.Dto.Models
+@using System.Net.Http.Json
 
 <div class="header borderd">
     <div class="d-flex align-items-center">
@@ -9,7 +13,28 @@
     </div>
     <div class="icons">
         <i class="fa @(ToggleScreen ? "fa-compress" : "fa-expand")" style="color:darkslategray" id="fullscreen-toggle" title="Toggle Full Screen" @onclick="ToggleFullScreen"></i>
-        <i class="fa fa-bell" style="color:blue" title="Notification"></i>
+        <div class="dropdown d-inline-block">
+            <span class="position-relative">
+                <i class="fa fa-bell dropdown-toggle" data-bs-toggle="dropdown" style="color:blue" title="Notification"></i>
+                @if (UnreadCount > 0)
+                {
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">@UnreadCount</span>
+                }
+            </span>
+            <ul class="dropdown-menu dropdown-menu-end">
+                @if (notifications.Count == 0)
+                {
+                    <li class="dropdown-item text-muted">No notifications</li>
+                }
+                else
+                {
+                    @foreach (var note in notifications)
+                    {
+                        <li class="dropdown-item">@note.Message</li>
+                    }
+                }
+            </ul>
+        </div>
         <i class="fa @(DarkMode ? "fa-moon-o" : "fa-sun-o")" style="color:@(DarkMode ? "white" : "gold")" id="theme-toggle" title="Light/Dark Mode" @onclick="ToggleMode"></i>
         <div class="dropdown d-inline-block">
             <i class="fa fa-user-circle dropdown-toggle" data-bs-toggle="dropdown"></i>
@@ -27,6 +52,9 @@
 
     private bool DarkMode = false;
     private bool ToggleScreen = false;
+    private HubConnection? hubConnection;
+    private List<Notification> notifications = new();
+    private int UnreadCount => notifications.Count(n => !n.IsRead);
 
     [Parameter]
     public EventCallback OnModeToggle { get; set; }
@@ -46,7 +74,27 @@
             await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "dark-mode");
         }
 
+        try
+        {
+            notifications = await HttpClient.GetFromJsonAsync<List<Notification>>("api/Notification") ?? new();
+        }
+        catch
+        {
+            notifications = new();
+        }
 
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/notificationHub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<Notification>("ReceiveNotification", (note) =>
+        {
+            notifications.Insert(0, note);
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
     }
 
     private async Task ToggleSidebar()
@@ -82,4 +130,6 @@
         await authStateProvider.Logout();
         Navigation.NavigateTo("/");
     }
+
+    public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
 }
