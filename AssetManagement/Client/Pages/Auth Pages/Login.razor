@@ -44,6 +44,11 @@
                 <p class="text-danger mt-2">@error</p>
             </EditForm>
 
+            <!-- Microsoft SSO Button -->
+            <div class="mt-3">
+                <button type="button" class="btn btn-outline-secondary w-100" @onclick="MicrosoftLogin">Sign in with Microsoft</button>
+            </div>
+
             <!-- Forgot Password and Signup Links -->
             <div class="text-center mt-3">
                 <p class="mb-1">
@@ -77,6 +82,11 @@
         {
             error = ex.Message;
         }
+    }
+
+    private void MicrosoftLogin()
+    {
+        navigationManager.NavigateTo("api/Authorize/MicrosoftLogin", true);
     }
 
     protected override async Task OnInitializedAsync()

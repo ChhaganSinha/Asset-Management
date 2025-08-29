@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 using AssetManagement.Server.Service;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,6 +93,15 @@ else
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
+
+// Add Microsoft authentication for SSO
+builder.Services.AddAuthentication()
+    .AddMicrosoftAccount(options =>
+    {
+        options.ClientId = config["Authentication:Microsoft:ClientId"];
+        options.ClientSecret = config["Authentication:Microsoft:ClientSecret"];
+        options.SaveTokens = true;
+    });
 
 // Configure Identity options
 builder.Services.Configure<IdentityOptions>(options =>
