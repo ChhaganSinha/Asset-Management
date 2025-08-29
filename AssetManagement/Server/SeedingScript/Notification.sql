@@ -1,0 +1,7 @@
+﻿CREATE TABLE Notification (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    SenderName TEXT NOT NULL DEFAULT '',
+    Message TEXT NOT NULL DEFAULT '',
+    IsRead INTEGER NOT NULL DEFAULT 0,
+    CreatedOn TEXT NOT NULL DEFAULT (datetime('now'))
+);

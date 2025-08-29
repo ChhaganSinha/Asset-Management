@@ -6,6 +6,256 @@
 @using AssetManagement.Dto.Models
 @using System.Net.Http.Json
 
+<style>
+    .notification-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .notification-bell {
+        position: relative;
+        color: #007bff;
+        font-size: 18px;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+        .notification-bell:hover {
+            color: #0056b3;
+        }
+
+    .notification-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        border-radius: 50%;
+        min-width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+        animation: pulse 2s infinite;
+        border: 2px solid white;
+    }
+
+    @@keyframes pulse {
+        0%
+
+    {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+    }
+
+    .notification-dropdown-menu {
+        width: 350px;
+        max-height: 400px;
+        overflow-y: auto;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        border-radius: 12px;
+        padding: 0;
+        margin-top: 8px;
+    }
+
+    .notification-header {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+        padding: 15px 20px;
+        font-weight: 600;
+        font-size: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .notification-actions {
+        display: flex;
+        gap: 15px;
+        font-size: 12px;
+    }
+
+        .notification-actions a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+        }
+
+            .notification-actions a:hover {
+                opacity: 1;
+                text-decoration: underline;
+            }
+
+    .notification-content {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .notification-section {
+        padding: 12px 20px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 12px;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .notification-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9ecef;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+
+        .notification-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification-item.unread {
+            background-color: #e3f2fd;
+            border-left: 3px solid #2196f3;
+        }
+
+    .notification-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 12px;
+        flex-shrink: 0;
+        background: #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .notification-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .notification-name {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 2px;
+        font-size: 14px;
+    }
+
+    .notification-message {
+        color: #6c757d;
+        font-size: 13px;
+        line-height: 1.4;
+        margin-bottom: 4px;
+    }
+
+    .notification-time {
+        color: #adb5bd;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .notification-empty {
+        padding: 40px 20px;
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .show-all-link {
+        display: block;
+        padding: 15px 20px;
+        text-align: center;
+        background: #f8f9fa;
+        color: #6c757d;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 0 0 12px 12px;
+        transition: background-color 0.2s ease;
+    }
+
+        .show-all-link:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+    /* Dark mode styles */
+    body.dark-mode .notification-dropdown-menu {
+        background: #343a40;
+        color: #fff;
+    }
+
+    body.dark-mode .notification-header {
+        background: linear-gradient(135deg, #495057, #343a40);
+    }
+
+    body.dark-mode .notification-section {
+        background: #495057;
+        color: #adb5bd;
+        border-bottom-color: #495057;
+    }
+
+    body.dark-mode .notification-item {
+        border-bottom-color: #495057;
+        color: #fff;
+    }
+
+        body.dark-mode .notification-item:hover {
+            background-color: #495057;
+        }
+
+        body.dark-mode .notification-item.unread {
+            background-color: #1a365d;
+            border-left-color: #3182ce;
+        }
+
+    body.dark-mode .notification-avatar {
+        background: #495057;
+        color: #adb5bd;
+    }
+
+    body.dark-mode .notification-name {
+        color: #fff;
+    }
+
+    body.dark-mode .notification-message {
+        color: #adb5bd;
+    }
+
+    body.dark-mode .show-all-link {
+        background: #495057;
+        color: #adb5bd;
+    }
+
+        body.dark-mode .show-all-link:hover {
+            background: #6c757d;
+            color: #fff;
+        }
+</style>
+
 <div class="header borderd">
     <div class="d-flex align-items-center">
         <button class="btn btn-dark me-3" id="menu-toggle" @onclick="ToggleSidebar"><i class="fa fa-bars"></i></button>
@@ -13,28 +263,86 @@
     </div>
     <div class="icons">
         <i class="fa @(ToggleScreen ? "fa-compress" : "fa-expand")" style="color:darkslategray" id="fullscreen-toggle" title="Toggle Full Screen" @onclick="ToggleFullScreen"></i>
-        <div class="dropdown d-inline-block">
-            <span class="position-relative">
-                <i class="fa fa-bell dropdown-toggle" data-bs-toggle="dropdown" style="color:blue" title="Notification"></i>
+
+        <div class="notification-dropdown">
+            <span class="notification-bell" data-bs-toggle="dropdown" title="Notifications">
+                <i class="fa fa-bell"></i>
                 @if (UnreadCount > 0)
                 {
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">@UnreadCount</span>
+                    <span class="notification-badge">@UnreadCount</span>
                 }
             </span>
-            <ul class="dropdown-menu dropdown-menu-end">
-                @if (notifications.Count == 0)
-                {
-                    <li class="dropdown-item text-muted">No notifications</li>
-                }
-                else
-                {
-                    @foreach (var note in notifications)
+            <div class="dropdown-menu dropdown-menu-end notification-dropdown-menu">
+                <div class="notification-header">
+                    <span>Notifications</span>
+                    <div class="notification-actions">
+                        <a href="#" @onclick="MarkAllAsRead" @onclick:preventDefault="true">mark as read</a>
+                        <a href="#" @onclick="ClearAllNotifications" @onclick:preventDefault="true">clear all</a>
+                    </div>
+                </div>
+
+                <div class="notification-content">
+                    @if (notifications.Count == 0)
                     {
-                        <li class="dropdown-item">@note.Message</li>
+                        <div class="notification-empty">
+                            No notifications
+                        </div>
                     }
+                    else
+                    {
+                        @* New Notifications *@
+                        @if (notifications.Any(n => !n.IsRead))
+                        {
+                            <div class="notification-section">NEW</div>
+                            @foreach (var note in notifications.Where(n => !n.IsRead).Take(3))
+                            {
+                                <div class="notification-item unread">
+                                    <div class="notification-avatar">
+                                        @GetInitials(note.SenderName ?? "Unknown")
+                                    </div>
+                                    <div class="notification-details">
+                                        <div class="notification-name">@(note.SenderName ?? "Unknown User")</div>
+                                        <div class="notification-message">@note.Message</div>
+                                        <div class="notification-time">
+                                            <i class="fa fa-clock-o"></i>
+                                            @GetTimeAgo(note.CreatedOn)
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                        @* Earlier Notifications *@
+                        @if (notifications.Any(n => n.IsRead))
+                        {
+                            <div class="notification-section">EARLIER</div>
+                            @foreach (var note in notifications.Where(n => n.IsRead).Take(3))
+                            {
+                                <div class="notification-item">
+                                    <div class="notification-avatar">
+                                        @GetInitials(note.SenderName ?? "Unknown")
+                                    </div>
+                                    <div class="notification-details">
+                                        <div class="notification-name">@(note.SenderName ?? "Unknown User")</div>
+                                        <div class="notification-message">@note.Message</div>
+                                        <div class="notification-time">
+                                            <i class="fa fa-clock-o"></i>
+                                            @GetTimeAgo(note.CreatedOn)
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+
+                @if (notifications.Count > 0)
+                {
+                    <a href="/notifications" class="show-all-link">show all</a>
                 }
-            </ul>
+            </div>
         </div>
+
         <i class="fa @(DarkMode ? "fa-moon-o" : "fa-sun-o")" style="color:@(DarkMode ? "white" : "gold")" id="theme-toggle" title="Light/Dark Mode" @onclick="ToggleMode"></i>
         <div class="dropdown d-inline-block">
             <i class="fa fa-user-circle dropdown-toggle" data-bs-toggle="dropdown"></i>
@@ -129,6 +437,64 @@
     {
         await authStateProvider.Logout();
         Navigation.NavigateTo("/");
+    }
+
+    private async Task MarkAllAsRead()
+    {
+        try
+        {
+            await HttpClient.PostAsync("api/Notification/mark-all-read", null);
+            foreach (var notification in notifications)
+            {
+                notification.IsRead = true;
+            }
+            StateHasChanged();
+        }
+        catch
+        {
+            // Handle error
+        }
+    }
+
+    private async Task ClearAllNotifications()
+    {
+        try
+        {
+            await HttpClient.DeleteAsync("api/Notification/clear-all");
+            notifications.Clear();
+            StateHasChanged();
+        }
+        catch
+        {
+            // Handle error
+        }
+    }
+
+    private string GetInitials(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return "?";
+
+        var words = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length >= 2)
+            return $"{words[0][0]}{words[1][0]}".ToUpper();
+
+        return words[0][0].ToString().ToUpper();
+    }
+
+    private string GetTimeAgo(DateTime createdAt)
+    {
+        var timeSpan = DateTime.Now - createdAt;
+
+        if (timeSpan.TotalMinutes < 1)
+            return "just now";
+        if (timeSpan.TotalMinutes < 60)
+            return $"{(int)timeSpan.TotalMinutes} min";
+        if (timeSpan.TotalHours < 24)
+            return $"{(int)timeSpan.TotalHours}h";
+        if (timeSpan.TotalDays < 7)
+            return $"{(int)timeSpan.TotalDays}d";
+
+        return createdAt.ToString("MMM dd");
     }
 
     public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
