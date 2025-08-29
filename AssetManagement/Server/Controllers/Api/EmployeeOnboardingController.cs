@@ -2,6 +2,7 @@ using AssetManagement.Dto;
 using AssetManagement.Dto.Models;
 using AssetManagement.Repositories;
 using AssetManagement.Server.EmailService;
+using AssetManagement.Server.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
@@ -16,11 +17,13 @@ namespace AssetManagement.Server.Controllers.Api
         private readonly IEmployeeOnboardingRepository _repository;
         private readonly IMailService _mailService;
         private readonly IWebHostEnvironment _env;
-        public EmployeeOnboardingController(IEmployeeOnboardingRepository repository, IMailService mailService, IWebHostEnvironment env)
+        private readonly NotificationService _notificationService;
+        public EmployeeOnboardingController(IEmployeeOnboardingRepository repository, IMailService mailService, IWebHostEnvironment env, NotificationService notificationService)
         {
             _repository = repository;
             _mailService = mailService;
             _env = env;
+            _notificationService = notificationService;
         }
 
         [HttpGet("{key}")]
@@ -59,6 +62,7 @@ namespace AssetManagement.Server.Controllers.Api
                     .Replace("<###ManagerName###>", result.Result.ReportingTo)
                     .Replace("<###ManagerMobile###>", result.Result.ManagerMobile);
                 await _mailService.SendEmailAsync(result.Result.ExternalEmailId, "AssetManagement Application Onboarding Form", contents);
+                await _notificationService.AddNotification($"Onboarding form submitted by {result.Result.Name}");
             }
             return result;
         }

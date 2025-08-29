@@ -35,6 +35,7 @@ namespace AssetManagement.DataContext
         public DbSet<EmployeeOnboardingDto> EmployeeOnboarding { get; set; }
 
         public DbSet<EmployeeInsurance> EmployeeInsurance { get; set; }
+        public DbSet<Notification> Notification { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
