@@ -54,8 +54,7 @@ namespace AssetManagement.Client.Client
                 var res = await HttpClient.GetAsync($"api/App/GetProfilePicByEmail/{email}");
                 if (res.IsSuccessStatusCode)
                 {
-                    data = await res.Content.ReadFromJsonAsync<UserProfilePicUpld>();
-
+                    data = await ReadFromJsonAsyncSafe<UserProfilePicUpld>(res);
                 }
                 else
                 {
