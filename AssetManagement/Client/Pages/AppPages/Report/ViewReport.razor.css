@@ -1,0 +1,21 @@
+.report-form .form-label,
+.report-form .form-check-label {
+    font-weight: 600;
+}
+
+.report-form .form-check-input {
+    cursor: pointer;
+}
+
+.report-form .form-check {
+    margin-right: 1rem;
+}
+
+.report-form .btn {
+    min-width: 90px;
+    font-weight: 600;
+}
+
+.report-form .btn + .btn {
+    margin-left: 0.5rem;
+}

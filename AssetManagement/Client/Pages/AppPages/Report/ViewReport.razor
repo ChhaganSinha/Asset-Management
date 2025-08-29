@@ -17,12 +17,12 @@
 
 <Breadcrumb Items="breadcrumbItems" />
 
-<div class="card-body">
+<div class="card-body report-form">
 
     <div class="form-group row m-0">
         <label class="col-form-label col-md-2 bold-font" style="line-height: 34px;">Report Type</label>
         <div class="col-md-10">
-            <InputRadioGroup @bind-Value="SelectedOption" class="d-flex" @oninput="OnRadioChange">
+            <InputRadioGroup @bind-Value="SelectedOption" class="d-flex flex-wrap align-items-center" @oninput="OnRadioChange">
                 <div class="form-check me-3">
                     <InputRadio class="form-check-input" Value="Employees" id="optEmployee" />
                     <label class="form-check-label" for="optEmployee">Employee</label>
@@ -75,7 +75,7 @@
                     </div>
                     <div class="form-group row" style="padding:4px">
                         <div class="col-md-10">
-                            <InputRadioGroup @bind-Value="selectedEmployeeStatus" class="d-flex" @oninput="OnStatusChange">
+                            <InputRadioGroup @bind-Value="selectedEmployeeStatus" class="d-flex flex-wrap align-items-center" @oninput="OnStatusChange">
                                 <div class="form-check me-3">
                                     <InputRadio class="form-check-input" Value="All" id="statusAll" />
                                     <label class="form-check-label" for="statusAll">All Employee</label>
@@ -138,8 +138,8 @@
 
                     </div>
 
-                    <button type="button" class="btn btn-primary btn-sm" @onclick="ViewReportData">View</button>
-                    <button type="button" class="btn btn-danger btn-sm" @onclick="ClearFilter">Clear</button>
+                    <button type="button" class="btn btn-primary me-2" @onclick="ViewReportData">View</button>
+                    <button type="button" class="btn btn-danger" @onclick="ClearFilter">Clear</button>
                 </EditForm>
             </div>
         }
@@ -210,8 +210,8 @@
 
                     </div>
 
-                    <button type="button" class="btn btn-primary btn-sm" @onclick="ViewReportData">View</button>
-                    <button type="button" class="btn btn-danger btn-sm" @onclick="ClearAssetFilter">Clear</button>
+                    <button type="button" class="btn btn-primary me-2" @onclick="ViewReportData">View</button>
+                    <button type="button" class="btn btn-danger" @onclick="ClearAssetFilter">Clear</button>
                 </EditForm>
             </div>
         }
