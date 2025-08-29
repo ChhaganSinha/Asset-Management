@@ -67,6 +67,64 @@ namespace AssetManagement.Server.Controllers.Api
             return Ok();
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult MicrosoftLogin(string returnUrl = "/")
+        {
+            var redirectUrl = Url.Action(nameof(MicrosoftResponse), new { ReturnUrl = returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Microsoft", redirectUrl);
+            return Challenge(properties, "Microsoft");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> MicrosoftResponse(string returnUrl = "/")
+        {
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return Redirect("/login");
+            }
+
+            var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
+            if (signInResult.Succeeded)
+            {
+                return LocalRedirect(returnUrl);
+            }
+
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Email not provided by external provider.");
+            }
+
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                IsActive = true
+            };
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                return BadRequest(createResult.Errors.FirstOrDefault()?.Description);
+            }
+
+            await _userManager.AddLoginAsync(user, info);
+
+            var role = await _roleManager.FindByNameAsync("User");
+            if (role == null)
+            {
+                role = new ApplicationRole { Name = "User" };
+                await _roleManager.CreateAsync(role);
+            }
+            await _userManager.AddToRoleAsync(user, "User");
+
+            await _signInManager.SignInAsync(user, false);
+
+            return LocalRedirect(returnUrl);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterParameters parameters)
