@@ -15,88 +15,99 @@
 
 <Breadcrumb Items="breadcrumbItems" />
 
-<div class="card-body report-form">
+<div class="report-form">
 
-    <!-- PILL TABS (replaces radios) -->
-    <ul class="nav nav-pills mb-3" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link @(SelectedOption == "Employeebtn" ? "active" : null)"
+    <!-- HEADER -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+        <div>
+            <h4 class="page-title mb-0">Reports</h4>
+            <div class="text-muted small">Generate Employee & Asset insights with filters</div>
+        </div>
+
+        <!-- PILL TABS -->
+        <div class="btn-group shadow-xs" role="tablist" aria-label="Report type">
+            <button class="btn btn-pill @(SelectedOption == "Employeebtn" ? "btn-primary" : "btn-outline-primary")"
                     type="button" role="tab" aria-selected="@(SelectedOption == "Employeebtn")"
                     @onclick="SwitchToEmployee">
                 Employee
             </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link @(SelectedOption == "Assetbtn" ? "active" : null)"
+            <button class="btn btn-pill @(SelectedOption == "Assetbtn" ? "btn-primary" : "btn-outline-primary")"
                     type="button" role="tab" aria-selected="@(SelectedOption == "Assetbtn")"
                     @onclick="SwitchToAsset">
                 Asset
             </button>
-        </li>
-    </ul>
+        </div>
+    </div>
 
     <!-- FILTERS CARD -->
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="m-0">Filters</h5>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-outline-primary btn-sm" title="View" @onclick="ViewReportData">View</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" title="Clear"
-                            @onclick="@(SelectedOption == "Employeebtn" ? ClearFilter : ClearAssetFilter)">
-                        Clear
-                    </button>
-                </div>
+    <div class="card card-elev border-0">
+        <div class="card-header bg-white d-flex align-items-center justify-content-between">
+            <h5 class="m-0">Filters</h5>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-soft-primary" title="View" @onclick="ViewReportData">
+                    View
+                </button>
+                <button type="button" class="btn btn-soft-secondary" title="Clear"
+                        @onclick="@(SelectedOption == "Employeebtn" ? ClearFilter : ClearAssetFilter)">
+                    Clear
+                </button>
             </div>
+        </div>
 
+        <div class="card-body">
             @if (SelectedOption == "Employeebtn")
             {
                 <EditForm Model="employeeModel">
                     <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label bold-font">Company</label>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">Company</label>
                             <DropdownSelect T="string" @bind-Value="selectedSourceCompanyCode"
                                             DataSource="CompanyDropdown" EmptyText="-- Select Company --" Css="form-select" />
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label bold-font">Job Profile</label>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">Job Profile</label>
                             <DropdownSelect T="string" @bind-Value="selectedJobProfile"
                                             DataSource="JobProfileDropdown" EmptyText="-- Select --" Css="form-select" />
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label bold-font">Manager</label>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">Manager</label>
                             <DropdownSelect T="string" @bind-Value="selectedManager"
                                             DataSource="ManagerDropdown" EmptyText="-- Select --" Css="form-select" />
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label bold-font">Office Branch</label>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">Office Branch</label>
                             <DropdownSelect T="string" @bind-Value="selectedBranch"
                                             DataSource="BranchDropdown" EmptyText="-- Select --" Css="form-select" />
                         </div>
 
-                        <!-- Employee status as a proper radio GROUP to avoid CS0103 -->
+                        <!-- Status -->
                         <div class="col-12">
-                            <label class="form-label bold-font me-3">Status</label>
-                            <InputRadioGroup @bind-Value="selectedEmployeeStatus">
-                                <div class="d-flex flex-wrap gap-3">
-                                    <div class="form-check">
-                                        <InputRadio class="form-check-input" Value="@("All")" id="statusAll" />
-                                        <label class="form-check-label" for="statusAll">All</label>
+                            <label class="form-label fw-semibold me-3">Status</label>
+                            <div class="status-group">
+                                <InputRadioGroup @bind-Value="selectedEmployeeStatus">
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <label class="form-check form-check-inline">
+                                            <InputRadio class="form-check-input" Value="@("All")" />
+                                            <span class="form-check-label">All</span>
+                                        </label>
+                                        <label class="form-check form-check-inline">
+                                            <InputRadio class="form-check-input" Value="@("Active")" />
+                                            <span class="form-check-label">Active</span>
+                                        </label>
+                                        <label class="form-check form-check-inline">
+                                            <InputRadio class="form-check-input" Value="@("Resigned")" />
+                                            <span class="form-check-label">Resigned</span>
+                                        </label>
                                     </div>
-                                    <div class="form-check">
-                                        <InputRadio class="form-check-input" Value="@("Active")" id="statusActive" />
-                                        <label class="form-check-label" for="statusActive">Active</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <InputRadio class="form-check-input" Value="@("Resigned")" id="statusResigned" />
-                                        <label class="form-check-label" for="statusResigned">Resigned</label>
-                                    </div>
-                                </div>
-                            </InputRadioGroup>
+                                </InputRadioGroup>
+                            </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label bold-font">Skills</label>
+                        <div class="col-12 col-lg-4">
+                            <label class="form-label fw-semibold">Skills</label>
                             <HxMultiSelect TItem="string" TValue="string" Data="SkillOptions"
                                            Value="@selectedSkills" ValueChanged="OnSkillsChanged"
                                            ValueExpression="@(() => selectedSkills)"
@@ -108,9 +119,9 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label bold-font">Join Date</label>
-                            <div class="input-group">
+                        <div class="col-12 col-lg-4">
+                            <label class="form-label fw-semibold">Join Date</label>
+                            <div class="input-group input-dates">
                                 <input type="date" class="form-control" @bind="joinDateStart" />
                                 <span class="input-group-text">to</span>
                                 <input type="date" class="form-control" @bind="joinDateEnd" />
@@ -119,9 +130,9 @@
 
                         @if (selectedEmployeeStatus == "Resigned")
                         {
-                            <div class="col-md-4">
-                                <label class="form-label bold-font">Resign Date</label>
-                                <div class="input-group">
+                            <div class="col-12 col-lg-4">
+                                <label class="form-label fw-semibold">Resign Date</label>
+                                <div class="input-group input-dates">
                                     <input type="date" class="form-control" @bind="resignDateStart" />
                                     <span class="input-group-text">to</span>
                                     <input type="date" class="form-control" @bind="resignDateEnd" />
@@ -135,29 +146,32 @@
             {
                 <EditForm Model="employeeModel">
                     <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label bold-font">Company</label>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">Company</label>
                             <DropdownSelect T="string" @bind-Value="selectedSourceCompanyForAssetCode"
                                             DataSource="CompanyDropdown" EmptyText="-- Select Company --" Css="form-select" />
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label bold-font">Asset Type</label>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">Asset Type</label>
                             <DropdownSelect T="string" @bind-Value="selectedAssetType"
                                             DataSource="AssetTypeDropdown" EmptyText="-- Select --" Css="form-select" />
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label bold-font">Brand</label>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">Brand</label>
                             <DropdownSelect T="string" @bind-Value="selectedAssetBrand"
                                             DataSource="AssetBrandDropdown" EmptyText="-- Select --" Css="form-select" />
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label bold-font">Model</label>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">Model</label>
                             <DropdownSelect T="string" @bind-Value="selectedAssetModel"
                                             DataSource="AssetModelDropdown" EmptyText="-- Select --" Css="form-select" />
                         </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label bold-font">Allocation</label>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">Allocation</label>
                             <InputSelect @bind-Value="allocationStatus" class="form-select">
                                 <option value="All">All</option>
                                 <option value="Free">Free</option>
@@ -165,18 +179,18 @@
                             </InputSelect>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label bold-font">Acquire Date</label>
-                            <div class="input-group">
+                        <div class="col-12 col-lg-4">
+                            <label class="form-label fw-semibold">Acquire Date</label>
+                            <div class="input-group input-dates">
                                 <input type="date" class="form-control" @bind="aquireDateStart" />
                                 <span class="input-group-text">to</span>
                                 <input type="date" class="form-control" @bind="aquireDateEnd" />
                             </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label bold-font">Discard Date</label>
-                            <div class="input-group">
+                        <div class="col-12 col-lg-4">
+                            <label class="form-label fw-semibold">Discard Date</label>
+                            <div class="input-group input-dates">
                                 <input type="date" class="form-control" @bind="discardDateStart" />
                                 <span class="input-group-text">to</span>
                                 <input type="date" class="form-control" @bind="discardDateEnd" />
@@ -188,26 +202,36 @@
         </div>
     </div>
 
+    <!-- LOADING OVERLAY -->
+    @if (isLoading)
+    {
+        <div class="loading-overlay">
+            <div class="spinner-border" role="status" aria-label="Loading"></div>
+            <div class="mt-2 small text-muted">Fetching data…</div>
+        </div>
+    }
+
+    <!-- EMPLOYEE REPORT -->
     @if (showReport && SelectedOption == "Employeebtn")
     {
-        <div class="card mt-3 shadow-sm border-0">
+        <div class="card card-elev mt-3 border-0">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="m-0">Employee Report</h6>
                     <small class="text-muted">Filtered results</small>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary">Total: @totalItem</span>
-                    <button type="button" class="btn btn-sm btn-outline-primary" @onclick="OpenExportDialog">Export</button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" @onclick="CloseReport">Close</button>
+                    <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">Total: @totalItem</span>
+                    <button type="button" class="btn btn-soft-primary btn-sm" @onclick="OpenExportDialog">Export</button>
+                    <button type="button" class="btn btn-soft-danger btn-sm" @onclick="CloseReport">Close</button>
                 </div>
             </div>
 
-            <div class="table-responsive" style="overflow:auto; max-height:420px">
-                <table id="printContent" class="table table-striped table-hover align-middle">
-                    <thead class="table-light sticky-top">
-                        <tr class="text-center">
-                            <th>SN.</th>
+            <div class="data-scroll">
+                <table id="printContent" class="table table-modern align-middle">
+                    <thead>
+                        <tr>
+                            <th class="sticky-col">SN.</th>
                             <th>Company</th>
                             <th>EmployeeID</th>
                             <th>Status</th>
@@ -230,7 +254,14 @@
                     <tbody>
                         @if (responceDataOfEmployee?.Count == 0)
                         {
-                            <tr><td colspan="18" class="text-center text-muted py-4">No data found</td></tr>
+                            <tr>
+                                <td colspan="18">
+                                    <div class="empty-state">
+                                        <div class="empty-title">No data found</div>
+                                        <div class="empty-text">Try adjusting filters and click View again.</div>
+                                    </div>
+                                </td>
+                            </tr>
                         }
                         else
                         {
@@ -239,22 +270,33 @@
                             {
                                 counter++;
                                 <tr>
-                                    <td>@counter</td>
+                                    <td class="sticky-col">@counter</td>
                                     <td>@r.CompanyCode</td>
-                                    <td>@r.EmployeeId</td>
-                                    <td>@r.Status</td>
-                                    <td>@r.EmployeeName</td>
-                                    <td>@r.fatherName</td>
-                                    <td>@r.EmailId</td>
-                                    <td>@r.MobileNumber</td>
-                                    <td>@r.AadhaarNumber</td>
-                                    <td>@r.PANNumber</td>
-                                    <td>@r.UANNo</td>
-                                    <td>@r.EmployeeEducation</td>
-                                    <td>@r.Skills</td>
-                                    <td>@r.Designation</td>
+                                    <td class="text-nowrap">@r.EmployeeId</td>
+                                    <td>
+                                        <span class="status-chip @(r.Status == EmployeeStatus.Permanent || r.Status == EmployeeStatus.Probation || r.Status == EmployeeStatus.Temporary
+                                                                              ? "chip-success"
+                                                                              : r.Status == EmployeeStatus.Resigned
+                                                                                  ? "chip-danger"
+                                                                                  : r.Status == EmployeeStatus.Consultant
+                                                                                      ? "chip-primary"
+                                                                                      : "chip-secondary")">
+                                @r.Status
+                            </span>
+                        </td>
+
+                                    <td class="text-truncate-2" title="@r.EmployeeName">@r.EmployeeName</td>
+                                    <td class="text-truncate-2" title="@r.fatherName">@r.fatherName</td>
+                                    <td class="text-truncate" title="@r.EmailId">@r.EmailId</td>
+                                    <td class="text-nowrap">@r.MobileNumber</td>
+                                    <td class="text-nowrap">@r.AadhaarNumber</td>
+                                    <td class="text-nowrap">@r.PANNumber</td>
+                                    <td class="text-nowrap">@r.UANNo</td>
+                                    <td class="text-truncate-2" title="@r.EmployeeEducation">@r.EmployeeEducation</td>
+                                    <td class="text-truncate-2" title="@r.Skills">@r.Skills</td>
+                                    <td class="text-truncate" title="@r.Designation">@r.Designation</td>
                                     <td>@r.DateOfBirth.ToString("dd/MMM/yyyy")</td>
-                                    <td>@r.ReportingTo</td>
+                                    <td class="text-truncate" title="@r.ReportingTo">@r.ReportingTo</td>
                                     <td>@r.DateOfJoin.ToString("dd/MMM/yyyy")</td>
                                     <td>@(r.DateOfLeaving == default ? "" : r.DateOfLeaving.ToString("dd/MMM/yyyy"))</td>
                                 </tr>
@@ -267,26 +309,27 @@
         </div>
     }
 
+    <!-- ASSET REPORT -->
     @if (showReport && SelectedOption == "Assetbtn")
     {
-        <div class="card mt-3 shadow-sm border-0">
+        <div class="card card-elev mt-3 border-0">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="m-0">Asset Report</h6>
                     <small class="text-muted">Filtered results</small>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary">Total: @totalItem</span>
-                    <button type="button" class="btn btn-sm btn-outline-primary" @onclick="OpenExportDialog">Export</button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" @onclick="CloseReport">Close</button>
+                    <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">Total: @totalItem</span>
+                    <button type="button" class="btn btn-soft-primary btn-sm" @onclick="OpenExportDialog">Export</button>
+                    <button type="button" class="btn btn-soft-danger btn-sm" @onclick="CloseReport">Close</button>
                 </div>
             </div>
 
-            <div class="table-responsive" style="overflow:auto; max-height:420px">
-                <table id="printAssetContent" class="table table-striped table-hover align-middle">
-                    <thead class="table-light sticky-top">
-                        <tr class="text-center">
-                            <th>SN.</th>
+            <div class="data-scroll">
+                <table id="printAssetContent" class="table table-modern align-middle">
+                    <thead>
+                        <tr>
+                            <th class="sticky-col">SN.</th>
                             <th>Company</th>
                             <th>Asset Type</th>
                             <th>Brand</th>
@@ -302,7 +345,14 @@
                     <tbody>
                         @if (responceDataOfAsset?.Count == 0)
                         {
-                            <tr><td colspan="11" class="text-center text-muted py-4">No data found</td></tr>
+                            <tr>
+                                <td colspan="11">
+                                    <div class="empty-state">
+                                        <div class="empty-title">No data found</div>
+                                        <div class="empty-text">Try adjusting filters and click View again.</div>
+                                    </div>
+                                </td>
+                            </tr>
                         }
                         else
                         {
@@ -311,15 +361,21 @@
                             {
                                 counter++;
                                 <tr>
-                                    <td>@counter</td>
+                                    <td class="sticky-col">@counter</td>
                                     <td>@r.CompanyCode</td>
                                     <td>@r.AssetType</td>
                                     <td>@r.Brand</td>
                                     <td>@r.Model</td>
-                                    <td>@r.SerialNumber</td>
-                                    <td>@r.Status</td>
-                                    <td>@r.EmployeeName</td>
-                                    <td>@r.EmployeeEmail</td>
+                                    <td class="text-nowrap">@r.SerialNumber</td>
+                                    <td>
+                                        <span class="status-chip @(r.Status == AllocationStatus.Allocated ? "chip-primary" :
+                                                                             r.Status == AllocationStatus.Free ? "chip-success" :
+                                                                             "chip-secondary")">
+                                                                             @r.Status
+                                        </span>
+                                    </td>
+                                    <td class="text-truncate" title="@r.EmployeeName">@r.EmployeeName</td>
+                                    <td class="text-truncate" title="@r.EmployeeEmail">@r.EmployeeEmail</td>
                                     <td>@r.AcquireDate.ToString("dd/MMM/yyyy")</td>
                                     <td>@(r.DiscardDate.HasValue? r.DiscardDate.Value.ToString("dd/MMM/yyyy") : "")</td>
                                 </tr>
@@ -334,18 +390,222 @@
 </div>
 
 <style>
-    .nav-pills .nav-link {
+    /* --- Page polish --- */
+    .page-title {
+        font-weight: 700;
+        letter-spacing: .2px;
+    }
+
+    .btn-pill {
         border-radius: 999px;
         padding: .5rem 1rem;
     }
 
-    .table thead.sticky-top {
-        top: 0;
-        z-index: 1;
+    .btn-soft-primary {
+        background: rgba(13,110,253,.08);
+        color: #0d6efd;
+        border: 1px solid rgba(13,110,253,.2);
     }
 
-    .bold-font {
+        .btn-soft-primary:hover {
+            background: rgba(13,110,253,.12);
+        }
+
+    .btn-soft-secondary {
+        background: rgba(108,117,125,.08);
+        color: #6c757d;
+        border: 1px solid rgba(108,117,125,.2);
+    }
+
+    .btn-soft-danger {
+        background: rgba(220,53,69,.08);
+        color: #dc3545;
+        border: 1px solid rgba(220,53,69,.2);
+    }
+
+    .badge.bg-primary-subtle {
+        background: rgba(13,110,253,.12) !important;
+    }
+
+    .card-elev {
+        border-radius: .8rem;
+        box-shadow: 0 6px 14px rgba(33,37,41,.06);
+    }
+
+    .shadow-xs {
+        box-shadow: 0 2px 8px rgba(33,37,41,.06);
+    }
+
+    .input-dates .input-group-text {
+        min-width: 2.25rem;
+        justify-content: center;
+    }
+
+    /* --- Loading overlay --- */
+    .loading-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,.6);
+        backdrop-filter: blur(2px);
+        z-index: 1050;
+    }
+
+    /* --- Table: modern skin --- */
+    .data-scroll {
+        overflow: auto;
+        max-height: 480px;
+        border-top: 1px solid #eee;
+        border-bottom-left-radius: .8rem;
+        border-bottom-right-radius: .8rem;
+    }
+
+    .table-modern {
+        width: 100%;
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: .925rem;
+        white-space: nowrap;
+    }
+
+        .table-modern thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #f8f9fa;
+            color: #495057;
+            font-weight: 700;
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 2px 0 rgba(0,0,0,.03);
+        }
+
+        /* First column sticks for easier scanning */
+        .table-modern .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            background: #fff;
+            box-shadow: 1px 0 0 rgba(0,0,0,.06);
+            font-weight: 600;
+        }
+
+        .table-modern tbody tr {
+            transition: background-color .15s ease, box-shadow .15s ease;
+        }
+
+            .table-modern tbody tr:hover {
+                background-color: #f8faff;
+            }
+
+        .table-modern td, .table-modern th {
+            padding: .65rem .75rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+    /* Truncation helpers */
+    .text-truncate {
+        max-width: 220px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        max-width: 240px;
+        white-space: normal;
+    }
+
+    /* Status Chips */
+    .status-chip {
+        display: inline-block;
+        padding: .25rem .5rem;
+        border-radius: 999px;
+        font-size: .75rem;
         font-weight: 600;
+        border: 1px solid transparent;
+    }
+
+    .chip-success {
+        background: rgba(25,135,84,.1);
+        color: #198754;
+        border-color: rgba(25,135,84,.25);
+    }
+
+    .chip-danger {
+        background: rgba(220,53,69,.1);
+        color: #dc3545;
+        border-color: rgba(220,53,69,.25);
+    }
+
+    .chip-primary {
+        background: rgba(13,110,253,.1);
+        color: #0d6efd;
+        border-color: rgba(13,110,253,.25);
+    }
+
+    .chip-secondary {
+        background: rgba(108,117,125,.1);
+        color: #6c757d;
+        border-color: rgba(108,117,125,.25);
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 2.25rem 1rem;
+        color: #6c757d;
+    }
+
+    .empty-title {
+        font-weight: 700;
+    }
+
+    .empty-text {
+        font-size: .925rem;
+    }
+
+    /* Gorgeous, subtle cross-browser scrollbars for the data area */
+    .data-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #cfd4da transparent;
+    }
+
+        .data-scroll::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+
+        .data-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .data-scroll::-webkit-scrollbar-thumb {
+            background-color: #cfd4da;
+            border-radius: 999px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+
+        .data-scroll:hover::-webkit-scrollbar-thumb {
+            background-color: #b9bec5;
+        }
+
+    /* Small tone tweaks */
+    .form-label.fw-semibold {
+        margin-bottom: .35rem;
+    }
+
+    .report-form {
+        padding-bottom: 1rem;
     }
 </style>
 
@@ -355,6 +615,7 @@
     // State
     private bool showReport = false;
     private int totalItem = 0;
+    private bool isLoading = false;
 
     // Models and data
     Employee employeeModel = new();
@@ -420,7 +681,7 @@
         asset = new List<Asset>(await client.GetAllAsset());
     }
 
-    // Tab switch (no parameters on the handlers -> avoids CS7036)
+    // Tab switch
     private void SwitchToEmployee() => SwitchTab("Employeebtn");
     private void SwitchToAsset() => SwitchTab("Assetbtn");
     private void SwitchTab(string tab)
@@ -471,46 +732,54 @@
     // Report actions
     public async Task ViewReportData()
     {
+        isLoading = true;
         totalItem = 0;
         showReport = true;
 
-        if (SelectedOption == "Employeebtn")
+        try
         {
-            var employeeFilterModel = new EmployeeFilterModel
+            if (SelectedOption == "Employeebtn")
             {
-                Company = selectedSourceCompanyCode,
-                Designation = selectedJobProfile,
-                ManagerName = selectedManager,
-                BranchOffice = selectedBranch,
-                Location = selectedLocation,
-                Skills = selectedSkills,
-                EmployeeStatus = selectedEmployeeStatus,
-                JoinDateStart = (joinDateStart.HasValue && joinDateEnd.HasValue) ? joinDateStart.Value : default,
-                JoinDateEnd = (joinDateStart.HasValue && joinDateEnd.HasValue) ? joinDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59) : default,
-                ResignDateStart = (resignDateStart.HasValue && resignDateEnd.HasValue) ? resignDateStart.Value : default,
-                ResignDateEnd = (resignDateStart.HasValue && resignDateEnd.HasValue) ? resignDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59) : default
-            };
+                var employeeFilterModel = new EmployeeFilterModel
+                {
+                    Company = selectedSourceCompanyCode,
+                    Designation = selectedJobProfile,
+                    ManagerName = selectedManager,
+                    BranchOffice = selectedBranch,
+                    Location = selectedLocation,
+                    Skills = selectedSkills,
+                    EmployeeStatus = selectedEmployeeStatus,
+                    JoinDateStart = (joinDateStart.HasValue && joinDateEnd.HasValue) ? joinDateStart.Value : default,
+                    JoinDateEnd = (joinDateStart.HasValue && joinDateEnd.HasValue) ? joinDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59) : default,
+                    ResignDateStart = (resignDateStart.HasValue && resignDateEnd.HasValue) ? resignDateStart.Value : default,
+                    ResignDateEnd = (resignDateStart.HasValue && resignDateEnd.HasValue) ? resignDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59) : default
+                };
 
-            responceDataOfEmployee = await client.GetFilteredEmployeeReport(employeeFilterModel);
+                responceDataOfEmployee = await client.GetFilteredEmployeeReport(employeeFilterModel);
+            }
+            else
+            {
+                var assetFilterModel = new AssetFilterModel
+                {
+                    Company = selectedSourceCompanyForAssetCode,
+                    AssetType = selectedAssetType,
+                    Brand = selectedAssetBrand,
+                    Model = selectedAssetModel,
+                    Status = allocationStatus == "Free" ? AllocationStatus.Free
+                            : allocationStatus == "Allocated" ? AllocationStatus.Allocated
+                            : null,
+                    AquireDateStart = (aquireDateStart.HasValue && aquireDateEnd.HasValue) ? aquireDateStart.Value : default,
+                    AquireDateEnd = (aquireDateStart.HasValue && aquireDateEnd.HasValue) ? aquireDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59) : default,
+                    DiscardDateStart = (discardDateStart.HasValue && discardDateEnd.HasValue) ? discardDateStart.Value : default,
+                    DiscardDateEnd = (discardDateStart.HasValue && discardDateEnd.HasValue) ? discardDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59) : default
+                };
+
+                responceDataOfAsset = await client.GetFilteredAssetReport(assetFilterModel);
+            }
         }
-        else // Assetbtn
+        finally
         {
-            var assetFilterModel = new AssetFilterModel
-            {
-                Company = selectedSourceCompanyForAssetCode,
-                AssetType = selectedAssetType,
-                Brand = selectedAssetBrand,
-                Model = selectedAssetModel,
-                Status = allocationStatus == "Free" ? AllocationStatus.Free
-                        : allocationStatus == "Allocated" ? AllocationStatus.Allocated
-                        : null,
-                AquireDateStart = (aquireDateStart.HasValue && aquireDateEnd.HasValue) ? aquireDateStart.Value : default,
-                AquireDateEnd = (aquireDateStart.HasValue && aquireDateEnd.HasValue) ? aquireDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59) : default,
-                DiscardDateStart = (discardDateStart.HasValue && discardDateEnd.HasValue) ? discardDateStart.Value : default,
-                DiscardDateEnd = (discardDateStart.HasValue && discardDateEnd.HasValue) ? discardDateEnd.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59) : default
-            };
-
-            responceDataOfAsset = await client.GetFilteredAssetReport(assetFilterModel);
+            isLoading = false;
         }
     }
 
@@ -544,7 +813,6 @@
     {
         if (SelectedOption == "Employeebtn")
         {
-            // Rebuild current filter to export
             var employeeFilterModel = new EmployeeFilterModel
             {
                 Company = selectedSourceCompanyCode,
