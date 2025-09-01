@@ -1301,7 +1301,23 @@ namespace AssetManagement.Repositories
             {
                 if (data.Id > 0)
                 {
-                    AppDbCxt.Asset.Update(data);
+                    // Retrieve the existing entity so that only the scalar
+                    // values are updated. Using Update() on a detached entity
+                    // causes EF Core to track the entire object graph and may
+                    // attempt to remove related records (e.g. user details),
+                    // which results in the foreign key violation seen when
+                    // saving assets.
+                    var existingAsset = await AppDbCxt.Asset.FirstOrDefaultAsync(a => a.Id == data.Id);
+                    if (existingAsset == null)
+                    {
+                        result.Message = "Asset not found.";
+                        return result;
+                    }
+
+                    // Copy current values from the incoming model to the
+                    // tracked entity. This limits the update to the Asset
+                    // table and avoids unintended deletes of related data.
+                    AppDbCxt.Entry(existingAsset).CurrentValues.SetValues(data);
                 }
                 else
                 {
@@ -1319,7 +1335,7 @@ namespace AssetManagement.Repositories
                     AppDbCxt.Company.Update(company);
                 }
 
-                AppDbCxt.SaveChanges();
+                await AppDbCxt.SaveChangesAsync();
 
                 result.Result = data;
                 result.IsSuccess = true;
