@@ -66,7 +66,7 @@ else
                             </button>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label bold-font required-field">SubType</label>
+                            <label class="form-label bold-font">SubType</label>
                             <InputSelect id="SubAssetType" @bind-Value="model.SubAssetType" class="form-select">
                                 <option>- Select -</option>
                                 @foreach (var st in assetTypeFilter?.SubAssets ?? Enumerable.Empty<SubAsset>())
