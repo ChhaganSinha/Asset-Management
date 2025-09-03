@@ -1297,6 +1297,12 @@ namespace AssetManagement.Repositories
         {
             var result = new ApiResponse<Asset>();
 
+            if (data == null)
+            {
+                result.Message = "Invalid asset data.";
+                return result;
+            }
+
             try
             {
                 if (data.Id > 0)
@@ -1312,9 +1318,28 @@ namespace AssetManagement.Repositories
                         result.Message = $"Duplicate Asset SerialNumber : {data.SerialNumber}";
                         return result;
                     }
+
+                    if (string.IsNullOrWhiteSpace(data.CompanyCode))
+                    {
+                        result.Message = "Company code is required.";
+                        return result;
+                    }
+
+                    var company = await AppDbCxt.Company
+                        .FirstOrDefaultAsync(o => o.CompanyCode == data.CompanyCode);
+
+                    if (company == null)
+                    {
+                        result.Message = $"Company code '{data.CompanyCode}' not found.";
+                        return result;
+                    }
+
+                    // link the asset to the existing company to satisfy the
+                    // foreign key constraint in the Asset table
+                    data.CompanyId = company.Id;
+
                     AppDbCxt.Asset.Add(data);
 
-                    Company company = await AppDbCxt.Company.Where(o => o.CompanyCode == data.CompanyCode).FirstAsync();
                     company.AssetEngazedCount += 1;
                     AppDbCxt.Company.Update(company);
                 }
