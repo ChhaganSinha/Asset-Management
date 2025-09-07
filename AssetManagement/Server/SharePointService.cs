@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using AssetManagement.Dto;
 using Azure.Identity;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Graph;
-using Microsoft.Identity.Client;
 using Org.BouncyCastle.Pqc.Crypto.Lms;
 
 namespace AssetManagement.Server
@@ -25,23 +23,14 @@ namespace AssetManagement.Server
         private readonly string list2Id = "6081f6ff-d7b6-4440-860f-13f54228b576"; //Grant application permission
         public SharePointService()
         {
-            var options = new ClientSecretCredentialOptions()
+            var options = new ClientSecretCredentialOptions
             {
                 AuthorityHost = AzureAuthorityHosts.AzurePublicCloud,
             };
-            IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
-            .Create(clientId)
-            .WithClientSecret(clientSecret)
-            .WithTenantId(tenantId)
-            .Build();
-            var authResult = confidentialClientApplication.AcquireTokenForClient(scopes).ExecuteAsync().Result;
-            //var clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clientSecret, options);
-            var authProvider = new DelegateAuthenticationProvider(req =>
-            {
-                req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResult.AccessToken);
-                return Task.FromResult(0);
-            });
-            _graphClient = new GraphServiceClient(authProvider);
+
+            var clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clientSecret, options);
+
+            _graphClient = new GraphServiceClient(clientSecretCredential, scopes);
         }
 
         public async Task InsertDummyDataIntoListAsync()
