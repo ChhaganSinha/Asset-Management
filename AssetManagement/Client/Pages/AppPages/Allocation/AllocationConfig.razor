@@ -381,6 +381,7 @@ else
         }
         asset = new List<Asset>(await client.GetAllAsset());
         asset = asset.Where(a => a.Status == AllocationStatus.Free && a._AssetStatus == AssetStatus.Active).ToList();
+        OnClose();
     }
 
     private void OnClose() => NavigationManager.NavigateTo("/allocations");

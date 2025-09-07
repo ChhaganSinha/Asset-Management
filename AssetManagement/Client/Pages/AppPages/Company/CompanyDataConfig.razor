@@ -359,13 +359,13 @@ else
 @code {
     [Parameter]
     public int Id { get; set; }
-    
+
     private static bool canView = false;
     private static bool canEdit = false;
     private static bool hasFullAccess = false;
     private bool AddZone = false;
     private List<ClientBreadcrumbItem> breadcrumbItems = new();
-    
+
     public string Title => model?.Id > 0 ? "Modify Company" : "Add Company";
 
     private bool show = false;
@@ -396,9 +396,9 @@ else
             NavigationManager.NavigateTo("/unauthorized");
             return;
         }
-        
+
         Zones = new List<ZoneArea>(await client.GetAllZoneArea());
-        
+
         if (Id > 0)
         {
             model = await client.GetCompanyById(Id);
@@ -418,14 +418,14 @@ else
         MessageBody = "Thank you!";
         show = true;
         TaskCompleted = false;
-        
+
         try
         {
             Message = "Please wait";
             int Id = model.Id;
             model.CompanyCode = model.CompanyCode.ToUpper();
             var response = await client.UpsertCompanyAsync(model);
-            
+
             if (response.IsSuccess)
             {
                 model = response.Result;
@@ -460,6 +460,7 @@ else
         {
             model = new();
         }
+        OnClose();
     }
 
     private void OnClose()

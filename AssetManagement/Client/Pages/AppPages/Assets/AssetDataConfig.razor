@@ -230,6 +230,14 @@ else
         show = true;
         TaskCompleted = false;
 
+         int Id = model.Id;
+            int AssetTypeId = (model.AssetTypeId - 1) ?? 0;
+            if(AssetTypeId >= 0)
+                model.AssetType = assetType[AssetTypeId].Name ?? "NA";
+
+         //model.CompanyId = company.Where(o => o.CompanyCode == model.CompanyCode).Select(o => o.Id).First();
+
+
         var response = await client.UpsertAssetAsync(model);
         if (response.IsSuccess)
         {
@@ -246,7 +254,12 @@ else
     }
 
     private void OnClose() => NavigationManager.NavigateTo("/assets");
-    private void ResetForm() => show = false;
+    private void ResetForm() 
+    {
+        show = false;
+        OnClose();
+    }
+
     private async void ClosePopUp()
     {
         AddAsset = false;
