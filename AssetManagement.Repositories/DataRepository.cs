@@ -1,10 +1,12 @@
 ﻿using AssetManagement.DataContext;
 using AssetManagement.Dto;
 using AssetManagement.Dto.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,14 +20,39 @@ namespace AssetManagement.Repositories
             AppDbCxt = appContext;
         }
 
-        public async Task<ApiResponse<Employee>> GetAllocationByEmail(string email)
+        public async Task<ApiResponse<Allocation>> GetAllocationByEmail(string email)
         {
-            throw new NotImplementedException();
+            var response = new ApiResponse<Allocation>();
+            try
+            {
+                var allocation = await AppDbCxt.Allocation.AsNoTracking().Where(o => o.EmployeeEmail == email).FirstOrDefaultAsync();
+                response.IsSuccess = true;
+                response.Result = allocation;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+            }
+            return response;
         }
 
         public async Task<ApiResponse<Employee>> GetEmployeeByEmail(string email)
         {
-            throw new NotImplementedException();
+            var response = new ApiResponse<Employee>();
+            try
+            {
+                var employee = await AppDbCxt.Employee.AsNoTracking().Where(o => o.EmailId == email).FirstOrDefaultAsync();
+                response.IsSuccess = true;
+                response.Result = employee;
+            }
+            catch (Exception ex) 
+            { 
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+            }
+            return response;
+
         }
 
         public async Task<ApiResponse<Employee>> UpdateEmployee(Employee data)
