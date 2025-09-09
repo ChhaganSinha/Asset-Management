@@ -25,7 +25,7 @@ namespace AssetManagement.Repositories
             var response = new ApiResponse<Allocation>();
             try
             {
-                var allocation = await AppDbCxt.Allocation.AsNoTracking().Where(o => o.EmployeeEmail == email).FirstOrDefaultAsync();
+                var allocation = await AppDbCxt.Allocation.AsNoTracking().FirstOrDefaultAsync(o => o.EmployeeEmail.ToLower() == email.ToLower());
                 response.IsSuccess = true;
                 response.Result = allocation;
             }
@@ -42,7 +42,7 @@ namespace AssetManagement.Repositories
             var response = new ApiResponse<Employee>();
             try
             {
-                var employee = await AppDbCxt.Employee.AsNoTracking().Where(o => o.EmailId == email).FirstOrDefaultAsync();
+                var employee = await AppDbCxt.Employee.AsNoTracking().FirstOrDefaultAsync(o => o.EmailId.ToLower() == email.ToLower());
                 response.IsSuccess = true;
                 response.Result = employee;
             }
