@@ -1,9 +1,13 @@
-name: Build & Deploy (Blazor WASM Hosted)
+name: Build & Deploy (AssetManagement)
 
 on:
   push:
-    branches: [ "main" ]   # adjust as needed
+    branches: [ "master" ]
   workflow_dispatch:
+
+concurrency:
+  group: assetmanagement-deploy
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
@@ -11,14 +15,9 @@ jobs:
 
     env:
       DOTNET_VERSION: "9.0.x"
-      SERVER_DIR: "/var/www/myapp"
-      SERVICE_NAME: "myapp"
-      SERVER_HOST: ${{ secrets.SSH_HOST }}
-      SERVER_USER: ${{ secrets.SSH_USER }}
-      SSH_KEY: ${{ secrets.SSH_KEY }}
-      SSH_PORT: ${{ secrets.SSH_PORT }}
-      # If your Server project folder is "MyApp.Server":
-      SERVER_PROJECT_PATH: "src/MyApp.Server/MyApp.Server.csproj"  # <-- set this correctly
+      SERVICE_NAME: "assetmanagement"
+      SERVER_DIR: "/var/Apps/AssetManagement"
+      SERVER_PROJECT_PATH: "AssetManagement/Server/AssetManagement.Server.csproj"
 
     steps:
       - name: Checkout
@@ -29,42 +28,65 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Restore
         run: dotnet restore
 
+      # Publishing the Server project also builds the Client and places it under wwwroot
       - name: Publish (Server)
-        run: dotnet publish ${{ env.SERVER_PROJECT_PATH }} -c Release -o published
-
-      # Optional: run backend tests
-      # - name: Test
-      #   run: dotnet test --no-build --verbosity normal
+        run: dotnet publish "${{ env.SERVER_PROJECT_PATH }}" -c Release -o published
 
       - name: Create deploy archive
         run: |
           cd published
           tar -czf ../deploy.tar.gz .
 
-      - name: Copy to server
+      - name: Copy bundle to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ env.SERVER_HOST }}
-          username: ${{ env.SERVER_USER }}
-          key: ${{ env.SSH_KEY }}
-          port: ${{ env.SSH_PORT }}
+          host: ${{ secrets.SSH_HOST }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
           source: "deploy.tar.gz"
-          target: "/home/${{ env.SERVER_USER }}/"
+          target: "/root/"
 
-      - name: Deploy on server
+      - name: Deploy & restart service on VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ env.SERVER_HOST }}
-          username: ${{ env.SERVER_USER }}
-          key: ${{ env.SSH_KEY }}
-          port: ${{ env.SSH_PORT }}
+          host: ${{ secrets.SSH_HOST }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
           script: |
-            set -e
-            mkdir -p $SERVER_DIR
-            tar -xzf /home/${{ env.SERVER_USER }}/deploy.tar.gz -C $SERVER_DIR
-            rm -f /home/${{ env.SERVER_USER }}/deploy.tar.gz
-            sudo systemctl restart $SERVICE_NAME
-            sudo systemctl status $SERVICE_NAME --no-pager -l
+            set -euo pipefail
+            SERVER_DIR="${{ env.SERVER_DIR }}"
+            SERVICE_NAME="${{ env.SERVICE_NAME }}"
+
+            mkdir -p "$SERVER_DIR"
+
+            # Optional backup of current release (keep one)
+            if [ -d "$SERVER_DIR" ]; then
+              ts=$(date +%Y%m%d-%H%M%S)
+              mkdir -p /var/backups/assetmanagement
+              tar -czf "/var/backups/assetmanagement/release-$ts.tgz" -C "$SERVER_DIR" .
+            fi
+
+            # Unpack new release
+            tar -xzf /root/deploy.tar.gz -C "$SERVER_DIR"
+            rm -f /root/deploy.tar.gz
+
+            # Ensure systemd picks up any unit changes and restart app
+            systemctl daemon-reload
+            systemctl restart "$SERVICE_NAME"
+            systemctl --no-pager -l status "$SERVICE_NAME"
+
+            # Quick local health check on Kestrel (Apache proxies 443->5003)
+            curl -sSf http://127.0.0.1:5003/ >/dev/null && echo "App OK on 5003"
