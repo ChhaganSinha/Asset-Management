@@ -18,8 +18,8 @@ jobs:
       SERVICE_NAME: "assetmanagement"
       SERVER_DIR: "/var/Apps/AssetManagement"
       SERVER_PROJECT_PATH: "AssetManagement/Server/AssetManagement.Server.csproj"
-      secrets.SSH_HOST: "198.177.124.103"
-      secrets.SSH_KEY: "wOzk3H97YWY0Sjg22u"
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
 
     steps:
       - name: Checkout
@@ -50,12 +50,15 @@ jobs:
           cd published
           tar -czf ../deploy.tar.gz .
 
+      - name: Install SSH client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
       - name: Copy bundle to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ env.secrets.SSH_HOST }}
+          host: ${{ env.SSH_HOST }}
           username: root
-          key: ${{ env.secrets.SSH_KEY }}
+          key: ${{ env.SSH_KEY }}
           port: 22
           source: "deploy.tar.gz"
           target: "/root/"
@@ -63,9 +66,9 @@ jobs:
       - name: Deploy & restart service on VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ env.secrets.SSH_HOST }}
+          host: ${{ env.SSH_HOST }}
           username: root
-          key: ${{ env.secrets.SSH_KEY }}
+          key: ${{ env.SSH_KEY }}
           port: 22
           script: |
             set -euo pipefail
