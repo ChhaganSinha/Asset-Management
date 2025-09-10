@@ -20,12 +20,12 @@ namespace AssetManagement.Repositories
             AppDbCxt = appContext;
         }
 
-        public async Task<ApiResponse<Allocation>> GetAllocationByEmail(string email)
+        public async Task<ApiResponse<List<Allocation>>> GetAllocationByEmail(string email)
         {
-            var response = new ApiResponse<Allocation>();
+            var response = new ApiResponse<List<Allocation>>();
             try
             {
-                var allocation = await AppDbCxt.Allocation.AsNoTracking().FirstOrDefaultAsync(o => o.EmployeeEmail.ToLower() == email.ToLower());
+                var allocation = await AppDbCxt.Allocation.AsNoTracking().Where(o => o.EmployeeEmail.ToLower() == email.ToLower()).ToListAsync();
                 response.IsSuccess = true;
                 response.Result = allocation;
             }
