@@ -1,0 +1,70 @@
+name: Build & Deploy (Blazor WASM Hosted)
+
+on:
+  push:
+    branches: [ "main" ]   # adjust as needed
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DOTNET_VERSION: "9.0.x"
+      SERVER_DIR: "/var/www/myapp"
+      SERVICE_NAME: "myapp"
+      SERVER_HOST: ${{ secrets.SSH_HOST }}
+      SERVER_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      # If your Server project folder is "MyApp.Server":
+      SERVER_PROJECT_PATH: "src/MyApp.Server/MyApp.Server.csproj"  # <-- set this correctly
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Publish (Server)
+        run: dotnet publish ${{ env.SERVER_PROJECT_PATH }} -c Release -o published
+
+      # Optional: run backend tests
+      # - name: Test
+      #   run: dotnet test --no-build --verbosity normal
+
+      - name: Create deploy archive
+        run: |
+          cd published
+          tar -czf ../deploy.tar.gz .
+
+      - name: Copy to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.SERVER_HOST }}
+          username: ${{ env.SERVER_USER }}
+          key: ${{ env.SSH_KEY }}
+          port: ${{ env.SSH_PORT }}
+          source: "deploy.tar.gz"
+          target: "/home/${{ env.SERVER_USER }}/"
+
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ env.SERVER_HOST }}
+          username: ${{ env.SERVER_USER }}
+          key: ${{ env.SSH_KEY }}
+          port: ${{ env.SSH_PORT }}
+          script: |
+            set -e
+            mkdir -p $SERVER_DIR
+            tar -xzf /home/${{ env.SERVER_USER }}/deploy.tar.gz -C $SERVER_DIR
+            rm -f /home/${{ env.SERVER_USER }}/deploy.tar.gz
+            sudo systemctl restart $SERVICE_NAME
+            sudo systemctl status $SERVICE_NAME --no-pager -l
