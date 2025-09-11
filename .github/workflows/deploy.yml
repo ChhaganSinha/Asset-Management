@@ -19,7 +19,6 @@ jobs:
       SERVER_DIR: "/var/Apps/AssetManagement"
       SERVER_PROJECT_PATH: "AssetManagement/Server/AssetManagement.Server.csproj"
       SSH_HOST: ${{ secrets.SSH_HOST }}
-      SSH_KEY: ${{ secrets.SSH_KEY }}
 
     steps:
       - name: Checkout
