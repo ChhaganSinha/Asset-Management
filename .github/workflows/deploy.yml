@@ -58,7 +58,7 @@ jobs:
         with:
           host: ${{ env.SSH_HOST }}
           username: root
-          key: ${{ env.SSH_KEY }}
+          key: ${{ secrets.SSH_PASSWORD  }}
           port: 22
           source: "deploy.tar.gz"
           target: "/root/"
@@ -68,7 +68,7 @@ jobs:
         with:
           host: ${{ env.SSH_HOST }}
           username: root
-          key: ${{ env.SSH_KEY }}
+          key: ${{ secrets.SSH_PASSWORD  }}
           port: 22
           script: |
             set -euo pipefail
