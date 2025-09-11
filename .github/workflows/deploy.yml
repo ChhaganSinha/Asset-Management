@@ -19,6 +19,10 @@ jobs:
       SERVER_DIR: "/var/Apps/AssetManagement"
       SERVER_PROJECT_PATH: "AssetManagement/Server/AssetManagement.Server.csproj"
       SSH_HOST: ${{ secrets.SSH_HOST }}
+      # Set to "true" only if your deploy modifies Apache config or certs.
+      APACHE_RELOAD: "false"
+      # If you prefer to health-check through Apache instead of Kestrel, set this to your public https URL.
+      PUBLIC_BASE_URL: "https://${{ secrets.SSH_HOST }}"
 
     steps:
       - name: Checkout
@@ -57,7 +61,7 @@ jobs:
         with:
           host: ${{ env.SSH_HOST }}
           username: root
-          password: ${{ secrets.SSH_PASSWORD  }}
+          password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           source: "deploy.tar.gz"
           target: "/root/"
@@ -67,30 +71,74 @@ jobs:
         with:
           host: ${{ env.SSH_HOST }}
           username: root
-          password: ${{ secrets.SSH_PASSWORD  }}
+          password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
             set -euo pipefail
             SERVER_DIR="${{ env.SERVER_DIR }}"
             SERVICE_NAME="${{ env.SERVICE_NAME }}"
+            APACHE_RELOAD="${{ env.APACHE_RELOAD }}"
+            PUBLIC_BASE_URL="${{ env.PUBLIC_BASE_URL }}"
 
+            echo "==> Preparing server dir: $SERVER_DIR"
             mkdir -p "$SERVER_DIR"
 
             # Optional backup of current release (keep one)
-            if [ -d "$SERVER_DIR" ]; then
+            if [ -d "$SERVER_DIR" ] && [ -n "$(ls -A "$SERVER_DIR" || true)" ]; then
               ts=$(date +%Y%m%d-%H%M%S)
               mkdir -p /var/backups/assetmanagement
               tar -czf "/var/backups/assetmanagement/release-$ts.tgz" -C "$SERVER_DIR" .
+              echo "==> Backup created at /var/backups/assetmanagement/release-$ts.tgz"
             fi
 
-            # Unpack new release
+            echo "==> Unpacking new release"
             tar -xzf /root/deploy.tar.gz -C "$SERVER_DIR"
             rm -f /root/deploy.tar.gz
 
-            # Ensure systemd picks up any unit changes and restart app
+            echo "==> Restarting service: $SERVICE_NAME"
             systemctl daemon-reload
             systemctl restart "$SERVICE_NAME"
             systemctl --no-pager -l status "$SERVICE_NAME"
 
-            # Quick local health check on Kestrel (Apache proxies 443->5003)
-            curl -sSf http://127.0.0.1:5003/ >/dev/null && echo "App OK on 5003"
+            # Optional: reload Apache only if you've changed its config or certs.
+            if [ "$APACHE_RELOAD" = "true" ]; then
+              echo "==> Reloading Apache (graceful)"
+              if command -v systemctl >/dev/null 2>&1; then
+                systemctl reload apache2
+              else
+                service apache2 reload || true
+              fi
+            fi
+
+            # --- Health check section ---
+            # First try Kestrel directly (local port 5003). Retry up to ~45s.
+            KESTREL_URL="http://127.0.0.1:5003/"
+            echo "==> Waiting for Kestrel on $KESTREL_URL"
+            ready=0
+            for i in {1..45}; do
+              if curl -sS "$KESTREL_URL" >/dev/null; then
+                echo "✔ App OK on $KESTREL_URL"
+                ready=1
+                break
+              fi
+              sleep 1
+            done
+
+            if [ "$ready" -eq 0 ]; then
+              echo "✖ Kestrel not ready on $KESTREL_URL within timeout."
+              echo "==> Diagnostics:"
+              ss -ltnp || true
+              journalctl -u "$SERVICE_NAME" -n 200 --no-pager || true
+
+              # Optional: try external HTTPS (through Apache) to help debugging proxies.
+              echo "==> Trying external HTTPS: $PUBLIC_BASE_URL"
+              if ! curl -k -sS "$PUBLIC_BASE_URL" >/dev/null; then
+                echo "✖ External HTTPS check failed too."
+                exit 1
+              else
+                echo "✔ External HTTPS responded (proxy OK) but Kestrel loopback failed."
+                exit 1
+              fi
+            fi
+
+            echo "==> Deployment finished successfully."
