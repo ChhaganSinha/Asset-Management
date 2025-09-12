@@ -38,23 +38,30 @@ namespace AssetManagement.Server.Controllers.Api
         #region Data
         [HttpPost]
         [Route("sp-updateEmployee")]
-        public async Task<ApiResponse<Employee>> UpdateEmployee(Employee data)
+        public async Task<ApiResponse<Employee>> UpdateEmployeeFromSP(Employee data)
         {
-            return await _dataRepository.UpdateEmployee(data);
+            return await _dataRepository.UpdateEmployeeFromSP(data);
         }
 
         [HttpGet("GetEmployeeByEmail")]
         public async Task<IActionResult> GetEmployeeByEmail([FromQuery] string email)
         {
-            var employee =  await _dataRepository.GetEmployeeByEmail(email);
+            var employee = await _dataRepository.GetEmployeeByEmail(email);
             return Ok(employee);
         }
 
         [HttpGet("GetAllocationByEmail")]
         public async Task<IActionResult> GetAllocationByEmail([FromQuery] string email)
         {
-            var allocation =   await _dataRepository.GetAllocationByEmail(email);
+            var allocation = await _dataRepository.GetAllocationByEmail(email);
             return Ok(allocation);
+        }
+
+        [HttpPost]
+        [Route("sp-updateAllocation")]
+        public async Task<ApiResponse<Allocation>> UpdateAllocationFromSP(Allocation data)
+        {
+            return await _dataRepository.UpdateAllocationFromSP(data);
         }
 
         #endregion

@@ -42,12 +42,12 @@ namespace AssetManagement.Repositories
             var response = new ApiResponse<Employee>();
             try
             {
-                var employee = await AppDbCxt.Employee.AsNoTracking().FirstOrDefaultAsync(o => o.EmailId.ToLower() == email.ToLower());
+                var employee = await AppDbCxt.Employee.AsNoTracking().FirstOrDefaultAsync(o => o.EmailId.ToLower() == email.ToLower() && o.Status != EmployeeStatus.Resigned);
                 response.IsSuccess = true;
                 response.Result = employee;
             }
-            catch (Exception ex) 
-            { 
+            catch (Exception ex)
+            {
                 response.IsSuccess = false;
                 response.Message = ex.Message;
             }
@@ -55,9 +55,43 @@ namespace AssetManagement.Repositories
 
         }
 
-        public async Task<ApiResponse<Employee>> UpdateEmployee(Employee data)
+        public async Task<ApiResponse<Employee>> UpdateEmployeeFromSP(Employee data)
         {
-            throw new NotImplementedException();
+            var response = new ApiResponse<Employee>();
+            try
+            {
+                AppDbCxt.Employee.Update(data);
+                await AppDbCxt.SaveChangesAsync();
+
+                response.IsSuccess = true;
+                response.Result = data;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+
+        public async Task<ApiResponse<Allocation>> UpdateAllocationFromSP(Allocation data)
+        {
+            var response = new ApiResponse<Allocation>();
+            try
+            {
+                AppDbCxt.Allocation.Update(data);
+                await AppDbCxt.SaveChangesAsync();
+
+                response.IsSuccess = true;
+                response.Result = data;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ex.Message;
+            }
+            return response;
         }
     }
 }
