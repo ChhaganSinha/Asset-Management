@@ -11,7 +11,6 @@ namespace AssetManagement.Server.Controllers.Api
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class EmployeeOnboardingController : ControllerBase
     {
         private readonly IEmployeeOnboardingRepository _repository;
