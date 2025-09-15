@@ -44,6 +44,8 @@ namespace AssetManagement.Server.Controllers.Api
         [AllowAnonymous]
         public async Task<ApiResponse<EmployeeOnboardingDto>> UpsertEmployeeOnboarding(EmployeeOnboardingDto data)
         {
+            var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+            data.BaseUrl = baseUrl;
             var result = await _repository.UpsertEmployeeOnboarding(data);
             if (result.IsSuccess)
             {
