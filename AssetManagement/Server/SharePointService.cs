@@ -16,11 +16,14 @@ namespace AssetManagement.Server
         private readonly string clientSecret = "GuU8Q~Dtf7iGj-Msa2VwnkozOSEN2vMT~YrHbbJP";
         string siteid = "Sharepoint Demo";
         string root = "https://credentinfotec.sharepoint.com";
-        private readonly string siteUrl = "https://credentinfotec.sharepoint.com/sites/intranet";
+        //private readonly string siteUrl = "https://credentinfotec.sharepoint.com/sites/intranet";
+        private readonly string siteUrl = "https://credentinfotec.sharepoint.com/sites/Intranet-Portal";
         string[] scopes = new[] { "https://graph.microsoft.com/.default" };
         GraphServiceClient _graphClient;
-        private readonly string listId = "ca2134e5-e964-4553-981c-7d6be9bb9c8e"; //employee Master 
-        private readonly string list2Id = "6081f6ff-d7b6-4440-860f-13f54228b576"; //Grant application permission
+        //private readonly string listId = "ca2134e5-e964-4553-981c-7d6be9bb9c8e"; //employee Master 
+        //private readonly string list2Id = "6081f6ff-d7b6-4440-860f-13f54228b576"; //Grant application permission
+        private readonly string listId = "b7e743ea-4610-4c0a-98df-8c998437c0f3"; //employee Master 
+        private readonly string list2Id = "dafa5446-7cc0-48e6-8547-f084d45492ba"; //Grant application permission
         public SharePointService()
         {
             var options = new ClientSecretCredentialOptions
