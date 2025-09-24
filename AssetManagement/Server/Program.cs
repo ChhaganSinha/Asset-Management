@@ -79,14 +79,14 @@ if (useSqlLite)
 }
 else
 {
-    //builder.Services.AddDbContext<AuthDbContext>(options =>
-    //{
-    //    options.UseMySql(conStringAuth, ServerVersion.AutoDetect(conStringAuth));
-    //});
-    //builder.Services.AddDbContext<AppDbContext>(options =>
-    //{
-    //    options.UseMySql(conString, ServerVersion.AutoDetect(conString));
-    //});
+    builder.Services.AddDbContext<AuthDbContext>(options =>
+    {
+        options.UseMySql(conStringAuth, ServerVersion.AutoDetect(conStringAuth));
+    });
+    builder.Services.AddDbContext<AppDbContext>(options =>
+    {
+        options.UseMySql(conString, ServerVersion.AutoDetect(conString));
+    });
 }
 
 // Add Identity
