@@ -1556,12 +1556,31 @@ namespace AssetManagement.Client.Client
             }
         }
 
-        public async Task<SharepointListUpdate> GetListItemByEmail(string Email)
+        public async Task<SharepointListUpdate?> GetListItemByEmail(string Email)
         {
             try
             {
                 var res = await HttpClient.PostAsync($"api/SharePoint/getListItemByEmail?Email={Email}", null);
                 res.EnsureSuccessStatusCode();
+                if (res.Content.Headers.ContentLength is 0 || res.StatusCode == System.Net.HttpStatusCode.NoContent)
+                {
+                    return null;
+                }
+
+                if (res.Content.Headers.ContentLength is null)
+                {
+                    var content = await res.Content.ReadAsStringAsync();
+                    if (string.IsNullOrWhiteSpace(content))
+                    {
+                        return null;
+                    }
+
+                    return JsonSerializer.Deserialize<SharepointListUpdate>(content, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                }
+
                 var data =  await res.Content.ReadFromJsonAsync<SharepointListUpdate>();
                 return data;
             }

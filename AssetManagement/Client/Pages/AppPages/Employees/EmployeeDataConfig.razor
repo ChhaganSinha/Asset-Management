@@ -1205,6 +1205,19 @@
                 sharepointTask = Task.Run(async () =>
                 {
                     var listData = await client.GetListItemByEmail(model.AadhaarNumber);
+                    if (listData is null)
+                    {
+                        model.SharepointPortal = false;
+                        model.LM  = false;
+                        model.EMS = false;
+                        model.CMS = false;
+                        selectedLM = null;
+                        selectedLMId = null;
+                        selectedEMS = null;
+                        selectedEmsId = null;
+                        return;
+                    }
+
                     model.SharepointPortal = listData.Portal;
                     model.LM  = listData.LM;
                     model.EMS = listData.EMS;
