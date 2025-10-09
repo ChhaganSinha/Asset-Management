@@ -1428,6 +1428,15 @@
 
 
                 }
+                if (!string.IsNullOrWhiteSpace(Key) && employeeOnboardingDto != null && employeeOnboardingDto.Id > 0)
+                {
+                    var (deleted, errorMessage) = await client.DeleteOnboardeeById(employeeOnboardingDto.Id);
+                    if (!deleted && !string.Equals(errorMessage, "Employee not found.", StringComparison.OrdinalIgnoreCase))
+                    {
+                        logger.LogWarning("Failed to delete onboarding record for {Email}: {Message}", employeeOnboardingDto.ExternalEmailId, errorMessage);
+                    }
+                }
+
                 if (EmailRequest)
                 {
                     await SendRequestToCreateEmail();
