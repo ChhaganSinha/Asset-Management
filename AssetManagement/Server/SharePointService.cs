@@ -67,7 +67,7 @@ namespace AssetManagement.Server
 
             try
             {
-                var createdItem = await _graphClient.Sites["root"].SiteWithPath("/sites/intranet").Lists[listId].Items.Request().AddAsync(newItem);
+                var createdItem = await _graphClient.Sites["root"].SiteWithPath("/sites/Intranet-Portal").Lists[listId].Items.Request().AddAsync(newItem);
                 Console.WriteLine($"Dummy item inserted successfully with ID: {createdItem.Id}");
             }
             catch (Exception ex)
@@ -132,7 +132,7 @@ namespace AssetManagement.Server
                 //    .Filter($"fields/AadharNumber eq '{request.AadharNumber}'")
                 //    .GetAsync();
 
-                var items = await _graphClient.Sites["root"].SiteWithPath("/sites/intranet").Lists[listId].Items
+                var items = await _graphClient.Sites["root"].SiteWithPath("/sites/Intranet-Portal").Lists[listId].Items
                    .Request()
                    .Header("Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly")
                    .Expand("Fields")
@@ -141,7 +141,7 @@ namespace AssetManagement.Server
 
                 if(items == null || items.Count == 0)
                 {
-                    items = await _graphClient.Sites["root"].SiteWithPath("/sites/intranet").Lists[listId].Items
+                    items = await _graphClient.Sites["root"].SiteWithPath("/sites/Intranet-Portal").Lists[listId].Items
                    .Request()
                    .Header("Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly")
                    .Expand("Fields")
@@ -150,7 +150,7 @@ namespace AssetManagement.Server
                 }
 
                 // Retrieve items from the second list
-                var grantApplicationPermissionItems = await _graphClient.Sites["root"].SiteWithPath("/sites/intranet").Lists[list2Id].Items
+                var grantApplicationPermissionItems = await _graphClient.Sites["root"].SiteWithPath("/sites/Intranet-Portal").Lists[list2Id].Items
                     .Request()
                     .Header("Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly")
                     .Expand("Fields")
@@ -195,7 +195,7 @@ namespace AssetManagement.Server
                         }
                     };
 
-                    await _graphClient.Sites["root"].SiteWithPath("/sites/intranet").Lists[listId].Items[itemToUpdate.Id]
+                    await _graphClient.Sites["root"].SiteWithPath("/sites/Intranet-Portal").Lists[listId].Items[itemToUpdate.Id]
                         .Request()
                         .UpdateAsync(updatedItem);
 
@@ -238,7 +238,7 @@ namespace AssetManagement.Server
                         }
                     };
 
-                    var createdItem = await _graphClient.Sites["root"].SiteWithPath("/sites/intranet").Lists[listId].Items.Request().AddAsync(newItem);
+                    var createdItem = await _graphClient.Sites["root"].SiteWithPath("/sites/Intranet-Portal").Lists[listId].Items.Request().AddAsync(newItem);
                     Console.WriteLine($"New item inserted with email '{request.Email}' in listId.");
                 }
 
@@ -262,7 +262,7 @@ namespace AssetManagement.Server
                         }
                     };
 
-                    await _graphClient.Sites["root"].SiteWithPath("/sites/intranet").Lists[list2Id].Items[grantApplicationPermissionItemToUpdate.Id]
+                    await _graphClient.Sites["root"].SiteWithPath("/sites/Intranet-Portal").Lists[list2Id].Items[grantApplicationPermissionItemToUpdate.Id]
                         .Request()
                         .UpdateAsync(grantApplicationPermissionUpdateItems);
 
@@ -287,7 +287,7 @@ namespace AssetManagement.Server
                         }
                     };
 
-                    var createdGrantApplicationPermissionItem = await _graphClient.Sites["root"].SiteWithPath("/sites/intranet").Lists[list2Id].Items.Request().AddAsync(grantApplicationPermissionNewItem);
+                    var createdGrantApplicationPermissionItem = await _graphClient.Sites["root"].SiteWithPath("/sites/Intranet-Portal").Lists[list2Id].Items.Request().AddAsync(grantApplicationPermissionNewItem);
                     Console.WriteLine($"New item inserted with email '{request.Email}' in list2Id.");
                 }
 
@@ -309,7 +309,7 @@ namespace AssetManagement.Server
             try
             {
                 // Retrieve items from the first list
-                var items = await _graphClient.Sites["root"].SiteWithPath("/sites/intranet").Lists[listId].Items
+                var items = await _graphClient.Sites["root"].SiteWithPath("/sites/Intranet-Portal").Lists[listId].Items
                     .Request()
                     .Header("Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly")
                     .Expand("fields")
@@ -317,7 +317,7 @@ namespace AssetManagement.Server
                     .GetAsync();
 
                 // Retrieve items from the second list
-                var grantApplicationPermissionItems = await _graphClient.Sites["root"].SiteWithPath("/sites/intranet").Lists[list2Id].Items
+                var grantApplicationPermissionItems = await _graphClient.Sites["root"].SiteWithPath("/sites/Intranet-Portal").Lists[list2Id].Items
                     .Request()
                     .Header("Prefer", "HonorNonIndexedQueriesWarningMayFailRandomly")
                     .Expand("fields")
@@ -379,7 +379,7 @@ namespace AssetManagement.Server
             var invitation = new Invitation
             {
                 InvitedUserEmailAddress = email,
-                InviteRedirectUrl = "https://credentinfotec.sharepoint.com/sites/intranet/Pages/NewPage.aspx",
+                InviteRedirectUrl = "https://credentinfotec.sharepoint.com/sites/Intranet-Portal",
                 InvitedUserDisplayName = displayName,
                 SendInvitationMessage = true
             };
