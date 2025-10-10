@@ -298,17 +298,19 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-8">
                             <label class="form-label bold-font">Skills</label>
-                            <HxMultiSelect TItem="EmployeeSkills"
-                                            AutoSort="false"
-                                            TValue="int"
-                                            Data="@SkillOptions"
-                                            Value="@SelectedSkill"
-                                            ValueChanged="OnSkillChanged"
-                                            ValueExpression="@(() => SelectedSkill)"
-                                            TextSelector="@(p => p.Skill)"
-                                            ValueSelector="@(p => p.Id)"
-                                            EmptyText="- select -"
-                                            NullDataText="Loading..." />
+                            <div class="multi-select-dropdown-scroll">
+                                <HxMultiSelect TItem="EmployeeSkills"
+                                               AutoSort="false"
+                                               TValue="int"
+                                               Data="@SkillOptions"
+                                               Value="@SelectedSkill"
+                                               ValueChanged="OnSkillChanged"
+                                               ValueExpression="@(() => SelectedSkill)"
+                                               TextSelector="@(p => p.Skill)"
+                                               ValueSelector="@(p => p.Id)"
+                                               EmptyText="- select -"
+                                               NullDataText="Loading..." />
+                            </div>
                         </div>
                         <div class="col-md-2 col-sm-12 d-flex align-items-end">
                             <a class="btn btn-primary w-100" @onclick="() => { AddSkill = true; }"><i class="fa fa-free-code-camp" aria-hidden="true"></i> Add Skills</a>
