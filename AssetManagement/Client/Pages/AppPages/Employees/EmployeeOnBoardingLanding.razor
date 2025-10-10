@@ -153,17 +153,19 @@
 
                             <label class="col-form-label col-md-2 bold-font">Skills</label>
                             <div class="col-md-4">
-                                <HxMultiSelect TItem="EmployeeSkills"
-                                               AutoSort="false"
-                                               TValue="int"
-                                               Data="@SkillOptions"
-                                               Value="@SelectedSkill"
-                                               ValueChanged="OnSkillChanged"
-                                               ValueExpression="@(() => SelectedSkill)"
-                                               TextSelector="@(p => p.Skill)"
-                                               ValueSelector="@(p => p.Id)"
-                                               EmptyText="- select -"
-                                               NullDataText="Loading..." />
+                                <div class="multi-select-dropdown-scroll">
+                                    <HxMultiSelect TItem="EmployeeSkills"
+                                                   AutoSort="false"
+                                                   TValue="int"
+                                                   Data="@SkillOptions"
+                                                   Value="@SelectedSkill"
+                                                   ValueChanged="OnSkillChanged"
+                                                   ValueExpression="@(() => SelectedSkill)"
+                                                   TextSelector="@(p => p.Skill)"
+                                                   ValueSelector="@(p => p.Id)"
+                                                   EmptyText="- select -"
+                                                   NullDataText="Loading..." />
+                                </div>
                             </div>
 
                         </div>
