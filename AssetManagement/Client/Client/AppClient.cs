@@ -640,6 +640,21 @@ namespace AssetManagement.Client.Client
 
             return result;
         }
+
+        public async Task<CertificateGenerationResponse> GenerateCertificateAsync(CertificateGenerationRequest request)
+        {
+            try
+            {
+                var res = await HttpClient.PostAsJsonAsync("api/Certificate/generate", request);
+                res.EnsureSuccessStatusCode();
+                return await res.Content.ReadFromJsonAsync<CertificateGenerationResponse>();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogCritical(ex, ex.Message);
+                throw;
+            }
+        }
         public async Task<ApiResponse<List<EmployeeImport>>> UpsertImportEmployeeAsync(List<EmployeeImport> data)
         {
             var result = new ApiResponse<List<EmployeeImport>>();

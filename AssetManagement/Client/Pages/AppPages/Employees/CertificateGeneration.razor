@@ -1,0 +1,213 @@
+@page "/certificate-generation"
+@using AssetManagement.Client.Client
+@using AssetManagement.Client.Shared
+@using AssetManagement.Dto.Models
+@using Microsoft.AspNetCore.Authorization
+@inject AppClient client
+@inject IJSRuntime JSRuntime
+@attribute [Authorize]
+
+<Breadcrumb Items="breadcrumbItems" />
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Certificate Generation</h5>
+        <UiAlert Model="alert"></UiAlert>
+
+        @if (isLoading)
+        {
+            <div class="loader-container mt-4">
+                <div class="loader-progress"></div>
+            </div>
+        }
+        else
+        {
+            <EditForm Model="formModel" OnValidSubmit="GenerateCertificate">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label bold-font required-field">Employee</label>
+                        <InputText class="form-control" @bind-Value="employeeSearch" @oninput="OnEmployeeSearch" placeholder="Search employee..." />
+                        <InputSelect class="form-control mt-2" @bind-Value="formModel.EmployeeId">
+                            <option value="0">Select Employee</option>
+                            @foreach (var employee in filteredEmployees)
+                            {
+                                <option value="@employee.Id">@employee.EmployeeName (@employee.EmployeeId)</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => formModel.EmployeeId" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label bold-font required-field">Letter Type</label>
+                        <div class="d-flex gap-3 mt-2">
+                            <label class="form-check-label">
+                                <InputRadio class="form-check-input me-1" @bind-Value="formModel.CertificateType" Value="CertificateType.Experience" />
+                                Experience Certificate
+                            </label>
+                            <label class="form-check-label">
+                                <InputRadio class="form-check-input me-1" @bind-Value="formModel.CertificateType" Value="CertificateType.Relieving" />
+                                Relieving Letter
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label bold-font required-field">Letter Date</label>
+                        <InputDate class="form-control" @bind-Value="formModel.LetterDate" />
+                        <ValidationMessage For="() => formModel.LetterDate" />
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label bold-font">Title</label>
+                        <InputSelect class="form-control" @bind-Value="formModel.Title">
+                            @foreach (var title in titleOptions)
+                            {
+                                <option value="@title">@title</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label bold-font">Pronouns</label>
+                        <InputSelect class="form-control" @bind-Value="selectedPronoun" @onchange="OnPronounChanged">
+                            @foreach (var option in pronounOptions)
+                            {
+                                <option value="@option.Key">@option.Label</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label bold-font required-field">Signer Name</label>
+                        <InputText class="form-control" @bind-Value="formModel.SignerName" />
+                        <ValidationMessage For="() => formModel.SignerName" />
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label bold-font required-field">Signer Designation</label>
+                        <InputText class="form-control" @bind-Value="formModel.SignerDesignation" />
+                        <ValidationMessage For="() => formModel.SignerDesignation" />
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" type="submit" disabled="@isSubmitting">
+                    @if (isSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        <span>Generating...</span>
+                    }
+                    else
+                    {
+                        <span>Generate &amp; Download</span>
+                    }
+                </button>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    private readonly List<ClientBreadcrumbItem> breadcrumbItems = new()
+    {
+        new ClientBreadcrumbItem { Text = "Home", Url = "/" },
+        new ClientBreadcrumbItem { Text = "Certificate Generation", IsActive = true }
+    };
+
+    private readonly List<string> titleOptions = new() { "Mr.", "Ms.", "Mrs.", "Mx." };
+
+    private readonly List<PronounOption> pronounOptions = new()
+    {
+        new("He", "He/Him/His", "He", "Him", "His"),
+        new("She", "She/Her/Her", "She", "Her", "Her"),
+        new("They", "They/Them/Their", "They", "Them", "Their")
+    };
+
+    private readonly AlertModel alert = new();
+    private CertificateGenerationRequest formModel = new();
+    private List<Employee> employees = new();
+    private List<Employee> filteredEmployees = new();
+    private string employeeSearch = string.Empty;
+    private string selectedPronoun = "He";
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            employees = (await client.GetAllEmployee())?.OrderBy(e => e.EmployeeName).ToList() ?? new List<Employee>();
+            filteredEmployees = employees.ToList();
+            ApplyPronouns(selectedPronoun);
+        }
+        catch
+        {
+            alert.SetError("Failed to load company or employee data.");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OnEmployeeSearch(ChangeEventArgs args)
+    {
+        employeeSearch = args?.Value?.ToString() ?? string.Empty;
+        var term = employeeSearch.Trim();
+        filteredEmployees = string.IsNullOrWhiteSpace(term)
+            ? employees.ToList()
+            : employees.Where(e =>
+                    e.EmployeeName.Contains(term, StringComparison.OrdinalIgnoreCase)
+                    || e.EmployeeId.Contains(term, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+    }
+
+    private void OnPronounChanged(ChangeEventArgs args)
+    {
+        selectedPronoun = args?.Value?.ToString() ?? "He";
+        ApplyPronouns(selectedPronoun);
+    }
+
+    private void ApplyPronouns(string key)
+    {
+        var option = pronounOptions.FirstOrDefault(p => p.Key == key) ?? pronounOptions.First();
+        formModel.HeShe = option.HeShe;
+        formModel.HimHer = option.HimHer;
+        formModel.HisHer = option.HisHer;
+    }
+
+    private async Task GenerateCertificate()
+    {
+        alert.Clear();
+        isSubmitting = true;
+
+        try
+        {
+            var response = await client.GenerateCertificateAsync(formModel);
+            if (response?.FileContent == null || response.FileContent.Length == 0)
+            {
+                alert.SetError("Certificate generation failed. Please try again.");
+                return;
+            }
+
+            await JSRuntime.InvokeVoidAsync("downloadFile", response.FileName, response.ContentType, response.FileContent);
+            alert.SetSuccess("Certificate generated successfully.");
+        }
+        catch
+        {
+            alert.SetError("Failed to generate certificate.");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private sealed record PronounOption(string Key, string Label, string HeShe, string HimHer, string HisHer);
+}

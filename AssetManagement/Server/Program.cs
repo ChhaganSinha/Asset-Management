@@ -147,6 +147,7 @@ builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IAllocationRepository, AllocationRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddSignalR();
 
@@ -239,4 +240,3 @@ app.MapHub<AssetManagement.Server.Hubs.NotificationHub>("/notificationHub");
 app.MapFallbackToFile("index.html");
 
 app.Run();
-

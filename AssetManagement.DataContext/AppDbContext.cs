@@ -36,6 +36,7 @@ namespace AssetManagement.DataContext
 
         public DbSet<EmployeeInsurance> EmployeeInsurance { get; set; }
         public DbSet<Notification> Notification { get; set; }
+        public DbSet<CertificateGenerationRecord> CertificateGenerationRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
