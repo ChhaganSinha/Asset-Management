@@ -42,17 +42,20 @@
 
                     <div class="col-md-4">
                         <label class="form-label bold-font required-field">Letter Type</label>
-                        <div class="d-flex gap-3 mt-2">
+
+                        <InputRadioGroup @bind-Value="formModel.CertificateType" class="d-flex gap-3 mt-2">
                             <label class="form-check-label">
-                                <InputRadio class="form-check-input me-1" @bind-Value="formModel.CertificateType" Value="CertificateType.Experience" />
+                                <InputRadio class="form-check-input me-1" Value="CertificateType.Experience" />
                                 Experience Certificate
                             </label>
+
                             <label class="form-check-label">
-                                <InputRadio class="form-check-input me-1" @bind-Value="formModel.CertificateType" Value="CertificateType.Relieving" />
+                                <InputRadio class="form-check-input me-1" Value="CertificateType.Relieving" />
                                 Relieving Letter
                             </label>
-                        </div>
+                        </InputRadioGroup>
                     </div>
+
 
                     <div class="col-md-4">
                         <label class="form-label bold-font required-field">Letter Date</label>
