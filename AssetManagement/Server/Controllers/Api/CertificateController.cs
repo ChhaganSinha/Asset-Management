@@ -60,8 +60,8 @@ namespace AssetManagement.Server.Controllers.Api
             }
 
             var templateName = ResolveTemplateName(company.CompanyCode, request.CertificateType);
-            var templateFile = _environment.WebRootFileProvider.GetFileInfo(Path.Combine("Private", templateName));
-            if (!templateFile.Exists)
+            var templateFile = ResolveTemplateFile(templateName);
+            if (templateFile == null)
             {
                 return NotFound($"Certificate template not found: {templateName}");
             }
@@ -273,6 +273,27 @@ namespace AssetManagement.Server.Controllers.Api
                 fullText = string.Concat(textElements.Select(t => t.Text));
                 matchIndex = fullText.IndexOf(placeholder, StringComparison.Ordinal);
             }
+        }
+
+        private IFileInfo? ResolveTemplateFile(string templateName)
+        {
+            var templateFile = _environment.WebRootFileProvider.GetFileInfo(Path.Combine("Private", templateName));
+            if (templateFile.Exists)
+            {
+                return templateFile;
+            }
+
+            var clientTemplatePath = Path.Combine("_content", "AssetManagement.Client", "Private", templateName);
+            templateFile = _environment.WebRootFileProvider.GetFileInfo(clientTemplatePath);
+            if (templateFile.Exists)
+            {
+                return templateFile;
+            }
+
+            _logger.LogWarning("Certificate template not found. Checked paths: {PrivatePath}, {ClientPath}",
+                Path.Combine("Private", templateName),
+                clientTemplatePath);
+            return null;
         }
     }
 }
