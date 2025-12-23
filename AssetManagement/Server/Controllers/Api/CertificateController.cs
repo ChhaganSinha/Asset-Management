@@ -10,6 +10,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 
 namespace AssetManagement.Server.Controllers.Api
@@ -61,7 +62,7 @@ namespace AssetManagement.Server.Controllers.Api
 
             var templateName = ResolveTemplateName(company.CompanyCode, request.CertificateType);
             var templateFile = ResolveTemplateFile(templateName);
-            if (templateFile is not null)
+            if (templateFile is null)
             {
                 return NotFound($"Certificate template not found: {templateName}");
             }
