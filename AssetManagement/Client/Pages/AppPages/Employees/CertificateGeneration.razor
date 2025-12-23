@@ -27,20 +27,29 @@
                 <ValidationSummary />
 
                 <div class="row g-3 mb-3">
-                    <div class="col-md-4">
+                    <div class="col-lg-4 col-md-6">
                         <label class="form-label bold-font required-field">Employee</label>
-                        <InputText class="form-control" @bind-Value="employeeSearch" @oninput="OnEmployeeSearch" placeholder="Search employee..." />
-                        <InputSelect class="form-control mt-2" @bind-Value="formModel.EmployeeId">
-                            <option value="0">Select Employee</option>
-                            @foreach (var employee in filteredEmployees)
-                            {
-                                <option value="@employee.Id">@employee.EmployeeName (@employee.EmployeeId)</option>
-                            }
-                        </InputSelect>
+                        <DropdownSelect @bind-Value="formModel.EmployeeId"
+                                        DataSource="employeeDropdown"
+                                        EventDropdown="OnEmployeeChanged"
+                                        EmptyText="-- Select Employee --"
+                                        Css="form-select" />
                         <ValidationMessage For="() => formModel.EmployeeId" />
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label bold-font">Employee Name</label>
+                        <InputText class="form-control" Value="@selectedEmployeeName" disabled />
+                    </div>
+
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label bold-font">Employee Designation</label>
+                        <InputText class="form-control" Value="@selectedEmployeeDesignation" disabled />
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-6 col-md-6">
                         <label class="form-label bold-font required-field">Letter Type</label>
                         <div class="d-flex gap-3 mt-2">
                             <label class="form-check-label">
@@ -54,7 +63,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-lg-6 col-md-6">
                         <label class="form-label bold-font required-field">Letter Date</label>
                         <InputDate class="form-control" @bind-Value="formModel.LetterDate" />
                         <ValidationMessage For="() => formModel.LetterDate" />
@@ -62,7 +71,7 @@
                 </div>
 
                 <div class="row g-3 mb-3">
-                    <div class="col-md-4">
+                    <div class="col-lg-4 col-md-6">
                         <label class="form-label bold-font">Title</label>
                         <InputSelect class="form-control" @bind-Value="formModel.Title">
                             @foreach (var title in titleOptions)
@@ -72,7 +81,7 @@
                         </InputSelect>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-lg-4 col-md-6">
                         <label class="form-label bold-font">Pronouns</label>
                         <InputSelect class="form-control" @bind-Value="selectedPronoun" @onchange="OnPronounChanged">
                             @foreach (var option in pronounOptions)
@@ -82,7 +91,7 @@
                         </InputSelect>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-lg-4 col-md-6">
                         <label class="form-label bold-font required-field">Signer Name</label>
                         <InputText class="form-control" @bind-Value="formModel.SignerName" />
                         <ValidationMessage For="() => formModel.SignerName" />
@@ -90,7 +99,7 @@
                 </div>
 
                 <div class="row g-3 mb-4">
-                    <div class="col-md-4">
+                    <div class="col-lg-4 col-md-6">
                         <label class="form-label bold-font required-field">Signer Designation</label>
                         <InputText class="form-control" @bind-Value="formModel.SignerDesignation" />
                         <ValidationMessage For="() => formModel.SignerDesignation" />
@@ -132,8 +141,9 @@
     private readonly AlertModel alert = new();
     private CertificateGenerationRequest formModel = new();
     private List<Employee> employees = new();
-    private List<Employee> filteredEmployees = new();
-    private string employeeSearch = string.Empty;
+    private List<KeyValuePair<string, string>> employeeDropdown = new();
+    private string selectedEmployeeName = string.Empty;
+    private string selectedEmployeeDesignation = string.Empty;
     private string selectedPronoun = "He";
     private bool isLoading = true;
     private bool isSubmitting = false;
@@ -143,7 +153,9 @@
         try
         {
             employees = (await client.GetAllEmployee())?.OrderBy(e => e.EmployeeName).ToList() ?? new List<Employee>();
-            filteredEmployees = employees.ToList();
+            employeeDropdown = employees
+                .Select(e => new KeyValuePair<string, string>(e.Id.ToString(), $"{e.EmployeeName} (EmpID: {e.EmployeeId})"))
+                .ToList();
             ApplyPronouns(selectedPronoun);
         }
         catch
@@ -156,16 +168,18 @@
         }
     }
 
-    private void OnEmployeeSearch(ChangeEventArgs args)
+    private void OnEmployeeChanged(string value)
     {
-        employeeSearch = args?.Value?.ToString() ?? string.Empty;
-        var term = employeeSearch.Trim();
-        filteredEmployees = string.IsNullOrWhiteSpace(term)
-            ? employees.ToList()
-            : employees.Where(e =>
-                    e.EmployeeName.Contains(term, StringComparison.OrdinalIgnoreCase)
-                    || e.EmployeeId.Contains(term, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+        if (!int.TryParse(value, out var employeeId))
+        {
+            selectedEmployeeName = string.Empty;
+            selectedEmployeeDesignation = string.Empty;
+            return;
+        }
+
+        var selectedEmployee = employees.FirstOrDefault(e => e.Id == employeeId);
+        selectedEmployeeName = selectedEmployee?.EmployeeName ?? string.Empty;
+        selectedEmployeeDesignation = selectedEmployee?.Designation ?? string.Empty;
     }
 
     private void OnPronounChanged(ChangeEventArgs args)
