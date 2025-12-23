@@ -9,26 +9,30 @@
 
 <Breadcrumb Items="breadcrumbItems" />
 
-<div class="card">
+<div class="card shadow-sm">
     <div class="card-body">
-        <h5 class="card-title">Certificate Generation</h5>
-        <UiAlert Model="alert"></UiAlert>
+        <h5 class="card-title mb-4">Certificate Generation</h5>
+
+        <UiAlert Model="alert" />
 
         @if (isLoading)
         {
-            <div class="loader-container mt-4">
-                <div class="loader-progress"></div>
+            <div class="d-flex justify-content-center my-5">
+                <div class="spinner-border text-primary"></div>
             </div>
         }
         else
         {
             <EditForm Model="formModel" OnValidSubmit="GenerateCertificate">
                 <DataAnnotationsValidator />
-                <ValidationSummary />
+                <ValidationSummary class="mb-3" />
 
-                <div class="row g-3 mb-3">
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label bold-font required-field">Employee</label>
+                <!-- Employee & Letter Type -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold required-field">
+                            Employee
+                        </label>
                         <DropdownSelect @bind-Value="formModel.EmployeeId"
                                         DataSource="employeeDropdown"
                                         EventDropdown="OnEmployeeChanged"
@@ -37,46 +41,38 @@
                         <ValidationMessage For="() => formModel.EmployeeId" />
                     </div>
 
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label bold-font">Employee Name</label>
-                        <InputText class="form-control" Value="@selectedEmployeeName" disabled />
-                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold required-field">
+                            Letter Type
+                        </label>
 
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label bold-font">Employee Designation</label>
-                        <InputText class="form-control" Value="@selectedEmployeeDesignation" disabled />
-                    </div>
-                </div>
+                        <InputRadioGroup @bind-Value="formModel.CertificateType"
+                                         class="d-flex flex-wrap gap-4 mt-2">
 
-                <div class="row g-3 mb-3">
-                    <div class="col-lg-6 col-md-6">
-                        <label class="form-label bold-font required-field">Letter Type</label>
+                            <div class="form-check">
+                                <InputRadio class="form-check-input"
+                                            Value="CertificateType.Experience" />
+                                <label class="form-check-label">
+                                    Experience Certificate
+                                </label>
+                            </div>
 
-                        <InputRadioGroup @bind-Value="formModel.CertificateType" class="d-flex gap-3 mt-2">
-                            <label class="form-check-label">
-                                <InputRadio class="form-check-input me-1" Value="CertificateType.Experience" />
-                                Experience Certificate
-                            </label>
+                            <div class="form-check">
+                                <InputRadio class="form-check-input"
+                                            Value="CertificateType.Relieving" />
+                                <label class="form-check-label">
+                                    Relieving Letter
+                                </label>
+                            </div>
 
-                            <label class="form-check-label">
-                                <InputRadio class="form-check-input me-1" Value="CertificateType.Relieving" />
-                                Relieving Letter
-                            </label>
                         </InputRadioGroup>
                     </div>
-
-
-                    <div class="col-md-4">
-                        <label class="form-label bold-font required-field">Letter Date</label>
-                        <InputDate class="form-control" @bind-Value="formModel.LetterDate" />
-                        <ValidationMessage For="() => formModel.LetterDate" />
-                    </div>
-                </div>
-
-                <div class="row g-3 mb-3">
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label bold-font">Title</label>
-                        <InputSelect class="form-control" @bind-Value="formModel.Title">
+                
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">
+                            Title
+                        </label>
+                        <InputSelect class="form-select" @bind-Value="formModel.Title">
                             @foreach (var title in titleOptions)
                             {
                                 <option value="@title">@title</option>
@@ -84,46 +80,30 @@
                         </InputSelect>
                     </div>
 
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label bold-font">Pronouns</label>
-                        <InputSelect class="form-control" @bind-Value="selectedPronoun" @onchange="OnPronounChanged">
-                            @foreach (var option in pronounOptions)
-                            {
-                                <option value="@option.Key">@option.Label</option>
-                            }
-                        </InputSelect>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label bold-font required-field">Signer Name</label>
-                        <InputText class="form-control" @bind-Value="formModel.SignerName" />
-                        <ValidationMessage For="() => formModel.SignerName" />
-                    </div>
                 </div>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label bold-font required-field">Signer Designation</label>
-                        <InputText class="form-control" @bind-Value="formModel.SignerDesignation" />
-                        <ValidationMessage For="() => formModel.SignerDesignation" />
-                    </div>
+                <!-- Action Button -->
+                <div class="d-flex justify-content-end mt-4">
+                    <button class="btn btn-primary px-4"
+                            type="submit"
+                            disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2">Generating...</span>
+                            
+                                        }
+                        else
+                        {
+                            <i class="bi bi-download me-1">Generate & Download</i>
+                            
+                                        }
+                    </button>
                 </div>
-
-                <button class="btn btn-primary" type="submit" disabled="@isSubmitting">
-                    @if (isSubmitting)
-                    {
-                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                        <span>Generating...</span>
-                    }
-                    else
-                    {
-                        <span>Generate &amp; Download</span>
-                    }
-                </button>
             </EditForm>
         }
     </div>
 </div>
+
 
 @code {
     private readonly List<ClientBreadcrumbItem> breadcrumbItems = new()
@@ -155,7 +135,7 @@
     {
         try
         {
-            employees = (await client.GetAllEmployee())?.OrderBy(e => e.EmployeeName).ToList() ?? new List<Employee>();
+            employees = (await client.GetAllEmployee())?.OrderBy(e => e.EmployeeName).Where(o=>o.Status==EmployeeStatus.Resigned).ToList() ?? new List<Employee>();
             employeeDropdown = employees
                 .Select(e => new KeyValuePair<string, string>(e.Id.ToString(), $"{e.EmployeeName} (EmpID: {e.EmployeeId})"))
                 .ToList();

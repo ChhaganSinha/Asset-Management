@@ -13,12 +13,6 @@ namespace AssetManagement.Dto.Models
         [Required]
         public DateTime LetterDate { get; set; } = DateTime.Today;
 
-        [Required]
-        public string SignerName { get; set; } = string.Empty;
-
-        [Required]
-        public string SignerDesignation { get; set; } = string.Empty;
-
         public string Title { get; set; } = "Mr.";
         public string HeShe { get; set; } = "He";
         public string HisHer { get; set; } = "His";

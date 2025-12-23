@@ -129,8 +129,6 @@ namespace AssetManagement.Server.Controllers.Api
                 ["{DateOfJoining}"] = dateOfJoin,
                 ["{DateOfLeaving}"] = dateOfLeaving,
                 ["{EmploymentDuration}"] = duration,
-                ["{SignerName}"] = request.SignerName,
-                ["{SignerDesignation}"] = request.SignerDesignation,
                 ["{HeShe}"] = request.HeShe,
                 ["{HisHer}"] = request.HisHer,
                 ["{HimHer}"] = request.HimHer
