@@ -62,6 +62,10 @@
                         {
                             <li><a href="employee-config">Add Employee</a></li>
                         }
+                        @if (canViewEmployees)
+                        {
+                            <li><a href="certificate-generation">Certificate Generation</a></li>
+                        }
                         @if (canViewOnboardings)
                         {
                             <li><a href="newOnboarding">Onbardings</a></li>
