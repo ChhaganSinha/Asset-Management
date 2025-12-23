@@ -82,22 +82,6 @@
 
                 </div>
 
-                <div class="row g-4 mb-4">
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">
-                            Signer Name
-                        </label>
-                        <InputText class="form-control" @bind-Value="formModel.SignerName" />
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">
-                            Signer Designation
-                        </label>
-                        <InputText class="form-control" @bind-Value="formModel.SignerDesignation" />
-                    </div>
-                </div>
-
                 <!-- Action Button -->
                 <div class="d-flex justify-content-end mt-4">
                     <button class="btn btn-primary px-4"
@@ -179,6 +163,8 @@
         var selectedEmployee = employees.FirstOrDefault(e => e.Id == employeeId);
         selectedEmployeeName = selectedEmployee?.EmployeeName ?? string.Empty;
         selectedEmployeeDesignation = selectedEmployee?.Designation ?? string.Empty;
+        formModel.SignerName = selectedEmployee.EmployeeName;
+        formModel.SignerDesignation = selectedEmployee.Designation;
     }
 
     private void OnPronounChanged(ChangeEventArgs args)
