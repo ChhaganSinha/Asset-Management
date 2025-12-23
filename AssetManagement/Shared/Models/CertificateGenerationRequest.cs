@@ -17,6 +17,8 @@ namespace AssetManagement.Dto.Models
         public string HeShe { get; set; } = "He";
         public string HisHer { get; set; } = "His";
         public string HimHer { get; set; } = "Him";
+        public string SignerName { get; set; } = string.Empty;
+        public string SignerDesignation { get; set; } = string.Empty;
     }
 
     public class CertificateGenerationResponse
