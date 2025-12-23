@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AssetManagement.Dto.Models
 {
@@ -10,5 +11,11 @@ namespace AssetManagement.Dto.Models
         public string GeneratedFileName { get; set; } = string.Empty;
         public DateTime GeneratedOn { get; set; } = DateTime.UtcNow;
         public string GeneratedBy { get; set; } = string.Empty;
+
+        [NotMapped]
+        public string EmployeeName { get; set; } = string.Empty;
+
+        [NotMapped]
+        public string CompanyCode { get; set; } = string.Empty;
     }
 }
