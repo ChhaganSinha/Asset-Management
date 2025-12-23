@@ -12,107 +12,16 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <h5 class="card-title mb-3">Certificate Generation</h5>
-
-        <UiAlert Model="alert" />
-
-        @if (isLoading)
-        {
-            <div class="d-flex justify-content-center my-5">
-                <div class="spinner-border text-primary"></div>
-            </div>
-        }
-        else
-        {
-            <EditForm Model="formModel" OnValidSubmit="GenerateCertificate">
-                <DataAnnotationsValidator />
-                <ValidationSummary class="mb-3" />
-
-                <!-- Employee & Letter Type -->
-                <div class="row g-4">
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label fw-semibold required-field">
-                            Employee
-                        </label>
-                        <DropdownSelect @bind-Value="formModel.EmployeeId"
-                                        DataSource="employeeDropdown"
-                                        EventDropdown="OnEmployeeChanged"
-                                        EmptyText="-- Select Employee --"
-                                        Css="form-select" />
-                        <ValidationMessage For="() => formModel.EmployeeId" />
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label fw-semibold required-field">
-                            Letter Type
-                        </label>
-
-                        <InputRadioGroup @bind-Value="formModel.CertificateType"
-                                         class="d-flex flex-wrap gap-4 mt-2">
-
-                            <div class="form-check">
-                                <InputRadio class="form-check-input"
-                                            Value="CertificateType.Experience" />
-                                <label class="form-check-label">
-                                    Experience Certificate
-                                </label>
-                            </div>
-
-                            <div class="form-check">
-                                <InputRadio class="form-check-input"
-                                            Value="CertificateType.Relieving" />
-                                <label class="form-check-label">
-                                    Relieving Letter
-                                </label>
-                            </div>
-
-                        </InputRadioGroup>
-                    </div>
-                
-                    <div class="col-lg-2 col-md-6">
-                        <label class="form-label fw-semibold">
-                            Title
-                        </label>
-                        <InputSelect class="form-select" @bind-Value="formModel.Title">
-                            @foreach (var title in titleOptions)
-                            {
-                                <option value="@title">@title</option>
-                            }
-                        </InputSelect>
-                    </div>
-
-                    <div class="col-lg-2 col-md-6">
-                        <label class="form-label fw-semibold">
-                            Letter Date
-                        </label>
-                        <InputDate class="form-control" @bind-Value="formModel.LetterDate" />
-                    </div>
-                </div>
-
-                <!-- Action Button -->
-                <div class="d-flex justify-content-end mt-4">
-                    <button class="btn btn-primary px-4"
-                            type="submit"
-                            disabled="@isSubmitting">
-                        @if (isSubmitting)
-                        {
-                            <span class="spinner-border spinner-border-sm me-2"></span>
-                            <span>Generating...</span>
-                        }
-                        else
-                        {
-                            <i class="bi bi-download me-1"></i>
-                            <span>Generate & Download</span>
-                        }
-                    </button>
-                </div>
-            </EditForm>
-        }
-    </div>
-</div>
-
-<div class="card shadow-sm">
-    <div class="card-body">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <h5 class="card-title mb-0">Certificate Generation</h5>
+            <button class="btn btn-primary"
+                    type="button"
+                    disabled="@isLoading"
+                    @onclick="OpenModal">
+                <i class="bi bi-plus-circle me-1"></i>
+                <span>Generate Certificate</span>
+            </button>
+        </div>
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
             <h6 class="mb-0">Generated Certificate Records</h6>
             @if (formModel.EmployeeId > 0)
@@ -123,6 +32,115 @@
         <CertificateGenerationRecordsGrid @ref="recordsGridRef" EmployeeId="formModel.EmployeeId" />
     </div>
 </div>
+
+@if (isModalOpen)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Generate Certificate</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <UiAlert Model="alert" />
+
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center my-5">
+                            <div class="spinner-border text-primary"></div>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="formModel" OnValidSubmit="GenerateCertificate">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="mb-3" />
+
+                            <div class="row g-4">
+                                <div class="col-lg-4 col-md-6">
+                                    <label class="form-label fw-semibold required-field">
+                                        Employee
+                                    </label>
+                                    <DropdownSelect @bind-Value="formModel.EmployeeId"
+                                                    DataSource="employeeDropdown"
+                                                    EventDropdown="OnEmployeeChanged"
+                                                    EmptyText="-- Select Employee --"
+                                                    Css="form-select" />
+                                    <ValidationMessage For="() => formModel.EmployeeId" />
+                                </div>
+
+                                <div class="col-lg-4 col-md-6">
+                                    <label class="form-label fw-semibold required-field">
+                                        Letter Type
+                                    </label>
+
+                                    <InputRadioGroup @bind-Value="formModel.CertificateType"
+                                                     class="d-flex flex-wrap gap-4 mt-2">
+
+                                        <div class="form-check">
+                                            <InputRadio class="form-check-input"
+                                                        Value="CertificateType.Experience" />
+                                            <label class="form-check-label">
+                                                Experience Certificate
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <InputRadio class="form-check-input"
+                                                        Value="CertificateType.Relieving" />
+                                            <label class="form-check-label">
+                                                Relieving Letter
+                                            </label>
+                                        </div>
+
+                                    </InputRadioGroup>
+                                </div>
+
+                                <div class="col-lg-2 col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Title
+                                    </label>
+                                    <InputSelect class="form-select" @bind-Value="formModel.Title">
+                                        @foreach (var title in titleOptions)
+                                        {
+                                            <option value="@title">@title</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+
+                                <div class="col-lg-2 col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Letter Date
+                                    </label>
+                                    <InputDate class="form-control" @bind-Value="formModel.LetterDate" />
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-4">
+                                <button class="btn btn-primary px-4"
+                                        type="submit"
+                                        disabled="@isSubmitting">
+                                    @if (isSubmitting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                        <span>Generating...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-download me-1"></i>
+                                        <span>Generate & Download</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
 
 @code {
     private readonly List<ClientBreadcrumbItem> breadcrumbItems = new()
@@ -149,6 +167,7 @@
     private string selectedPronoun = "He";
     private bool isLoading = true;
     private bool isSubmitting = false;
+    private bool isModalOpen = false;
     private CertificateGenerationRecordsGrid? recordsGridRef;
 
     protected override async Task OnInitializedAsync()
@@ -218,6 +237,7 @@
             await JSRuntime.InvokeVoidAsync("downloadFile", response.FileName, response.ContentType, response.FileContent);
             alert.SetSuccess("Certificate generated successfully.");
             recordsGridRef?.RefreshGrid();
+            isModalOpen = false;
         }
         catch
         {
@@ -227,6 +247,17 @@
         {
             isSubmitting = false;
         }
+    }
+
+    private void OpenModal()
+    {
+        alert.Clear();
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
     }
 
     private sealed record PronounOption(string Key, string Label, string HeShe, string HimHer, string HisHer);
