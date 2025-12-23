@@ -61,7 +61,7 @@ namespace AssetManagement.Server.Controllers.Api
 
             var templateName = ResolveTemplateName(company.CompanyCode, request.CertificateType);
             var templateFile = ResolveTemplateFile(templateName);
-            if (templateFile == null)
+            if (templateFile is not null)
             {
                 return NotFound($"Certificate template not found: {templateName}");
             }
