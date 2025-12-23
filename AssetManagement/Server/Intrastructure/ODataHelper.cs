@@ -34,6 +34,7 @@ namespace AssetManagement.Server.Intrastructure
             builder.EntitySet<Allocation>("Allocation");
             builder.EntitySet<AllocationLog>("Report");
             builder.EntitySet<EmployeeOnboardingDto>("EmployeeOnboarding");
+            builder.EntitySet<CertificateGenerationRecord>("CertificateGenerationRecord");
             return builder.GetEdmModel();
         }
     }
