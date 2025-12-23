@@ -132,7 +132,9 @@ namespace AssetManagement.Server.Controllers.Api
                 ["{EmploymentDuration}"] = duration,
                 ["{HeShe}"] = request.HeShe,
                 ["{HisHer}"] = request.HisHer,
-                ["{HimHer}"] = request.HimHer
+                ["{HimHer}"] = request.HimHer,
+                ["{SignerName}"] = request.SignerName ?? string.Empty,
+                ["{SignerDesignation}"] = request.SignerDesignation ?? string.Empty
             };
         }
 
