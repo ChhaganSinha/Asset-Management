@@ -62,10 +62,6 @@
                         {
                             <li><a href="employee-config">Add Employee</a></li>
                         }
-                        @if (canViewEmployees)
-                        {
-                            <li><a href="certificate-generation">Certificate Generation</a></li>
-                        }
                         @if (canViewOnboardings)
                         {
                             <li><a href="newOnboarding">Onbardings</a></li>
@@ -109,6 +105,12 @@
                 {
                     <a href="reports" title="Reports">
                         <i class="fa fa-file-text" style="color:goldenrod;"></i> <span>Report</span>
+                    </a>
+                }
+                @if (canViewCertificates)
+                {
+                    <a href="certificate-generation" title="Certificates">
+                        <i class="fa fa-certificate" style="color:hotpink;"></i> <span>Certificates </span>
                     </a>
                 }
 
@@ -173,6 +175,7 @@
     private bool canViewAllocations = false;
     private bool canViewNewAlloction = false;
     private bool canViewReport = false;
+    private bool canViewCertificates = false;
     private bool canViewSettings = false;
     private bool canViewPermissions = false;
 
@@ -261,6 +264,12 @@
         if (ReportPermissions != null)
         {
             canViewReport = ReportPermissions.CanView;
+        }
+
+        var CertificatePermissions = await PermissionService.HasPermission("Certificate Generation");
+        if (CertificatePermissions != null)
+        {
+            canViewCertificates = CertificatePermissions.CanView;
         }
 
         var SettingsPermissions = await PermissionService.HasPermission("App Settings");

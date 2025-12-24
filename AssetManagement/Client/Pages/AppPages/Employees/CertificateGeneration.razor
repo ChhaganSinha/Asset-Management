@@ -202,8 +202,8 @@
         var selectedEmployee = employees.FirstOrDefault(e => e.Id == employeeId);
         selectedEmployeeName = selectedEmployee?.EmployeeName ?? string.Empty;
         selectedEmployeeDesignation = selectedEmployee?.Designation ?? string.Empty;
-        formModel.SignerName = selectedEmployee.EmployeeName;
-        formModel.SignerDesignation = selectedEmployee.Designation;
+        formModel.SignerName = "Anil Dara";
+        formModel.SignerDesignation = "Partner";
     }
 
     private void OnPronounChanged(ChangeEventArgs args)

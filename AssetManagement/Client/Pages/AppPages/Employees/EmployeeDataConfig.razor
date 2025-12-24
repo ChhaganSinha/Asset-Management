@@ -1492,7 +1492,7 @@
         if (Message.Contains("Successfully Added"))
         {
             model = new();
-           
+
         }
         if (model.Id > 0)
         {
@@ -1657,38 +1657,42 @@
             string prefix = model.Status == EmployeeStatus.Consultant
                 ? $"{ECODE}-CONS"
                 : ECODE;
-
-            // Us prefix se shuru hone wale IDs nikaalo
-            var targetEmpIDs = employee
-                .Where(o => o.EmployeeId.StartsWith(prefix))
-                .OrderByDescending(o => o.Id)
-                .Select(o => o.EmployeeId)
-                .ToList();
-
-            // Sabse latest ID le lo
-            string lastEmployeeId = targetEmpIDs.FirstOrDefault();
-
-            if (lastEmployeeId != null)
+                
+            List<string> targetEmpIDs = new List<string>();
+            if (prefix.Contains("CONS"))
             {
-                // Numeric part dhoondo
-                string pattern = @"\d+";
-                Match match = Regex.Match(lastEmployeeId, pattern);
-
-                if (match.Success)
-                {
-                    string numericPart = match.Value;
-                    if (int.TryParse(numericPart, out int lastNumericId))
-                    {
-                        lastNumericId++;
-                        model.EmployeeId = $"{prefix}{lastNumericId:D3}";
-                    }
-                }
+                // Us prefix se shuru hone wale IDs nikaalo
+                 targetEmpIDs = employee
+                    .Where(o => o.EmployeeId.StartsWith($"{ECODE}-CONS"))
+                    .OrderByDescending(o => o.Id)
+                    .Select(o => o.EmployeeId)
+                    .ToList();
             }
             else
             {
-                // Pehla ID generate karo
-                model.EmployeeId = $"{prefix}001";
+                // Us prefix se shuru hone wale IDs nikaalo
+                 targetEmpIDs = employee
+                    .Where(o => o.EmployeeId.StartsWith(prefix) && !o.EmployeeId.Contains("CONS"))
+                    .OrderByDescending(o => o.Id)
+                    .Select(o => o.EmployeeId)
+                    .ToList();
             }
+            
+
+            // Get last numeric part safely
+            int lastEmployeeId = targetEmpIDs
+                .Select(code =>
+                {
+                    var match = Regex.Match(code ?? string.Empty, @"(\d+)$");
+                    return match.Success ? int.Parse(match.Value) : 0;
+                })
+                .DefaultIfEmpty(0)
+                .Max();
+
+            // Generate next Employee ID
+            lastEmployeeId++;
+
+            model.EmployeeId = $"{prefix}{lastEmployeeId:D4}";
         }
     }  
 
