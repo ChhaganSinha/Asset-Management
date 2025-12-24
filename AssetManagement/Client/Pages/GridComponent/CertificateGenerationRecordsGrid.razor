@@ -36,6 +36,7 @@ else
         c.Add(o => o.EmployeeName).SetWidth("140px").Css("table-bordered").Titled("Employee");
         c.Add(o => o.EmployeeId).SetWidth("80px").Css("table-bordered").Titled("Employee Id");
         c.Add(o => o.CompanyCode).SetWidth("80px").Css("table-bordered").Titled("Company");
+        c.Add(o => o.CertificateType).SetWidth("140px").Css("table-bordered").Titled("Certificate Type");
         c.Add(o => o.TemplateName).Css("table-bordered").Titled("Template");
         c.Add(o => o.GeneratedFileName).Css("table-bordered").Titled("Generated File");
         c.Add(o => o.GeneratedOn).Format("{0:dd/MMM/yyyy}").SetWidth("120px").Css("table-bordered").Titled("Generated On");

@@ -36,6 +36,9 @@ namespace AssetManagement.Server.Controllers.Api.OData
                            CompanyId = record.CompanyId,
                            EmployeeId = record.EmployeeId,
                            TemplateName = record.TemplateName,
+                           CertificateType = record.TemplateName.StartsWith("ReleivingLetter", System.StringComparison.OrdinalIgnoreCase)
+                               ? "Relieving"
+                               : "Experience",
                            GeneratedFileName = record.GeneratedFileName,
                            GeneratedOn = record.GeneratedOn,
                            GeneratedBy = record.GeneratedBy,

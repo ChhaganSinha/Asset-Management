@@ -17,5 +17,8 @@ namespace AssetManagement.Dto.Models
 
         [NotMapped]
         public string CompanyCode { get; set; } = string.Empty;
+
+        [NotMapped]
+        public string CertificateType { get; set; } = string.Empty;
     }
 }
