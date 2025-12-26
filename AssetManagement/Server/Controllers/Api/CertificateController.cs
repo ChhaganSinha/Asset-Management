@@ -84,7 +84,7 @@ namespace AssetManagement.Server.Controllers.Api
             }
 
             var fileNamePrefix = request.CertificateType == CertificateType.Relieving ? "RelievingLetter" : "ExperienceCertificate";
-            var fileName = $"{fileNamePrefix}_{employee.EmployeeId}_{DateTime.UtcNow:yyyyMMdd}.docx";
+            var fileName = $"{fileNamePrefix}_{employee.EmployeeName}_{DateTime.UtcNow:yyyyMMdd}.docx";
             var record = new CertificateGenerationRecord
             {
                 CompanyId = company.Id,
@@ -114,7 +114,8 @@ namespace AssetManagement.Server.Controllers.Api
         {
             var (addressLine1, addressLine2, city) = BuildAddress(employee);
             var dateOfJoin = employee.DateOfJoin.ToString("dd-MMM-yyyy", CultureInfo.InvariantCulture);
-            var dateOfLeaving = request.LastWorkingDay.ToString("dd-MMM-yyyy", CultureInfo.InvariantCulture);
+            var ResignationDate = employee.ResignedDate?.ToString("dd-MMM-yyyy", CultureInfo.InvariantCulture);
+            var RelievedDate = employee.DateOfLeaving.ToString("dd-MMM-yyyy", CultureInfo.InvariantCulture);
             var duration = FormatEmploymentDuration(employee.DateOfJoin, request.LastWorkingDay);
 
             return new Dictionary<string, string>
@@ -128,8 +129,8 @@ namespace AssetManagement.Server.Controllers.Api
                 ["{FatherName}"] = employee.fatherName,
                 ["{Designation}"] = employee.Designation,
                 ["{DateOfJoining}"] = dateOfJoin,
-                ["{DateOfLeaving}"] = dateOfLeaving,
-                ["{LastWorkingDay}"] = dateOfLeaving,
+                ["{ResignationDate}"] = ResignationDate,
+                ["{RelievedDate}"] = RelievedDate,
                 ["{EmploymentDuration}"] = duration,
                 ["{HeShe}"] = request.HeShe,
                 ["{HisHer}"] = request.HisHer,
