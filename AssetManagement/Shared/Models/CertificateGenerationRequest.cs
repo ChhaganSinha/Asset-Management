@@ -13,6 +13,9 @@ namespace AssetManagement.Dto.Models
         [Required]
         public DateTime LetterDate { get; set; } = DateTime.Today;
 
+        [Required]
+        public DateTime LastWorkingDay { get; set; } = DateTime.Today;
+
         public string Title { get; set; } = "Mr.";
         public string HeShe { get; set; } = "He";
         public string HisHer { get; set; } = "His";
