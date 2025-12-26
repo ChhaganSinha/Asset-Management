@@ -58,7 +58,7 @@
                             <ValidationSummary class="mb-3" />
 
                             <div class="row g-4">
-                                <div class="col-12 col-md-6 col-lg-4">
+                                <div class="col-12 col-md-6 col-lg-6">
                                     <label class="form-label fw-semibold required-field">
                                         Employee
                                     </label>
@@ -70,7 +70,7 @@
                                     <ValidationMessage For="() => formModel.EmployeeId" />
                                 </div>
 
-                                <div class="col-12 col-md-6 col-lg-4">
+                                <div class="col-12 col-md-6 col-lg-6">
                                     <label class="form-label fw-semibold required-field">
                                         Letter Type
                                     </label>
@@ -96,8 +96,9 @@
 
                                     </InputRadioGroup>
                                 </div>
-
-                                <div class="col-12 col-md-6 col-lg-2">
+                                </div>
+                                <div class="row g-4">
+                                <div class="col-12 col-md-6 col-lg-6">
                                     <label class="form-label fw-semibold">
                                         Title
                                     </label>
@@ -109,20 +110,14 @@
                                     </InputSelect>
                                 </div>
 
-                                <div class="col-12 col-md-6 col-lg-2">
+                                <div class="col-12 col-md-6 col-lg-6">
                                     <label class="form-label fw-semibold">
                                         Letter Date
                                     </label>
                                     <InputDate class="form-control" @bind-Value="formModel.LetterDate" />
                                 </div>
 
-                                <div class="col-12 col-md-6 col-lg-2">
-                                    <label class="form-label fw-semibold required-field">
-                                        Last Working Day
-                                    </label>
-                                    <InputDate class="form-control" @bind-Value="formModel.LastWorkingDay" />
-                                    <ValidationMessage For="() => formModel.LastWorkingDay" />
-                                </div>
+                               
                             </div>
 
                             <div class="d-flex justify-content-end mt-4">
