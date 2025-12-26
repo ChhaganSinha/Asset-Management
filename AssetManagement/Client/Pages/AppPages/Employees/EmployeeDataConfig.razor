@@ -67,7 +67,7 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label bold-font required-field">Employee Status</label>
-                            <InputSelect id="Status" @bind-Value="model.Status" class="form-select" @onclick="GetEmployeeId">
+                            <InputSelect id="Status" @bind-Value="model.Status" class="form-select" @onchange="OnStatusChanged">
                                 @foreach (var s in Enum.GetValues(typeof(EmployeeStatus)))
                                 {
                                     <option value="@s">@s</option>
@@ -289,8 +289,14 @@
                         @if (model.Status.Equals(EmployeeStatus.Resigned))
                         {
                             <div class="col-md-4">
-                                <label class="form-label bold-font">Resigned Date</label>
-                                <input type="date" id="DateOfLeaving" name="DateOfLeaving" @bind="model.DateOfLeaving" min=@model.DateOfJoin.AddDays(1).Date.ToString("yyyy-MM-dd") class="form-control">
+                                <label class="form-label bold-font">Resignation Details</label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="small text-muted">
+                                        <div>Resigned: @(model.ResignedDate?.ToString("dd/MMM/yyyy") ?? "-")</div>
+                                        <div>Relieving: @((RelievingDate ?? (model.DateOfLeaving != default ? model.DateOfLeaving : null))?.ToString("dd/MMM/yyyy") ?? "-")</div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary ms-2" @onclick="OpenResignationDialog">Update</button>
+                                </div>
                                 <ValidationMessage For="() => model.DateOfLeaving" />
                             </div>
                         }
@@ -843,6 +849,29 @@
                 <AddDesignationComponent OnSaveDesignation="HandleSaveDesignation" />
             </PageDialog>
 
+            <PageDialog Title="Update Resignation Details" Show="ShowResignationDialog" OnCloseDialog="CloseResignationDialog">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label bold-font">Resigned Date</label>
+                        <InputDate @bind-Value="model.ResignedDate" class="form-control" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label bold-font">Relieving Date</label>
+                        <InputDate @bind-Value="RelievingDate" class="form-control" min="@model.DateOfJoin.AddDays(1).ToString("yyyy-MM-dd")" />
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(ResignationValidationMessage))
+                    {
+                        <div class="col-12">
+                            <div class="alert alert-warning" role="alert">@ResignationValidationMessage</div>
+                        </div>
+                    }
+                </div>
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="CloseResignationDialog">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveResignationDetails">Save</button>
+                </div>
+            </PageDialog>
+
             <FilePreviewDailog Title="Preview" Show="ShowPreview" ClosePreview="ClosePreview">
                 <div style="width: 100%; overflow: auto;">
                     @if (IsImageFile(filePath))
@@ -916,6 +945,9 @@
     Dictionary<int, List<int>> EmployeeSkillIds = new Dictionary<int, List<int>>();
     private List<int> SelectedSkill { get; set; } = new();
     private bool show = false;
+    public bool ShowResignationDialog = false;
+    private DateTime? RelievingDate;
+    private string ResignationValidationMessage = string.Empty;
 
 
     string SizeLimitInfoAadhar = string.Empty;
@@ -1271,6 +1303,16 @@
             Init();
         }
 
+        if (model.Status == EmployeeStatus.Resigned)
+        {
+            if (model.ResignedDate is null && model.DateOfLeaving != default)
+            {
+                model.ResignedDate = model.DateOfLeaving;
+            }
+
+            RelievingDate = model.DateOfLeaving != default ? model.DateOfLeaving : RelievingDate;
+        }
+
         // Breadcrumbs (cheap) — set at the end
         breadcrumbItems = new()
     {
@@ -1309,6 +1351,77 @@
         ResumeView     = UrlOrNull(baseUri, resume)       ?? string.Empty;
     }
 
+    private void OpenResignationDialog()
+    {
+        RelievingDate ??= model.DateOfLeaving != default ? model.DateOfLeaving : null;
+
+        if (model.ResignedDate is null && model.DateOfLeaving != default)
+        {
+            model.ResignedDate = model.DateOfLeaving;
+        }
+
+        ResignationValidationMessage = string.Empty;
+        ShowResignationDialog = true;
+    }
+
+    private void CloseResignationDialog()
+    {
+        ResignationValidationMessage = string.Empty;
+        ShowResignationDialog = false;
+    }
+
+    private void SaveResignationDetails()
+    {
+        ResignationValidationMessage = string.Empty;
+
+        if (!model.ResignedDate.HasValue)
+        {
+            ResignationValidationMessage = "Please select the resigned date.";
+        }
+
+        if (!RelievingDate.HasValue)
+        {
+            ResignationValidationMessage = string.IsNullOrEmpty(ResignationValidationMessage)
+                ? "Please select the relieving date."
+                : $"{ResignationValidationMessage} Please select the relieving date.";
+        }
+
+        if (model.ResignedDate.HasValue && RelievingDate.HasValue && RelievingDate.Value < model.DateOfJoin.AddDays(1))
+        {
+            ResignationValidationMessage = "Relieving date should be after the date of joining.";
+        }
+
+        if (!string.IsNullOrWhiteSpace(ResignationValidationMessage))
+        {
+            return;
+        }
+
+        model.DateOfLeaving = RelievingDate ?? model.DateOfLeaving;
+        ShowResignationDialog = false;
+    }
+
+    private void OnStatusChanged(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<EmployeeStatus>(e.Value?.ToString(), out var status))
+        {
+            model.Status = status;
+
+            if (status == EmployeeStatus.Resigned)
+            {
+                if (RelievingDate is null && model.DateOfLeaving != default)
+                {
+                    RelievingDate = model.DateOfLeaving;
+                }
+
+                OpenResignationDialog();
+            }
+            else
+            {
+                ShowResignationDialog = false;
+            }
+        }
+    }
+
     // typed TryGets for different dictionaries
     private static Employee? TryGet(IDictionary<string, Employee> map, string? key)
         => (!string.IsNullOrWhiteSpace(key) && map.TryGetValue(key, out var v)) ? v : null;
@@ -1336,6 +1449,22 @@
         TaskCompleted = false;
         try
         {
+            if (model.Status == EmployeeStatus.Resigned)
+            {
+                if (RelievingDate.HasValue)
+                {
+                    model.DateOfLeaving = RelievingDate.Value;
+                }
+
+                if (!model.ResignedDate.HasValue || model.DateOfLeaving == default)
+                {
+                    Message = "Alert";
+                    MessageBody = "Please add both resigned and relieving dates.";
+                    TaskCompleted = true;
+                    return;
+                }
+            }
+
             if (model.DateOfLeaving != DateTime.MinValue && model.DateOfLeaving < model.DateOfJoin)
             {
                 Message = "Alert";
