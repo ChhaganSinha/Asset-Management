@@ -94,7 +94,6 @@ namespace AssetManagement.Dto.Models
         public DateTime? DeputationStartDate { get; set; }
         public DateTime? DeputationEndDate  { get; set; }
 
-        [NotMapped]
         public DateTime? ResignedDate { get; set; }
 
         public DateTime DateOfLeaving { get; set; } = DateTime.Now;
